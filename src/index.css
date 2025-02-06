@@ -1,0 +1,122 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Nueva paleta convertida a HSL */
+    --primary-blue: 215 100% 34%;         /* rgb(0 74 173) */
+    --primary-yellow: 45 100% 60%;        /* rgb(255 215 52) */
+    
+    /* Sistema de colores completo */
+    --background: 0 0% 100%;
+    --foreground: 215 100% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 215 100% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 100% 15%;
+    --primary: var(--primary-blue);
+    --primary-foreground: 0 0% 100%;
+    --secondary: var(--primary-yellow);
+    --secondary-foreground: 215 100% 15%;
+    --muted: 45 100% 95%;
+    --muted-foreground: 215 30% 45%;
+    --accent: 215 100% 97%;
+    --accent-foreground: var(--primary-blue);
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 215 30% 90%;
+    --input: 215 30% 90%;
+    --ring: var(--primary-blue);
+    --radius: 0.75rem;
+
+    /* Colores para gráficos */
+    --chart-1: var(--primary-blue);
+    --chart-2: var(--primary-yellow);
+    --chart-3: 202 90% 54%;
+    --chart-4: 45 100% 80%;
+    --chart-5: 215 100% 70%;
+  }
+
+  .dark {
+    --background: 215 100% 7%;
+    --foreground: 45 100% 92%;
+    --card: 215 100% 10%;
+    --card-foreground: 45 100% 92%;
+    --popover: 215 100% 10%;
+    --popover-foreground: 45 100% 92%;
+    --primary: var(--primary-yellow);
+    --primary-foreground: 215 100% 15%;
+    --secondary: var(--primary-blue);
+    --secondary-foreground: 45 100% 92%;
+    --muted: 215 50% 20%;
+    --muted-foreground: 215 30% 70%;
+    --accent: 215 100% 20%;
+    --accent-foreground: var(--primary-yellow);
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 215 30% 25%;
+    --input: 215 30% 25%;
+    --ring: var(--primary-yellow);
+    
+    --chart-1: var(--primary-yellow);
+    --chart-2: var(--primary-blue);
+    --chart-3: 45 100% 70%;
+    --chart-4: 215 100% 40%;
+    --chart-5: 45 100% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+  }
+
+  /* Tipografía educativa */
+  h1 {
+    @apply text-4xl font-bold tracking-tighter;
+  }
+  h2 {
+    @apply text-3xl font-semibold tracking-tight;
+  }
+  h3 {
+    @apply text-2xl font-medium tracking-normal;
+  }
+
+  /* Efectos especiales */
+  .shine-effect {
+    @apply relative overflow-hidden;
+    &::after {
+      content: '';
+      @apply absolute inset-0 bg-gradient-to-r from-transparent via-[hsla(45,100%,90%,0.3)] to-transparent;
+      animation: shine 3s infinite;
+    }
+  }
+
+  @keyframes shine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+}
+
+@layer components {
+  .edu-card {
+    @apply bg-card p-6 rounded-xl border transition-all hover:shadow-lg;
+  }
+  
+  .accent-border {
+    @apply border-l-4 border-secondary;
+  }
+  
+  .highlight-text {
+    @apply relative px-1;
+    &::before {
+      content: '';
+      @apply absolute inset-0 -z-1 bg-yellow-100/50 transform -skew-x-12;
+    }
+  }
+}
