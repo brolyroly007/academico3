@@ -1,8 +1,10 @@
-const express = require("express");
-const { google } = require("googleapis");
-const cors = require("cors");
-const fetch = require("node-fetch");
-require("dotenv").config();
+import express from 'express';
+import { google } from 'googleapis';
+import cors from 'cors';
+import fetch from 'node-fetch';
+import dotenv from 'dotenv';
+
+dotenv.config();
 /* eslint-disable no-undef */
 
 const app = express();
