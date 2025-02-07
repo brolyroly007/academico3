@@ -1,28 +1,20 @@
-// src/services/DocumentService.js
 import { handleError } from "../utils/errorHandler";
 const API_URL = import.meta.env.VITE_API_URL;
+
 class DocumentService {
   constructor() {
     this.headers = {
       "Content-Type": "application/json",
-      "X-API-Key": import.meta.env.VITE_API_KEY,
-      "anthropic-version": "2023-06-01",
     };
   }
 
   async generateIndex(data) {
     try {
-      const response = await fetch(import.meta.env.VITE_API_URL, {
+      console.log("Using API URL:", API_URL);
+      const response = await fetch(`${API_URL}/api/generate-index`, {
         method: "POST",
         headers: this.headers,
-        body: JSON.stringify({
-          messages: [
-            {
-              role: "user",
-              content: `Genera un índice para un ${data.documentType} sobre ${data.topic} con formato ${data.citationFormat}`,
-            },
-          ],
-        }),
+        body: JSON.stringify(data),
       });
 
       if (!response.ok) {
@@ -30,7 +22,7 @@ class DocumentService {
       }
 
       const result = await response.json();
-      return result.content;
+      return result.index;
     } catch (error) {
       handleError(error);
       throw error;
@@ -39,18 +31,12 @@ class DocumentService {
 
   async generateDocument(formData) {
     try {
-      const response = await fetch(import.meta.env.VITE_API_URL, {
+      const response = await fetch(`${API_URL}/api/generate-document`, {
         method: "POST",
         headers: this.headers,
         body: JSON.stringify({
-          messages: [
-            {
-              role: "user",
-              content: `Genera un documento de tipo ${formData.get(
-                "documentType"
-              )} usando el índice: ${formData.get("indiceModificado")}`,
-            },
-          ],
+          documentType: formData.get("documentType"),
+          index: formData.get("indiceModificado"),
         }),
       });
 

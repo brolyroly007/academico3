@@ -1,8 +1,8 @@
-// googleSheets.js
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export async function appendToSheet(data) {
   try {
+    console.log("API URL being used:", API_URL);
     console.log("Enviando datos al servidor:", data);
 
     const response = await fetch(`${API_URL}/api/append-to-sheet`, {
