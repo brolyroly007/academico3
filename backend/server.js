@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import express from "express";
 import { google } from "googleapis";
 import cors from "cors";
@@ -12,7 +13,13 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: ["https://academico3.vercel.app"],
+    methods: ["GET", "POST"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 const auth = new google.auth.GoogleAuth({
@@ -78,9 +85,7 @@ async function setupSheet(sheets, spreadsheetId) {
                 startIndex: 10,
                 endIndex: 11,
               },
-              properties: {
-                pixelSize: 400,
-              },
+              properties: { pixelSize: 400 },
               fields: "pixelSize",
             },
           },
@@ -95,30 +100,23 @@ async function setupSheet(sheets, spreadsheetId) {
 app.post("/api/generate-index", async (req, res) => {
   try {
     console.log("Recibido en servidor:", req.body);
-
     const { documentType, topic, length, additionalInfo } = req.body;
 
     if (!documentType || !topic || !length) {
-      console.log("Campos faltantes:", { documentType, topic, length });
       return res.status(400).json({ error: "Campos requeridos faltantes" });
-    }
-
-    if (!process.env.CLAUDE_API_KEY) {
-      console.log("API Key faltante");
-      return res.status(500).json({ error: "API Key no configurada" });
     }
 
     const prompt =
       documentType.toLowerCase() === "ensayo"
         ? `[Título principal]
-          1. Introducción
-          2. Desarrollo
-              [3-4 Subtemas específicos]
-          3. Conclusiones
-          4. Bibliografía`
+         1. Introducción
+         2. Desarrollo
+             [3-4 Subtemas específicos]
+         3. Conclusiones
+         4. Bibliografía`
         : `I. Sección principal
-          1.1 Subsección
-          1.2 Subsección`;
+         1.1 Subsección
+         1.2 Subsección`;
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -134,37 +132,32 @@ app.post("/api/generate-index", async (req, res) => {
           {
             role: "user",
             content: `Genera un índice para un ${documentType} sobre "${topic}". 
-          Longitud: ${length}.
-          Estructura sugerida: ${prompt}
-          Información adicional: ${additionalInfo || "No hay"}`,
+         Longitud: ${length}.
+         Estructura sugerida: ${prompt}
+         Información adicional: ${additionalInfo || "No hay"}`,
           },
         ],
       }),
     });
 
-    console.log("Status Claude:", response.status);
-    const responseText = await response.text();
-    console.log("Respuesta Claude:", responseText);
-
     if (!response.ok) {
-      throw new Error(responseText);
+      throw new Error(await response.text());
     }
 
-    const data = JSON.parse(responseText);
+    const data = await response.json();
     res.json({ index: data.content[0].text });
   } catch (error) {
     console.error("Error completo:", error);
-    res.status(500).json({
-      error: "Error al generar índice",
-      details: error.message,
-    });
+    res
+      .status(500)
+      .json({ error: "Error al generar índice", details: error.message });
   }
 });
 
 app.post("/api/append-to-sheet", async (req, res) => {
   try {
     const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_ID;
-    const RANGE = "Hoja 1!A:P"; // Cambiado de O a P
+    const RANGE = "Hoja 1!A:P";
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
@@ -172,29 +165,29 @@ app.post("/api/append-to-sheet", async (req, res) => {
     });
 
     let nextId = 1;
-    if (response.data.values && response.data.values.length > 1) {
+    if (response.data.values?.length > 1) {
       const lastId = response.data.values[response.data.values.length - 1][0];
       nextId = parseInt(lastId) + 1;
     }
 
     const values = [
       [
-        nextId, // ID
-        new Date().toISOString(), // Fecha
-        req.body.documentType, // Tipo
-        req.body.topic, // Tema
-        req.body.citationFormat, // Formato
-        req.body.length, // Longitud
-        req.body.course, // Curso
-        req.body.career, // Carrera
-        req.body.essayTone, // Tono
-        req.body.additionalInfo, // Estructura
-        req.body.index, // Índice (nueva columna)
-        req.body.name, // Contacto
-        `${req.body.countryCode}${req.body.phoneNumber}`, // WhatsApp
-        "Pendiente", // Status
-        "", // Asignado a
-        "", // Fecha entrega
+        nextId,
+        new Date().toISOString(),
+        req.body.documentType,
+        req.body.topic,
+        req.body.citationFormat,
+        req.body.length,
+        req.body.course,
+        req.body.career,
+        req.body.essayTone,
+        req.body.additionalInfo,
+        req.body.index,
+        req.body.name,
+        `${req.body.countryCode}${req.body.phoneNumber}`,
+        "Pendiente",
+        "",
+        "",
       ],
     ];
 
@@ -216,7 +209,7 @@ app.post("/api/append-to-sheet", async (req, res) => {
                 sheetId: 0,
                 startRowIndex: rowIndex,
                 endRowIndex: rowIndex + 1,
-                startColumnIndex: 13, // Columna N (Status)
+                startColumnIndex: 13,
                 endColumnIndex: 14,
               },
               rows: [
@@ -239,7 +232,7 @@ app.post("/api/append-to-sheet", async (req, res) => {
                 sheetId: 0,
                 startRowIndex: rowIndex,
                 endRowIndex: rowIndex + 1,
-                startColumnIndex: 10, // Columna K (Índice)
+                startColumnIndex: 10,
                 endColumnIndex: 11,
               },
               rows: [
@@ -270,8 +263,7 @@ app.post("/api/append-to-sheet", async (req, res) => {
 
 app.post("/api/setup-sheet", async (req, res) => {
   try {
-    const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_ID;
-    await setupSheet(sheets, SPREADSHEET_ID);
+    await setupSheet(sheets, process.env.GOOGLE_SHEETS_ID);
     res.json({ success: true });
   } catch (error) {
     console.error("Error:", error);
@@ -282,6 +274,5 @@ app.post("/api/setup-sheet", async (req, res) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_ID;
-  setupSheet(sheets, SPREADSHEET_ID);
+  setupSheet(sheets, process.env.GOOGLE_SHEETS_ID);
 });
