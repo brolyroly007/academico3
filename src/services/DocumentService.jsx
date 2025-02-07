@@ -1,8 +1,9 @@
-import { handleError } from "../utils/errorHandler";
 const API_URL = import.meta.env.VITE_API_URL;
+console.log("Current API_URL:", API_URL);
 
 class DocumentService {
   constructor() {
+    console.log("DocumentService initialized with URL:", API_URL);
     this.headers = {
       "Content-Type": "application/json",
     };
@@ -10,7 +11,9 @@ class DocumentService {
 
   async generateIndex(data) {
     try {
-      console.log("Using API URL:", API_URL);
+      console.log("Generating index with URL:", API_URL);
+      console.log("Sending data:", data);
+
       const response = await fetch(`${API_URL}/api/generate-index`, {
         method: "POST",
         headers: this.headers,
@@ -22,15 +25,17 @@ class DocumentService {
       }
 
       const result = await response.json();
+      console.log("Index generated:", result);
       return result.index;
     } catch (error) {
-      handleError(error);
+      console.error("Error generating index:", error);
       throw error;
     }
   }
 
   async generateDocument(formData) {
     try {
+      console.log("Generating document with URL:", API_URL);
       const response = await fetch(`${API_URL}/api/generate-document`, {
         method: "POST",
         headers: this.headers,
@@ -46,7 +51,7 @@ class DocumentService {
 
       return await response.blob();
     } catch (error) {
-      handleError(error);
+      console.error("Error generating document:", error);
       throw error;
     }
   }
