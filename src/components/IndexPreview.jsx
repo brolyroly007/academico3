@@ -31,7 +31,7 @@ function IndexPreview() {
         console.log("Enviando payload:", payload);
 
         const response = await fetch(
-          "http://localhost:5000/api/generate-index",
+          `${import.meta.env.VITE_API_URL}/api/generate-index`,
           {
             method: "POST",
             headers: {
