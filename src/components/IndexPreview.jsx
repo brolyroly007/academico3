@@ -28,10 +28,14 @@ function IndexPreview() {
           additionalInfo: formData.additionalInfo || "",
         };
 
-        console.log("Enviando payload:", payload);
+        console.log(
+          "URL completa:",
+          `${import.meta.env.VITE_API_URL}/api/generate-index`
+        );
+        console.log("Payload:", JSON.stringify(payload));
 
         const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/generate-index`, // Usa variable de entorno
+          `${import.meta.env.VITE_API_URL}/api/generate-index`,
           {
             method: "POST",
             headers: {
@@ -41,6 +45,7 @@ function IndexPreview() {
           }
         );
 
+        console.log("Respuesta status:", response.status);
         const responseText = await response.text();
         console.log("Respuesta completa:", responseText);
 

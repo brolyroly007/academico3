@@ -15,7 +15,7 @@ dotenv.config();
 const app = express();
 app.use(
   cors({
-    origin: "*",
+    origin: ["https://academico3.vercel.app/", "*"],
     methods: ["GET", "POST"],
   })
 );
