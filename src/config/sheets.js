@@ -1,3 +1,2 @@
-// src/config/sheets.js
-export const SPREADSHEET_ID = "tu_id_de_spreadsheet";
-export const SHEET_NAME = "Pedidos";
+export const SPREADSHEET_ID = "1omXRQgCj4-B9VeqkxNMV07QWKkY1B65nsvajPnqOuT4";
+export const SHEET_NAME = "Academico3";

@@ -41,11 +41,11 @@ export function HomePage() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
-      <main className="flex-1 w-full px-4 py-8 md:py-16">
+      <main className="flex-1 w-full px-6 py-8 md:py-16">
         {/* Hero Section */}
         <section className="text-center mb-16 md:mb-24 px-4 sm:px-6">
           <div className="max-w-5xl mx-auto space-y-8">
-            <div className="inline-flex items-center bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2.5 rounded-full text-sm font-medium mb-6 shadow-md hover:shadow-lg transition-shadow">
+            <div className="inline-flex items-center bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2.5 rounded-full text-sm font-medium mb-6 shadow-lg hover:shadow-xl transition-shadow">
               <Send className="h-4 w-4 mr-2" />
               Generación académica automatizada
             </div>
@@ -63,9 +63,9 @@ export function HomePage() {
               estructuración automatizada y personalización avanzada.
             </p>
 
-            <div className="flex justify-center gap-4 mt-8">
+            <div className="flex justify-center gap-6 mt-8">
               <Link to="/configuracion">
-                <Button className="h-14 px-12 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-lg rounded-xl shadow-xl hover:shadow-2xl transition-all hover:-translate-y-0.5">
+                <Button className="h-14 px-12 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-lg rounded-xl shadow-2xl hover:shadow-3xl transition-all hover:-translate-y-0.5">
                   Iniciar Proyecto
                   <span className="ml-2 opacity-90">→</span>
                 </Button>
@@ -76,16 +76,16 @@ export function HomePage() {
 
         {/* Features Grid */}
         <section className="w-full px-4 sm:px-6 mb-24">
-          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
               <Card
                 key={index}
-                className="relative overflow-hidden border-0 bg-white shadow-md hover:shadow-xl transition-all group isolate"
+                className="relative overflow-hidden border-0 bg-white shadow-lg hover:shadow-xl transition-all group isolate"
               >
                 <div className="absolute inset-0 border-t-2 border-blue-100 opacity-0 group-hover:opacity-100 transition-opacity" />
                 <CardHeader className="items-start p-6 pb-0 space-y-4">
                   <div
-                    className={`mb-4 ${feature.color} p-3 rounded-lg w-fit shadow-inner`}
+                    className={`mb-4 ${feature.color} p-4 rounded-xl w-fit shadow-inner`}
                   >
                     {feature.icon}
                   </div>
@@ -140,7 +140,7 @@ export function HomePage() {
                   key={index}
                   className="relative flex items-start gap-8 group"
                 >
-                  <div className="flex-shrink-0 w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg ring-2 ring-white ring-offset-2">
+                  <div className="flex-shrink-0 w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center shadow-xl ring-2 ring-white ring-offset-2">
                     {step.icon}
                   </div>
                   <div className="flex-1">

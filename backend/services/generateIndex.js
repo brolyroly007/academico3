@@ -1,9 +1,17 @@
 // services/generateIndex.js
-const fetch = require("node-fetch");
+import fetch from "node-fetch";
+import dotenv from "dotenv";
 
-async function generateIndex(documentType, topic, length, additionalInfo = "") {
+dotenv.config();
+
+export async function generateIndex(
+  documentType,
+  topic,
+  length,
+  additionalInfo = ""
+) {
   try {
-    const response = await fetch(process.env.CLAUDE_API_URL, {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -58,4 +66,4 @@ async function generateIndex(documentType, topic, length, additionalInfo = "") {
   }
 }
 
-module.exports = generateIndex;
+export default generateIndex;

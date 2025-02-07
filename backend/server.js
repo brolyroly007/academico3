@@ -1,18 +1,22 @@
-import express from 'express';
-import { google } from 'googleapis';
-import cors from 'cors';
-import fetch from 'node-fetch';
-import dotenv from 'dotenv';
+import express from "express";
+import { google } from "googleapis";
+import cors from "cors";
+import fetch from "node-fetch";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
-/* eslint-disable no-undef */
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 const auth = new google.auth.GoogleAuth({
-  keyFile: "./credentials.json",
+  credentials: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS),
   scopes: ["https://www.googleapis.com/auth/spreadsheets"],
 });
 
@@ -31,7 +35,7 @@ async function setupSheet(sheets, spreadsheetId) {
       "Carrera",
       "Tono",
       "Estructura",
-      "Índice", // Nueva columna añadida
+      "Índice",
       "Contacto",
       "WhatsApp",
       "Status",
@@ -41,7 +45,7 @@ async function setupSheet(sheets, spreadsheetId) {
 
     await sheets.spreadsheets.values.update({
       spreadsheetId,
-      range: "Hoja 1!A1:P1", // Cambiado de O1 a P1 para incluir la nueva columna
+      range: "Hoja 1!A1:P1",
       valueInputOption: "RAW",
       resource: { values: [headers] },
     });
@@ -71,11 +75,11 @@ async function setupSheet(sheets, spreadsheetId) {
               range: {
                 sheetId: 0,
                 dimension: "COLUMNS",
-                startIndex: 10, // Columna K (Índice)
+                startIndex: 10,
                 endIndex: 11,
               },
               properties: {
-                pixelSize: 400, // Ancho para la columna del índice
+                pixelSize: 400,
               },
               fields: "pixelSize",
             },
