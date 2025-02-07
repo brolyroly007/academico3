@@ -15,11 +15,11 @@ dotenv.config();
 const app = express();
 app.use(
   cors({
-    origin: ["https://academico3.vercel.app"],
+    origin: "*",
     methods: ["GET", "POST"],
-    credentials: true,
   })
 );
+
 app.use(express.json());
 
 const auth = new google.auth.GoogleAuth({
