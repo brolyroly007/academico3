@@ -28,9 +28,13 @@ function IndexPreview() {
           additionalInfo: formData.additionalInfo || "",
         };
 
-        console.log("Enviando payload:", payload);
+        console.log(
+          "URL completa:",
+          `${import.meta.env.VITE_API_URL}/api/generate-index`
+        );
+        console.log("Payload JSON:", JSON.stringify(payload));
 
-        const response = await fetch(
+        const fullResponse = await fetch(
           `${import.meta.env.VITE_API_URL}/api/generate-index`,
           {
             method: "POST",
@@ -41,10 +45,12 @@ function IndexPreview() {
           }
         );
 
-        const responseText = await response.text();
+        console.log("Respuesta status:", fullResponse.status);
+        console.log("Respuesta headers:", fullResponse.headers);
+        const responseText = await fullResponse.text();
         console.log("Respuesta completa:", responseText);
 
-        if (!response.ok) {
+        if (!fullResponse.ok) {
           throw new Error(responseText || "Error al generar el índice");
         }
 
@@ -56,7 +62,10 @@ function IndexPreview() {
           throw new Error("Respuesta inválida del servidor");
         }
       } catch (error) {
-        console.error("Error completo:", error);
+        console.error("Error de red completo:", error);
+        console.error("Tipo de error:", error.name);
+        console.error("Mensaje de error:", error.message);
+
         handleError(error);
         setGeneratedIndex(`1. Introducción
 2. Desarrollo
