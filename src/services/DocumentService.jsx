@@ -9,13 +9,35 @@ class DocumentService {
     this.baseURL = API_URL;
   }
 
+  async testConnection() {
+    try {
+      const response = await fetch(`${this.baseURL}/api/health`, {
+        method: "GET",
+        headers: this.headers,
+      });
+      console.log("🔗 Health Check Response:", await response.json());
+      return response.ok;
+    } catch (error) {
+      console.error("❌ Health Check Error:", error);
+      return false;
+    }
+  }
+
   async generateIndex(data) {
     try {
+      // Primero, prueba la conexión
+      const isConnected = await this.testConnection();
+      if (!isConnected) {
+        throw new Error("No se pudo establecer conexión con el backend");
+      }
+
       console.log("🔍 URL completa:", `${this.baseURL}/api/generate-index`);
       const response = await fetch(`${this.baseURL}/api/generate-index`, {
         method: "POST",
         headers: this.headers,
         body: JSON.stringify(data),
+        mode: "cors",
+        cache: "no-cache",
       });
 
       console.log("📡 Respuesta status:", response.status);

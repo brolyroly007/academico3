@@ -5,7 +5,7 @@ import fetch from "node-fetch";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
-import morgan from "morgan"; // Añade esta línea
+import morgan from "morgan";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,7 +15,7 @@ dotenv.config();
 const app = express();
 
 // Middleware de logging
-app.use(morgan("dev")); // Añade esta línea
+app.use(morgan("dev"));
 
 // Middleware de depuración de solicitudes
 app.use((req, res, next) => {
@@ -29,7 +29,7 @@ app.use(
   cors({
     origin: (origin, callback) => {
       console.log("🌍 Origen de la solicitud:", origin);
-      callback(null, true); // Permitir cualquier origen para depuración
+      callback(null, true);
     },
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -38,6 +38,15 @@ app.use(
 );
 
 app.use(express.json());
+
+// Añade este nuevo endpoint de health check
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    status: "OK",
+    message: "Backend está funcionando correctamente",
+    timestamp: new Date().toISOString(),
+  });
+});
 
 const auth = new google.auth.GoogleAuth({
   credentials: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS),
