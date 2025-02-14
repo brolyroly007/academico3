@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import express from "express";
 import { google } from "googleapis";
 import cors from "cors";
@@ -6,6 +5,7 @@ import fetch from "node-fetch";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
+import morgan from "morgan"; // Añade esta línea
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,10 +13,27 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 
 const app = express();
+
+// Middleware de logging
+app.use(morgan("dev")); // Añade esta línea
+
+// Middleware de depuración de solicitudes
+app.use((req, res, next) => {
+  console.log(`🔍 Solicitud recibida: ${req.method} ${req.path}`);
+  console.log("📦 Headers:", req.headers);
+  console.log("🌐 Origin:", req.get("origin"));
+  next();
+});
+
 app.use(
   cors({
-    origin: "*",
-    methods: ["GET", "POST"],
+    origin: (origin, callback) => {
+      console.log("🌍 Origen de la solicitud:", origin);
+      callback(null, true); // Permitir cualquier origen para depuración
+    },
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
   })
 );
 
@@ -271,9 +288,8 @@ app.post("/api/setup-sheet", async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 8080; // Ajusta a 8080
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, "0.0.0.0", () => {
-  // Añade '0.0.0.0' para Railway
   console.log(`🚀 Server running on port ${PORT}`);
   setupSheet(sheets, process.env.GOOGLE_SHEETS_ID);
 });
