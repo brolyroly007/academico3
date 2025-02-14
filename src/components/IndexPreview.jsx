@@ -29,7 +29,7 @@ function IndexPreview() {
         };
 
         console.log(
-          "URL completa:",
+          "🌐 API URL completa:",
           `${import.meta.env.VITE_API_URL}/api/generate-index`
         );
         console.log("Payload JSON:", JSON.stringify(payload));
