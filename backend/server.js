@@ -44,38 +44,37 @@ app.options("*", cors());
 
 app.use(express.json());
 
-// Página de inicio
+// Endpoint para la ruta raíz
 app.get("/", (req, res) => {
-  res.send(`
+  res.status(200).send(`
     <html>
       <head>
         <title>Academico3 API</title>
         <style>
-          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 40px; line-height: 1.6; }
-          .container { max-width: 800px; margin: 0 auto; background: #f9f9f9; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-          h1 { color: #0066cc; margin-top: 0; }
-          h2 { margin-top: 30px; color: #444; }
-          ul { margin-top: 20px; }
-          li { margin: 8px 0; }
-          .status { display: inline-block; background: #4CAF50; color: white; padding: 4px 12px; border-radius: 4px; }
-          footer { margin-top: 40px; font-size: 0.9em; color: #666; text-align: center; }
+          body { font-family: system-ui, sans-serif; line-height: 1.5; max-width: 800px; margin: 0 auto; padding: 2rem; }
+          h1 { color: #0066cc; }
+          .status { background: #4CAF50; color: white; padding: 0.5rem 1rem; border-radius: 4px; display: inline-block; }
+          .endpoints { margin: 2rem 0; background: #f5f5f5; padding: 1.5rem; border-radius: 8px; }
+          footer { margin-top: 3rem; color: #666; font-size: 0.9rem; }
         </style>
       </head>
       <body>
-        <div class="container">
-          <h1>Academico3 Backend</h1>
-          <p><span class="status">Activo</span></p>
-          <p>Timestamp: ${new Date().toISOString()}</p>
+        <h1>Academico3 API Server</h1>
+        <p><span class="status">Activo</span></p>
+        <p>Timestamp: ${new Date().toISOString()}</p>
+        
+        <div class="endpoints">
           <h2>Endpoints disponibles:</h2>
           <ul>
             <li><a href="/api/health">/api/health</a> - Verificar estado del servidor</li>
             <li><code>/api/generate-index</code> - Generar índice académico (POST)</li>
             <li><code>/api/append-to-sheet</code> - Guardar datos en Google Sheets (POST)</li>
           </ul>
-          <footer>
-            Academico3 API - Render Deployment
-          </footer>
         </div>
+        
+        <footer>
+          Academico3 API - ${process.env.NODE_ENV || "development"} environment
+        </footer>
       </body>
     </html>
   `);
