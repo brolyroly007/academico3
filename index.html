@@ -13,10 +13,19 @@
         // 1. Reemplazar fetch inmediatamente
         const originalFetch = window.fetch;
         window.fetch = function(url, options) {
-          if (typeof url === 'string' && url.includes('localhost:5000')) {
-            const newUrl = url.replace('http://localhost:5000', 'https://academico3-production.up.railway.app');
-            console.log(`🔄 Redirigiendo: ${url} → ${newUrl}`);
-            url = newUrl;
+          if (typeof url === 'string') {
+            // Reemplazar localhost
+            if (url.includes('localhost:5000')) {
+              const newUrl = url.replace('http://localhost:5000', 'https://academico3.onrender.com');
+              console.log(`🔄 Redirigiendo localhost: ${url} → ${newUrl}`);
+              url = newUrl;
+            }
+            // También reemplazar Railway
+            else if (url.includes('academico3-production.up.railway.app')) {
+              const newUrl = url.replace('https://academico3-production.up.railway.app', 'https://academico3.onrender.com');
+              console.log(`🔄 Redirigiendo Railway: ${url} → ${newUrl}`);
+              url = newUrl;
+            }
           }
           return originalFetch(url, options);
         };
@@ -24,10 +33,19 @@
         // 2. Reemplazar XMLHttpRequest por si acaso
         const originalXHROpen = XMLHttpRequest.prototype.open;
         XMLHttpRequest.prototype.open = function(method, url, ...rest) {
-          if (typeof url === 'string' && url.includes('localhost:5000')) {
-            const newUrl = url.replace('http://localhost:5000', 'https://academico3-production.up.railway.app');
-            console.log(`🔄 Redirigiendo XHR: ${url} → ${newUrl}`);
-            url = newUrl;
+          if (typeof url === 'string') {
+            // Reemplazar localhost
+            if (url.includes('localhost:5000')) {
+              const newUrl = url.replace('http://localhost:5000', 'https://academico3.onrender.com');
+              console.log(`🔄 Redirigiendo XHR localhost: ${url} → ${newUrl}`);
+              url = newUrl;
+            }
+            // También reemplazar Railway
+            else if (url.includes('academico3-production.up.railway.app')) {
+              const newUrl = url.replace('https://academico3-production.up.railway.app', 'https://academico3.onrender.com');
+              console.log(`🔄 Redirigiendo XHR Railway: ${url} → ${newUrl}`);
+              url = newUrl;
+            }
           }
           return originalXHROpen.call(this, method, url, ...rest);
         };
@@ -39,8 +57,8 @@
           if (window.PerformanceObserver) {
             const observer = new PerformanceObserver((list) => {
               list.getEntries().forEach(entry => {
-                if (entry.name && entry.name.includes('localhost:5000')) {
-                  console.error('⚠️ Detectada solicitud a localhost no interceptada:', entry.name);
+                if (entry.name && (entry.name.includes('localhost:5000') || entry.name.includes('railway.app'))) {
+                  console.error('⚠️ Detectada solicitud no interceptada:', entry.name);
                 }
               });
             });

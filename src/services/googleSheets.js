@@ -1,7 +1,5 @@
 // src/services/googleSheets.js
-const API_URL =
-  import.meta.env.VITE_API_URL ||
-  "https://academico3-production.up.railway.app";
+const API_URL = "https://academico3.onrender.com";
 
 export async function appendToSheet(data) {
   try {

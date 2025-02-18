@@ -9,21 +9,33 @@
       // Buscar todas las solicitudes fetch en curso
       const fetchRequests = performance
         .getEntriesByType("resource")
-        .filter((r) => r.name.includes("localhost:5000"));
+        .filter(
+          (r) =>
+            r.name.includes("localhost:5000") || r.name.includes("railway.app")
+        );
 
       if (fetchRequests.length > 0) {
-        console.warn("⚠️ Detectadas solicitudes a localhost:5000");
+        console.warn("⚠️ Detectadas solicitudes a redireccionar");
 
         // Reemplazar la función fetch global
         const originalFetch = window.fetch;
         window.fetch = function (url, options) {
-          if (typeof url === "string" && url.includes("localhost:5000")) {
-            const newUrl = url.replace(
-              "http://localhost:5000",
-              "https://academico3-production.up.railway.app"
-            );
-            console.log(`🔄 Redirigiendo: ${url} → ${newUrl}`);
-            url = newUrl;
+          if (typeof url === "string") {
+            if (url.includes("localhost:5000")) {
+              const newUrl = url.replace(
+                "http://localhost:5000",
+                "https://academico3.onrender.com"
+              );
+              console.log(`🔄 Redirigiendo localhost: ${url} → ${newUrl}`);
+              url = newUrl;
+            } else if (url.includes("academico3-production.up.railway.app")) {
+              const newUrl = url.replace(
+                "https://academico3-production.up.railway.app",
+                "https://academico3.onrender.com"
+              );
+              console.log(`🔄 Redirigiendo Railway: ${url} → ${newUrl}`);
+              url = newUrl;
+            }
           }
           return originalFetch(url, options);
         };
