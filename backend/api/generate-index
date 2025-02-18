@@ -1,13 +1,16 @@
 // Endpoint para generar índice
 app.post("/api/generate-index", async (req, res) => {
   try {
+    console.log("🚀 Solicitud de generación de índice recibida");
+    console.log("📦 Datos recibidos:", JSON.stringify(req.body, null, 2));
+
     const { documentType, topic, length, additionalInfo } = req.body;
-    
-    console.log("Datos recibidos:", req.body); // Para debugging
 
     if (!documentType || !topic || !length) {
-      return res.status(400).json({ 
-        error: "Faltan campos requeridos (documentType, topic, length)" 
+      console.error("❌ Campos requeridos faltantes");
+      return res.status(400).json({
+        error: "Campos requeridos faltantes",
+        received: req.body,
       });
     }
 
@@ -16,17 +19,20 @@ app.post("/api/generate-index", async (req, res) => {
       headers: {
         "Content-Type": "application/json",
         "X-API-Key": process.env.CLAUDE_API_KEY,
-        "anthropic-version": "2023-06-01"
+        "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
         model: "claude-3-haiku-20240307",
         max_tokens: 4096,
-        messages: [{
-          role: "user",
-          content: `Genera un índice para un ${documentType} sobre ${topic}. 
+        messages: [
+          {
+            role: "user",
+            content: `Genera un índice para un ${documentType} sobre ${topic}. 
           El documento será de ${length}. 
           
-          ${documentType.toLowerCase() === 'ensayo' ? `
+          ${
+            documentType.toLowerCase() === "ensayo"
+              ? `
           Usa esta estructura:
           [Título principal]
               1. Introducción
@@ -34,7 +40,8 @@ app.post("/api/generate-index", async (req, res) => {
                   [3-4 Subtemas específicos]
               3. Conclusiones
               4. Bibliografía
-          ` : `
+          `
+              : `
           Usa una estructura más detallada con:
           - 4-6 secciones principales en numeración romana
           - 2-3 subsecciones por sección en numeración arábiga
@@ -42,14 +49,18 @@ app.post("/api/generate-index", async (req, res) => {
             I. Sección principal
                 1.1 Subsección
                 1.2 Subsección
-          `}
+          `
+          }
           
-          Información adicional a considerar: ${additionalInfo || 'No hay información adicional'}
+          Información adicional a considerar: ${
+            additionalInfo || "No hay información adicional"
+          }
           
           Genera un índice específico al tema y mantén coherencia.
-          Solo entrega el índice, sin explicaciones adicionales.`
-        }]
-      })
+          Solo entrega el índice, sin explicaciones adicionales.`,
+          },
+        ],
+      }),
     });
 
     console.log("Respuesta de Claude status:", response.status); // Para debugging
@@ -57,7 +68,7 @@ app.post("/api/generate-index", async (req, res) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error("Error de Claude:", errorText); // Para debugging
-      throw new Error('Error en la API de Claude: ' + errorText);
+      throw new Error("Error en la API de Claude: " + errorText);
     }
 
     const data = await response.json();
@@ -65,10 +76,11 @@ app.post("/api/generate-index", async (req, res) => {
 
     res.json({ index: data.content[0].text });
   } catch (error) {
-    console.error("Error detallado:", error); // Para debugging
-    res.status(500).json({ 
-      error: "Error al generar el índice",
-      details: error.message 
+    console.error("🚨 Error completo en generación de índice:", error);
+    res.status(500).json({
+      error: "Error al generar índice",
+      details: error.message,
+      fullError: error.toString(),
     });
   }
 });

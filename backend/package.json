@@ -15,8 +15,8 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "googleapis": "^144.0.0",
-    "morgan": "^1.10.0",
-    "node-fetch": "^2.7.0"
+    "node-fetch": "^2.7.0",
+    "morgan": "^1.10.0"
   },
   "description": "",
   "devDependencies": {
