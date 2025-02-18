@@ -1,4 +1,6 @@
-const API_URL = "https://academico3-production.up.railway.app";
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  "https://academico3-production.up.railway.app";
 console.log("🚀 API URL:", API_URL);
 
 class DocumentService {
@@ -16,10 +18,13 @@ class DocumentService {
 
       const response = await fetch(`${this.baseURL}/api/generate-index`, {
         method: "POST",
-        headers: this.headers,
+        headers: {
+          ...this.headers,
+          Origin: window.location.origin,
+        },
         body: JSON.stringify(data),
         mode: "cors",
-        credentials: "omit",
+        credentials: "same-origin",
       });
 
       console.log("📡 Respuesta status:", response.status);
