@@ -3,6 +3,16 @@ app.post("/api/generate-index", async (req, res) => {
   try {
     console.log("🚀 Solicitud de generación de índice recibida");
     console.log("📦 Datos recibidos:", JSON.stringify(req.body, null, 2));
+    console.log("🔍 Origen:", req.get("origin"));
+
+    // Establecer cabeceras CORS explícitamente
+    res.header("Access-Control-Allow-Origin", req.get("origin") || "*");
+    res.header("Access-Control-Allow-Credentials", "true");
+    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.header(
+      "Access-Control-Allow-Headers",
+      "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    );
 
     const { documentType, topic, length, additionalInfo } = req.body;
 
@@ -27,7 +37,7 @@ app.post("/api/generate-index", async (req, res) => {
         messages: [
           {
             role: "user",
-            content: `Genera un índice para un ${documentType} sobre ${topic}. 
+            content: `Genera un índice para un ${documentType} sobre "${topic}". 
           El documento será de ${length}. 
           
           ${
@@ -63,16 +73,16 @@ app.post("/api/generate-index", async (req, res) => {
       }),
     });
 
-    console.log("Respuesta de Claude status:", response.status); // Para debugging
+    console.log("Respuesta de Claude status:", response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Error de Claude:", errorText); // Para debugging
+      console.error("Error de Claude:", errorText);
       throw new Error("Error en la API de Claude: " + errorText);
     }
 
     const data = await response.json();
-    console.log("Respuesta de Claude:", data); // Para debugging
+    console.log("Respuesta de Claude recibida correctamente");
 
     res.json({ index: data.content[0].text });
   } catch (error) {

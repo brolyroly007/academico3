@@ -1,7 +1,7 @@
+// src/services/DocumentService.jsx
 const API_URL =
   import.meta.env.VITE_API_URL ||
   "https://academico3-production.up.railway.app";
-console.log("🚀 API URL:", API_URL);
 
 class DocumentService {
   constructor() {
@@ -9,22 +9,21 @@ class DocumentService {
       "Content-Type": "application/json",
     };
     this.baseURL = API_URL;
+    console.log("🚀 API URL configurada en DocumentService:", this.baseURL);
   }
 
   async generateIndex(data) {
     try {
-      console.log("🔍 URL completa:", `${this.baseURL}/api/generate-index`);
+      console.log(
+        "🔍 URL completa para generate-index:",
+        `${this.baseURL}/api/generate-index`
+      );
       console.log("📦 Payload:", JSON.stringify(data));
 
       const response = await fetch(`${this.baseURL}/api/generate-index`, {
         method: "POST",
-        headers: {
-          ...this.headers,
-          Origin: window.location.origin,
-        },
+        headers: this.headers,
         body: JSON.stringify(data),
-        mode: "cors",
-        credentials: "same-origin",
       });
 
       console.log("📡 Respuesta status:", response.status);

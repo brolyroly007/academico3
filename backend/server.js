@@ -25,18 +25,42 @@ app.use((req, res, next) => {
   next();
 });
 
+// Configuración CORS mejorada
+const allowedOrigins = [
+  "https://academico3.vercel.app",
+  "https://academico3-production.up.railway.app",
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+];
+
 app.use(
   cors({
-    origin: [
-      "https://academico3.vercel.app", // Tu frontend en Vercel
-      "https://academico3-production.up.railway.app", // Backend
-      "http://localhost:5173", // Para desarrollo local
-    ],
+    origin: function (origin, callback) {
+      // Permitir solicitudes sin origen (ej. herramientas de desarrollo)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.warn(`Origen bloqueado por CORS: ${origin}`);
+        callback(null, false);
+      }
+    },
     methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "Origin",
+      "X-Requested-With",
+    ],
     credentials: true,
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   })
 );
+
+// Habilitar CORS para todas las rutas
+app.options("*", cors());
 
 app.use(express.json());
 
@@ -124,26 +148,31 @@ async function setupSheet(sheets, spreadsheetId) {
   }
 }
 
+// Endpoint para generar índice
 app.post("/api/generate-index", async (req, res) => {
   try {
-    console.log("Recibido en servidor:", req.body);
+    console.log("🚀 Solicitud de generación de índice recibida");
+    console.log("📦 Datos recibidos:", JSON.stringify(req.body, null, 2));
+    console.log("🔍 Origen:", req.get("origin"));
+
+    // Establecer cabeceras CORS explícitamente
+    res.header("Access-Control-Allow-Origin", req.get("origin") || "*");
+    res.header("Access-Control-Allow-Credentials", "true");
+    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.header(
+      "Access-Control-Allow-Headers",
+      "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    );
+
     const { documentType, topic, length, additionalInfo } = req.body;
 
     if (!documentType || !topic || !length) {
-      return res.status(400).json({ error: "Campos requeridos faltantes" });
+      console.error("❌ Campos requeridos faltantes");
+      return res.status(400).json({
+        error: "Campos requeridos faltantes",
+        received: req.body,
+      });
     }
-
-    const prompt =
-      documentType.toLowerCase() === "ensayo"
-        ? `[Título principal]
-         1. Introducción
-         2. Desarrollo
-             [3-4 Subtemas específicos]
-         3. Conclusiones
-         4. Bibliografía`
-        : `I. Sección principal
-         1.1 Subsección
-         1.2 Subsección`;
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -154,30 +183,65 @@ app.post("/api/generate-index", async (req, res) => {
       },
       body: JSON.stringify({
         model: "claude-3-haiku-20240307",
-        max_tokens: 1000,
+        max_tokens: 4096,
         messages: [
           {
             role: "user",
             content: `Genera un índice para un ${documentType} sobre "${topic}". 
-         Longitud: ${length}.
-         Estructura sugerida: ${prompt}
-         Información adicional: ${additionalInfo || "No hay"}`,
+          El documento será de ${length}. 
+          
+          ${
+            documentType.toLowerCase() === "ensayo"
+              ? `
+          Usa esta estructura:
+          [Título principal]
+              1. Introducción
+              2. Desarrollo
+                  [3-4 Subtemas específicos]
+              3. Conclusiones
+              4. Bibliografía
+          `
+              : `
+          Usa una estructura más detallada con:
+          - 4-6 secciones principales en numeración romana
+          - 2-3 subsecciones por sección en numeración arábiga
+          - Formato: 
+            I. Sección principal
+                1.1 Subsección
+                1.2 Subsección
+          `
+          }
+          
+          Información adicional a considerar: ${
+            additionalInfo || "No hay información adicional"
+          }
+          
+          Genera un índice específico al tema y mantén coherencia.
+          Solo entrega el índice, sin explicaciones adicionales.`,
           },
         ],
       }),
     });
 
+    console.log("Respuesta de Claude status:", response.status);
+
     if (!response.ok) {
-      throw new Error(await response.text());
+      const errorText = await response.text();
+      console.error("Error de Claude:", errorText);
+      throw new Error("Error en la API de Claude: " + errorText);
     }
 
     const data = await response.json();
+    console.log("Respuesta de Claude recibida correctamente");
+
     res.json({ index: data.content[0].text });
   } catch (error) {
-    console.error("Error completo:", error);
-    res
-      .status(500)
-      .json({ error: "Error al generar índice", details: error.message });
+    console.error("🚨 Error completo en generación de índice:", error);
+    res.status(500).json({
+      error: "Error al generar índice",
+      details: error.message,
+      fullError: error.toString(),
+    });
   }
 });
 

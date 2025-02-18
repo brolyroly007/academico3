@@ -1,8 +1,11 @@
-const API_URL = import.meta.env.VITE_API_URL;
+// src/services/googleSheets.js
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  "https://academico3-production.up.railway.app";
 
 export async function appendToSheet(data) {
   try {
-    console.log("API URL being used:", API_URL);
+    console.log("API URL siendo usada:", API_URL);
     console.log("Enviando datos al servidor:", data);
 
     const response = await fetch(`${API_URL}/api/append-to-sheet`, {

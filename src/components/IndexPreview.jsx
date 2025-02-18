@@ -1,3 +1,4 @@
+// src/components/IndexPreview.jsx
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,6 +8,7 @@ import { CheckCheck, AlertCircle, ChevronLeft, List } from "lucide-react";
 import { appendToSheet } from "../services/googleSheets";
 import { handleError, handleSuccess } from "../utils/errorHandler";
 import { ProgressIndicator } from "./ProgressIndicator";
+import DocumentService from "../services/DocumentService";
 
 function IndexPreview() {
   const navigate = useNavigate();
@@ -28,39 +30,10 @@ function IndexPreview() {
           additionalInfo: formData.additionalInfo || "",
         };
 
-        console.log(
-          "🌐 API URL completa:",
-          `${import.meta.env.VITE_API_URL}/api/generate-index`
-        );
-        console.log("Payload JSON:", JSON.stringify(payload));
+        console.log("Generando índice con payload:", payload);
 
-        const fullResponse = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/generate-index`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(payload),
-          }
-        );
-
-        console.log("Respuesta status:", fullResponse.status);
-        console.log("Respuesta headers:", fullResponse.headers);
-        const responseText = await fullResponse.text();
-        console.log("Respuesta completa:", responseText);
-
-        if (!fullResponse.ok) {
-          throw new Error(responseText || "Error al generar el índice");
-        }
-
-        const data = JSON.parse(responseText);
-
-        if (data.index) {
-          setGeneratedIndex(data.index);
-        } else {
-          throw new Error("Respuesta inválida del servidor");
-        }
+        const index = await DocumentService.generateIndex(payload);
+        setGeneratedIndex(index);
       } catch (error) {
         console.error("Error de red completo:", error);
         console.error("Tipo de error:", error.name);
