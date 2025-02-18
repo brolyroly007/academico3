@@ -25,45 +25,61 @@ app.use((req, res, next) => {
   next();
 });
 
-// Configuración CORS mejorada
-const allowedOrigins = [
-  "https://academico3.vercel.app",
-  "https://academico3-production.up.railway.app",
-  "https://academico3-frontend.onrender.com", // Añade tu frontend de Render
-  "http://localhost:5173",
-  "http://127.0.0.1:5173",
-];
-
+// Configuración CORS simplificada para desarrollo
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // Permitir solicitudes sin origen (ej. herramientas de desarrollo)
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        console.warn(`Origen bloqueado por CORS: ${origin}`);
-        callback(null, false);
-      }
-    },
-    methods: ["GET", "POST", "OPTIONS"],
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: [
       "Content-Type",
       "Authorization",
       "Origin",
       "X-Requested-With",
     ],
-    credentials: true,
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
   })
 );
 
-// Habilitar CORS para todas las rutas
+// Pre-flight para todas las rutas
 app.options("*", cors());
 
 app.use(express.json());
+
+// Página de inicio
+app.get("/", (req, res) => {
+  res.send(`
+    <html>
+      <head>
+        <title>Academico3 API</title>
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 40px; line-height: 1.6; }
+          .container { max-width: 800px; margin: 0 auto; background: #f9f9f9; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+          h1 { color: #0066cc; margin-top: 0; }
+          h2 { margin-top: 30px; color: #444; }
+          ul { margin-top: 20px; }
+          li { margin: 8px 0; }
+          .status { display: inline-block; background: #4CAF50; color: white; padding: 4px 12px; border-radius: 4px; }
+          footer { margin-top: 40px; font-size: 0.9em; color: #666; text-align: center; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>Academico3 Backend</h1>
+          <p><span class="status">Activo</span></p>
+          <p>Timestamp: ${new Date().toISOString()}</p>
+          <h2>Endpoints disponibles:</h2>
+          <ul>
+            <li><a href="/api/health">/api/health</a> - Verificar estado del servidor</li>
+            <li><code>/api/generate-index</code> - Generar índice académico (POST)</li>
+            <li><code>/api/append-to-sheet</code> - Guardar datos en Google Sheets (POST)</li>
+          </ul>
+          <footer>
+            Academico3 API - Render Deployment
+          </footer>
+        </div>
+      </body>
+    </html>
+  `);
+});
 
 // Añade este nuevo endpoint de health check
 app.get("/api/health", (req, res) => {
@@ -75,7 +91,7 @@ app.get("/api/health", (req, res) => {
 });
 
 const auth = new google.auth.GoogleAuth({
-  credentials: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS),
+  credentials: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS || "{}"),
   scopes: ["https://www.googleapis.com/auth/spreadsheets"],
 });
 
@@ -83,6 +99,11 @@ const sheets = google.sheets({ version: "v4", auth });
 
 async function setupSheet(sheets, spreadsheetId) {
   try {
+    if (!spreadsheetId) {
+      console.warn("No se proporcionó ID de hoja de cálculo");
+      return;
+    }
+
     const headers = [
       "ID",
       "Fecha",
@@ -144,8 +165,9 @@ async function setupSheet(sheets, spreadsheetId) {
         ],
       },
     });
+    console.log("✅ Hoja de cálculo configurada correctamente");
   } catch (error) {
-    console.error("Error configurando la hoja:", error);
+    console.error("❌ Error configurando la hoja:", error);
   }
 }
 
@@ -157,7 +179,7 @@ app.post("/api/generate-index", async (req, res) => {
     console.log("🔍 Origen:", req.get("origin"));
 
     // Establecer cabeceras CORS explícitamente
-    res.header("Access-Control-Allow-Origin", req.get("origin") || "*");
+    res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Credentials", "true");
     res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
     res.header(
@@ -172,6 +194,14 @@ app.post("/api/generate-index", async (req, res) => {
       return res.status(400).json({
         error: "Campos requeridos faltantes",
         received: req.body,
+      });
+    }
+
+    if (!process.env.CLAUDE_API_KEY) {
+      console.error("❌ CLAUDE_API_KEY no configurada");
+      return res.status(500).json({
+        error: "Error de configuración del servidor",
+        details: "API key no configurada",
       });
     }
 
@@ -248,7 +278,16 @@ app.post("/api/generate-index", async (req, res) => {
 
 app.post("/api/append-to-sheet", async (req, res) => {
   try {
+    // Asegurar que CORS funcione para esta ruta
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
     const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_ID;
+    if (!SPREADSHEET_ID) {
+      throw new Error("GOOGLE_SHEETS_ID no configurado");
+    }
+
     const RANGE = "Hoja 1!A:P";
 
     const response = await sheets.spreadsheets.values.get({
@@ -366,5 +405,18 @@ app.post("/api/setup-sheet", async (req, res) => {
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  setupSheet(sheets, process.env.GOOGLE_SHEETS_ID);
+
+  // Intentar configurar la hoja, pero manejar posibles errores
+  try {
+    if (process.env.GOOGLE_SHEETS_ID) {
+      setupSheet(sheets, process.env.GOOGLE_SHEETS_ID);
+    } else {
+      console.warn("⚠️ GOOGLE_SHEETS_ID no configurado, omitiendo setupSheet");
+    }
+  } catch (error) {
+    console.error(
+      "⚠️ Error al configurar hoja de cálculo durante inicio:",
+      error
+    );
+  }
 });
