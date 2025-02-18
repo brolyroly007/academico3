@@ -8,7 +8,6 @@ import { CheckCheck, AlertCircle, ChevronLeft, List } from "lucide-react";
 import { appendToSheet } from "../services/googleSheets";
 import { handleError, handleSuccess } from "../utils/errorHandler";
 import { ProgressIndicator } from "./ProgressIndicator";
-import DocumentService from "../services/DocumentService";
 
 function IndexPreview() {
   const navigate = useNavigate();
@@ -23,6 +22,9 @@ function IndexPreview() {
       if (!formData) return;
 
       try {
+        // IMPORTANTE: URL FORZADA PARA PRODUCCIÓN
+        const FORCED_API_URL = "https://academico3-production.up.railway.app";
+
         const payload = {
           documentType: formData.documentType,
           topic: formData.topic,
@@ -30,12 +32,32 @@ function IndexPreview() {
           additionalInfo: formData.additionalInfo || "",
         };
 
-        console.log("Generando índice con payload:", payload);
+        console.log("🚨 USANDO URL FORZADA:", FORCED_API_URL);
+        console.log("Payload:", payload);
 
-        const index = await DocumentService.generateIndex(payload);
-        setGeneratedIndex(index);
+        const response = await fetch(`${FORCED_API_URL}/api/generate-index`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Origin: "https://academico3.vercel.app",
+          },
+          body: JSON.stringify(payload),
+        });
+
+        console.log("📡 Respuesta status:", response.status);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("❌ Error del servidor:", errorText);
+          throw new Error(
+            `Error del servidor: ${response.status} - ${errorText}`
+          );
+        }
+
+        const data = await response.json();
+        setGeneratedIndex(data.index);
       } catch (error) {
-        console.error("Error de red completo:", error);
+        console.error("Error completo:", error);
         console.error("Tipo de error:", error.name);
         console.error("Mensaje de error:", error.message);
 

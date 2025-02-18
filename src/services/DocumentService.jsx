@@ -1,7 +1,7 @@
 // src/services/DocumentService.jsx
-const API_URL =
-  import.meta.env.VITE_API_URL ||
-  "https://academico3-production.up.railway.app";
+// IMPORTANTE: URL forzada para producción
+const API_URL = "https://academico3-production.up.railway.app";
+console.log("🚀 API URL (FORZADA):", API_URL);
 
 class DocumentService {
   constructor() {
@@ -9,21 +9,21 @@ class DocumentService {
       "Content-Type": "application/json",
     };
     this.baseURL = API_URL;
-    console.log("🚀 API URL configurada en DocumentService:", this.baseURL);
   }
 
   async generateIndex(data) {
     try {
-      console.log(
-        "🔍 URL completa para generate-index:",
-        `${this.baseURL}/api/generate-index`
-      );
+      console.log("🔍 URL completa:", `${this.baseURL}/api/generate-index`);
       console.log("📦 Payload:", JSON.stringify(data));
 
       const response = await fetch(`${this.baseURL}/api/generate-index`, {
         method: "POST",
-        headers: this.headers,
+        headers: {
+          ...this.headers,
+          Origin: "https://academico3.vercel.app",
+        },
         body: JSON.stringify(data),
+        mode: "cors",
       });
 
       console.log("📡 Respuesta status:", response.status);

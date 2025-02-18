@@ -1,34 +1,32 @@
 import { fileURLToPath } from "url";
 import path from "path";
-import { defineConfig, loadEnv } from "vite";
+import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), "");
-  const apiUrl =
-    env.VITE_API_URL || "https://academico3-production.up.railway.app";
+// URL de API forzada para producción
+const API_URL = "https://academico3-production.up.railway.app";
 
-  return {
-    plugins: [react()],
-    define: {
-      "import.meta.env.VITE_API_URL": JSON.stringify(apiUrl),
+export default defineConfig({
+  plugins: [react()],
+  define: {
+    // Forzar la URL de API
+    "import.meta.env.VITE_API_URL": JSON.stringify(API_URL),
+  },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
     },
-    resolve: {
-      alias: {
-        "@": path.resolve(__dirname, "./src"),
+  },
+  server: {
+    proxy: {
+      "/api": {
+        target: API_URL,
+        changeOrigin: true,
+        secure: false,
       },
     },
-    server: {
-      proxy: {
-        "/api": {
-          target: apiUrl,
-          changeOrigin: true,
-          secure: false,
-        },
-      },
-    },
-  };
+  },
 });
