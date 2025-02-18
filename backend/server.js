@@ -29,6 +29,7 @@ app.use((req, res, next) => {
 const allowedOrigins = [
   "https://academico3.vercel.app",
   "https://academico3-production.up.railway.app",
+  "https://academico3-frontend.onrender.com", // Añade tu frontend de Render
   "http://localhost:5173",
   "http://127.0.0.1:5173",
 ];
@@ -362,7 +363,7 @@ app.post("/api/setup-sheet", async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on port ${PORT}`);
   setupSheet(sheets, process.env.GOOGLE_SHEETS_ID);
