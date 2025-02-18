@@ -5,36 +5,32 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + React</title>
-    <!-- INTERCEPTOR DE API - DEBE ESTAR ANTES DE CUALQUIER OTRO SCRIPT -->
     <script>
+      // Registrar Service Worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js')
+            .then(function(registration) {
+              console.log('Service Worker registrado con éxito:', registration.scope);
+            })
+            .catch(function(error) {
+              console.log('Error al registrar Service Worker:', error);
+            });
+        });
+      }
+      
+      // Interceptor adicional (como respaldo)
       (function() {
-        console.log('🔒 Interceptor API iniciado');
-        
-        // Guardar la implementación original
         const originalFetch = window.fetch;
-
-        // Reemplazar fetch
         window.fetch = function(url, options) {
           if (typeof url === 'string' && url.includes('localhost:5000')) {
             console.warn('⚠️ INTERCEPTANDO URL LOCAL:', url);
             url = url.replace('http://localhost:5000', 'https://academico3-production.up.railway.app');
             console.log('🔄 REDIRIGIENDO A:', url);
           }
-          
           return originalFetch(url, options);
         };
-        
-        // Interceptar también XMLHttpRequest por si acaso
-        const originalXHROpen = XMLHttpRequest.prototype.open;
-        XMLHttpRequest.prototype.open = function(method, url, ...rest) {
-          if (typeof url === 'string' && url.includes('localhost:5000')) {
-            console.warn('⚠️ INTERCEPTANDO XHR LOCAL:', url);
-            url = url.replace('http://localhost:5000', 'https://academico3-production.up.railway.app');
-            console.log('🔄 REDIRIGIENDO XHR A:', url);
-          }
-          
-          return originalXHROpen.call(this, method, url, ...rest);
-        };
+        console.log('🔒 Interceptor API iniciado');
       })();
     </script>
   </head>
