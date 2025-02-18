@@ -27,10 +27,11 @@ app.use((req, res, next) => {
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      console.log("🌍 Origen de la solicitud:", origin);
-      callback(null, true);
-    },
+    origin: [
+      "https://academico3.vercel.app", // Tu frontend en Vercel
+      "https://academico3-production.up.railway.app", // Backend
+      "http://localhost:5173", // Para desarrollo local
+    ],
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
