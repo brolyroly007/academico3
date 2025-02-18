@@ -5,32 +5,48 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + React</title>
+    <!-- Script de parche para URL de API -->
     <script>
-      // Registrar Service Worker
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-          navigator.serviceWorker.register('/sw.js')
-            .then(function(registration) {
-              console.log('Service Worker registrado con éxito:', registration.scope);
-            })
-            .catch(function(error) {
-              console.log('Error al registrar Service Worker:', error);
-            });
-        });
-      }
-      
-      // Interceptor adicional (como respaldo)
       (function() {
+        console.log('🔧 Iniciando parche de URLs...');
+        
+        // 1. Reemplazar fetch inmediatamente
         const originalFetch = window.fetch;
         window.fetch = function(url, options) {
           if (typeof url === 'string' && url.includes('localhost:5000')) {
-            console.warn('⚠️ INTERCEPTANDO URL LOCAL:', url);
-            url = url.replace('http://localhost:5000', 'https://academico3-production.up.railway.app');
-            console.log('🔄 REDIRIGIENDO A:', url);
+            const newUrl = url.replace('http://localhost:5000', 'https://academico3-production.up.railway.app');
+            console.log(`🔄 Redirigiendo: ${url} → ${newUrl}`);
+            url = newUrl;
           }
           return originalFetch(url, options);
         };
-        console.log('🔒 Interceptor API iniciado');
+        
+        // 2. Reemplazar XMLHttpRequest por si acaso
+        const originalXHROpen = XMLHttpRequest.prototype.open;
+        XMLHttpRequest.prototype.open = function(method, url, ...rest) {
+          if (typeof url === 'string' && url.includes('localhost:5000')) {
+            const newUrl = url.replace('http://localhost:5000', 'https://academico3-production.up.railway.app');
+            console.log(`🔄 Redirigiendo XHR: ${url} → ${newUrl}`);
+            url = newUrl;
+          }
+          return originalXHROpen.call(this, method, url, ...rest);
+        };
+        
+        console.log('✅ Parche aplicado correctamente');
+        
+        // 3. Monitorear la red para verificar si hay solicitudes que se escapen
+        window.addEventListener('load', function() {
+          if (window.PerformanceObserver) {
+            const observer = new PerformanceObserver((list) => {
+              list.getEntries().forEach(entry => {
+                if (entry.name && entry.name.includes('localhost:5000')) {
+                  console.error('⚠️ Detectada solicitud a localhost no interceptada:', entry.name);
+                }
+              });
+            });
+            observer.observe({entryTypes: ['resource']});
+          }
+        });
       })();
     </script>
   </head>
