@@ -1,4 +1,3 @@
-// src/components/IndexPreview.jsx
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,7 +22,7 @@ function IndexPreview() {
 
       try {
         // IMPORTANTE: URL FORZADA PARA PRODUCCIÓN
-        const FORCED_API_URL = "https://academico3-production.up.railway.app";
+        const API_URL = "https://academico3-production.up.railway.app";
 
         const payload = {
           documentType: formData.documentType,
@@ -32,35 +31,32 @@ function IndexPreview() {
           additionalInfo: formData.additionalInfo || "",
         };
 
-        console.log("🚨 USANDO URL FORZADA:", FORCED_API_URL);
-        console.log("Payload:", payload);
+        console.log("Enviando payload:", payload);
 
-        const response = await fetch(`${FORCED_API_URL}/api/generate-index`, {
+        const response = await fetch(`${API_URL}/api/generate-index`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Origin: "https://academico3.vercel.app",
           },
           body: JSON.stringify(payload),
         });
 
-        console.log("📡 Respuesta status:", response.status);
+        const responseText = await response.text();
+        console.log("Respuesta completa:", responseText);
 
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error("❌ Error del servidor:", errorText);
-          throw new Error(
-            `Error del servidor: ${response.status} - ${errorText}`
-          );
+          throw new Error(responseText || "Error al generar el índice");
         }
 
-        const data = await response.json();
-        setGeneratedIndex(data.index);
+        const data = JSON.parse(responseText);
+
+        if (data.index) {
+          setGeneratedIndex(data.index);
+        } else {
+          throw new Error("Respuesta inválida del servidor");
+        }
       } catch (error) {
         console.error("Error completo:", error);
-        console.error("Tipo de error:", error.name);
-        console.error("Mensaje de error:", error.message);
-
         handleError(error);
         setGeneratedIndex(`1. Introducción
 2. Desarrollo
