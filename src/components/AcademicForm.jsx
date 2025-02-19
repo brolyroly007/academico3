@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { FileUpload } from "./FileUpload";
 import { ProgressIndicator } from "./ProgressIndicator";
 import { handleError } from "../utils/errorHandler";
 import {
@@ -85,7 +84,6 @@ export default function AcademicForm() {
     career: "",
     essayTone: "",
     additionalInfo: "",
-    referenceFile: null,
     name: "",
     countryCode: "+51",
     phoneNumber: "",
@@ -103,7 +101,7 @@ export default function AcademicForm() {
     { title: "Contenido", fields: ["topic", "course", "career"] },
     {
       title: "Detalles Finales",
-      fields: ["name", "phoneNumber", "additionalInfo"],
+      fields: ["name", "phoneNumber"], // Removido additionalInfo de los campos requeridos
     },
   ];
 
@@ -549,7 +547,7 @@ export default function AcademicForm() {
 
                     <div className="space-y-2">
                       <Label className="text-base sm:text-lg">
-                        Instrucciones Específicas
+                        Instrucciones Específicas (opcional)
                       </Label>
                       <Textarea
                         value={formData.additionalInfo}
@@ -562,18 +560,10 @@ export default function AcademicForm() {
                         placeholder="Ej: Requerimientos especiales, estructura específica..."
                         className="min-h-[100px] sm:min-h-[120px] hover:border-primary/80 transition-colors"
                       />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-base sm:text-lg">
-                        Material de Referencia
-                      </Label>
-                      <FileUpload
-                        onFileChange={(file) =>
-                          setFormData({ ...formData, referenceFile: file })
-                        }
-                        className="border-2 border-dashed hover:border-primary/40 hover:bg-primary/5 transition-colors"
-                      />
+                      <p className="text-sm text-muted-foreground">
+                        Campo opcional: puedes proporcionar detalles adicionales
+                        si lo deseas
+                      </p>
                     </div>
                   </div>
                 </div>
