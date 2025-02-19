@@ -5,72 +5,9 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RedactorIA - Asistente para Documentos Académicos</title>
-    <!-- Script de parche de URL mejorado -->
-    <script>
-      (function() {
-        console.log('🔧 Iniciando parche de URLs avanzado...');
-        
-        // Prevenir intentos de conexión a localhost en producción
-        window.__API_URL__ = "https://academico3.onrender.com";
-        
-        // Reemplazar fetch inmediatamente
-        const originalFetch = window.fetch;
-        window.fetch = function(url, options) {
-          let modifiedUrl = url;
-          
-          if (typeof url === 'string') {
-            // Reemplazar cualquier localhost o railway con la URL de render
-            if (url.includes('localhost:5000') || url.includes('academico3-production.up.railway.app')) {
-              modifiedUrl = url.replace(/(http:\/\/localhost:5000|https:\/\/academico3-production\.up\.railway\.app)/g, 
-                                     window.__API_URL__);
-              console.log(`🔄 Redirigiendo URL: ${url} → ${modifiedUrl}`);
-            }
-            
-            // Arreglar doble slash en URLs (excepto después de https:)
-            modifiedUrl = modifiedUrl.replace(/([^:]\/)\/+/g, "$1");
-          }
-          
-          // Registrar todas las solicitudes hacia la API
-          if (modifiedUrl && typeof modifiedUrl === 'string' && 
-              (modifiedUrl.includes('generate-index') || modifiedUrl.includes('append-to-sheet'))) {
-            console.log(`📡 Solicitud a API: ${modifiedUrl}`);
-          }
-          
-          return originalFetch(modifiedUrl, options)
-            .then(response => {
-              if (!response.ok && response.status >= 400) {
-                console.warn(`⚠️ Respuesta con error ${response.status} de: ${modifiedUrl}`);
-              }
-              return response;
-            })
-            .catch(error => {
-              console.error(`❌ Error en fetch a ${modifiedUrl}:`, error);
-              throw error;
-            });
-        };
-        
-        // También interceptar XMLHttpRequest
-        const originalXHROpen = XMLHttpRequest.prototype.open;
-        XMLHttpRequest.prototype.open = function(method, url, ...rest) {
-          let modifiedUrl = url;
-          
-          if (typeof url === 'string') {
-            if (url.includes('localhost:5000') || url.includes('academico3-production.up.railway.app')) {
-              modifiedUrl = url.replace(/(http:\/\/localhost:5000|https:\/\/academico3-production\.up\.railway\.app)/g, 
-                                     window.__API_URL__);
-              console.log(`🔄 Redirigiendo XHR: ${url} → ${modifiedUrl}`);
-            }
-            
-            // Arreglar doble slash
-            modifiedUrl = modifiedUrl.replace(/([^:]\/)\/+/g, "$1");
-          }
-          
-          return originalXHROpen.call(this, method, modifiedUrl, ...rest);
-        };
-        
-        console.log('✅ Parche de URL avanzado aplicado correctamente');
-      })();
-    </script>
+    
+    <!-- API Proxy - CRÍTICO: Este script debe cargarse antes de cualquier otro -->
+    <script src="/api-proxy.js"></script>
   </head>
   <body>
     <div id="root"></div>
