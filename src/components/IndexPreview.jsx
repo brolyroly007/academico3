@@ -21,8 +21,8 @@ function IndexPreview() {
       if (!formData) return;
 
       try {
-        // IMPORTANTE: URL FORZADA PARA PRODUCCIÓN
-        const API_URL = "https://academico3-production.up.railway.app";
+        // URL para API
+        const API_URL = "https://academico3.onrender.com";
 
         const payload = {
           documentType: formData.documentType,

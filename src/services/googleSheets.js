@@ -15,8 +15,9 @@ export async function appendToSheet(data) {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Error al guardar en Google Sheets");
+      const errorText = await response.text();
+      console.error("Error response:", errorText);
+      throw new Error(errorText || "Error al guardar en Google Sheets");
     }
 
     const result = await response.json();
