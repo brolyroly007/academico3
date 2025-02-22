@@ -1,13 +1,15 @@
 {
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "https://academico3.onrender.com/api/:path*"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/"
+  "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "functions": {
+    "api/generate-index.js": {
+      "memory": 1024,
+      "maxDuration": 10
     }
+  },
+  "rewrites": [
+    { "source": "/api/generate-index", "destination": "/api/generate-index.js" }
   ],
   "headers": [
     {
@@ -20,7 +22,7 @@
         },
         {
           "key": "Access-Control-Allow-Headers",
-          "value": "X-Requested-With, Content-Type, Accept"
+          "value": "Content-Type, Authorization"
         }
       ]
     }

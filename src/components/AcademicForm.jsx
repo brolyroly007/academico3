@@ -24,6 +24,8 @@ import {
   ClipboardList,
   Phone,
   User,
+  AlertTriangle,
+  ListTree,
 } from "lucide-react";
 
 const DOCUMENT_TYPES = [
@@ -71,10 +73,35 @@ const SUGERIDOS_TEMAS = [
   "Avances en medicina genética",
 ];
 
+const INDEX_STRUCTURES = [
+  {
+    value: "estandar",
+    label: "Estructura Estándar",
+    description:
+      "Organización tradicional con introducción, desarrollo y conclusiones",
+    icon: <FileText className="h-5 w-5" />,
+  },
+  {
+    value: "capitulos",
+    label: "Por Capítulos",
+    description: "División en capítulos numerados con subsecciones detalladas",
+    icon: <ListTree className="h-5 w-5" />,
+  },
+  {
+    value: "academica",
+    label: "Estructura Académica",
+    description: "Formato académico con objetivos, marco teórico y metodología",
+    icon: <BookOpen className="h-5 w-5" />,
+  },
+];
+
 export default function AcademicForm() {
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Recuperar el paso y datos guardados
   const savedStep = location.state?.currentStep ?? 0;
+  const maxVisitedStep = location.state?.maxVisitedStep ?? savedStep;
   const savedFormData = location.state?.formData ?? {
     documentType: "",
     topic: "",
@@ -87,22 +114,23 @@ export default function AcademicForm() {
     name: "",
     countryCode: "+51",
     phoneNumber: "",
+    indexStructure: "estandar",
   };
 
+  // Estados
   const [formData, setFormData] = useState(savedFormData);
   const [errors, setErrors] = useState({});
   const [currentStep, setCurrentStep] = useState(savedStep);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
+  const [maxStep, setMaxStep] = useState(maxVisitedStep);
 
   const steps = [
     { title: "Tipo de Documento", fields: ["documentType", "citationFormat"] },
     { title: "Configuración", fields: ["length", "essayTone"] },
     { title: "Contenido", fields: ["topic", "course", "career"] },
-    {
-      title: "Detalles Finales",
-      fields: ["name", "phoneNumber"], // Removido additionalInfo de los campos requeridos
-    },
+    { title: "Estructura de Índice", fields: ["indexStructure"] },
+    { title: "Detalles Finales", fields: ["name", "phoneNumber"] },
   ];
 
   useEffect(() => {
@@ -138,17 +166,38 @@ export default function AcademicForm() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleStepChange = (step) => {
+    if (step <= maxStep && validateStep()) {
+      setCurrentStep(step);
+    }
+  };
+
+  const handleNextStep = () => {
+    if (validateStep()) {
+      const nextStep = currentStep + 1;
+      setCurrentStep(nextStep);
+      setMaxStep(Math.max(maxStep, nextStep));
+    }
+  };
+
+  const handleBack = () => {
+    setCurrentStep((prev) => prev - 1);
+  };
+
   const handleSubmit = async (e) => {
     e?.preventDefault();
     if (validateStep()) {
       if (currentStep < steps.length - 1) {
-        setCurrentStep((prev) => prev + 1);
+        handleNextStep();
       } else {
         setIsSubmitting(true);
         try {
+          // Al navegar a preview, incluimos el paso actual y el paso máximo alcanzado
           navigate("/preview", {
             state: {
               formData,
+              currentStep: currentStep,
+              maxVisitedStep: maxStep,
             },
           });
         } catch (error) {
@@ -159,6 +208,7 @@ export default function AcademicForm() {
       }
     }
   };
+
   const SummaryPanel = () => (
     <Card className="bg-muted/50 border-primary/20 sticky top-8 h-fit">
       <CardContent className="p-4 sm:p-6 space-y-4">
@@ -168,49 +218,91 @@ export default function AcademicForm() {
         </div>
 
         <div className="space-y-3 text-sm">
-          <div>
-            <span className="font-medium">Tipo de Documento:</span>
-            <p className="text-muted-foreground">
-              {formData.documentType || "Pendiente"}
-            </p>
-          </div>
+          {/* Siempre mostrar la información básica si existe */}
+          {formData.documentType && (
+            <div>
+              <span className="font-medium">Tipo de Documento:</span>
+              <p className="text-muted-foreground">{formData.documentType}</p>
+            </div>
+          )}
 
-          <div>
-            <span className="font-medium">Tema Principal:</span>
-            <p className="text-muted-foreground">
-              {formData.topic || "Pendiente"}
-            </p>
-          </div>
+          {formData.topic && (
+            <div>
+              <span className="font-medium">Tema Principal:</span>
+              <p className="text-muted-foreground">{formData.topic}</p>
+            </div>
+          )}
 
-          <div>
-            <span className="font-medium">Formato de Citas:</span>
-            <p className="text-muted-foreground">
-              {formData.citationFormat || "Pendiente"}
-            </p>
-          </div>
+          {formData.citationFormat && (
+            <div>
+              <span className="font-medium">Formato de Citas:</span>
+              <p className="text-muted-foreground">{formData.citationFormat}</p>
+            </div>
+          )}
 
-          <div>
-            <span className="font-medium">Longitud:</span>
-            <p className="text-muted-foreground">
-              {formData.length || "Pendiente"}
-            </p>
-          </div>
+          {formData.length && (
+            <div>
+              <span className="font-medium">Longitud:</span>
+              <p className="text-muted-foreground">{formData.length}</p>
+            </div>
+          )}
 
-          <div>
-            <span className="font-medium">Nombre:</span>
-            <p className="text-muted-foreground">
-              {formData.name || "Pendiente"}
-            </p>
-          </div>
+          {formData.course && (
+            <div>
+              <span className="font-medium">Curso:</span>
+              <p className="text-muted-foreground">{formData.course}</p>
+            </div>
+          )}
 
-          <div>
-            <span className="font-medium">WhatsApp:</span>
-            <p className="text-muted-foreground">
-              {formData.countryCode && formData.phoneNumber
-                ? `${formData.countryCode} ${formData.phoneNumber}`
-                : "Pendiente"}
-            </p>
-          </div>
+          {formData.career && (
+            <div>
+              <span className="font-medium">Área de Estudio:</span>
+              <p className="text-muted-foreground">{formData.career}</p>
+            </div>
+          )}
+
+          {formData.essayTone && (
+            <div>
+              <span className="font-medium">Tono de Redacción:</span>
+              <p className="text-muted-foreground">{formData.essayTone}</p>
+            </div>
+          )}
+
+          {/* Mostrar estructura de índice si ya fue seleccionada */}
+          {formData.indexStructure && (
+            <div>
+              <span className="font-medium">Estructura del Índice:</span>
+              <p className="text-muted-foreground">
+                {formData.indexStructure === "estandar"
+                  ? "Estructura Estándar"
+                  : "Por Capítulos"}
+              </p>
+            </div>
+          )}
+
+          {/* Mostrar datos de contacto si ya fueron ingresados */}
+          {formData.name && (
+            <div>
+              <span className="font-medium">Nombre:</span>
+              <p className="text-muted-foreground">{formData.name}</p>
+            </div>
+          )}
+
+          {formData.phoneNumber && (
+            <div>
+              <span className="font-medium">WhatsApp:</span>
+              <p className="text-muted-foreground">
+                {formData.countryCode} {formData.phoneNumber}
+              </p>
+            </div>
+          )}
+
+          {formData.additionalInfo && (
+            <div>
+              <span className="font-medium">Instrucciones Adicionales:</span>
+              <p className="text-muted-foreground">{formData.additionalInfo}</p>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -218,27 +310,22 @@ export default function AcademicForm() {
 
   return (
     <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-8">
-      {" "}
-      {/* Container principal */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-4">
-        {" "}
-        {/* Grid container */}
         <Card className="border-0 shadow-xl h-fit">
           <CardContent className="p-3 sm:p-6">
-            {" "}
-            {/* Padding más pequeño en móvil */}
             <div className="mb-4 sm:mb-8">
               <div className="flex gap-2 sm:gap-4 mb-4 overflow-x-auto pb-2 scrollbar-hide">
                 {steps.map((step, index) => (
                   <button
                     key={index}
-                    onClick={() =>
-                      currentStep >= index && setCurrentStep(index)
-                    }
+                    onClick={() => handleStepChange(index)}
+                    disabled={index > maxStep}
                     className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1 sm:py-2 rounded-lg transition-all flex-shrink-0 text-sm sm:text-base ${
                       currentStep === index
                         ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                        : "bg-muted text-muted-foreground hover:bg-muted/80"
+                        : index <= maxStep
+                        ? "bg-muted text-muted-foreground hover:bg-muted/80 cursor-pointer"
+                        : "bg-muted/50 text-muted-foreground/50 cursor-not-allowed"
                     }`}
                   >
                     <span className="font-medium truncate">{step.title}</span>
@@ -473,8 +560,176 @@ export default function AcademicForm() {
                 </div>
               )}
 
-              {/* Step 4: Final Details */}
+              {/* Step 4: Index Structure (ahora es el paso 4 en lugar del 5) */}
               {currentStep === 3 && (
+                <div className="space-y-4 sm:space-y-6 animate-fade-in">
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold">
+                      Elige la estructura para tu índice
+                    </h3>
+
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                      <div className="flex gap-3">
+                        <AlertTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <h4 className="font-medium text-yellow-800 mb-1">
+                            Importante
+                          </h4>
+                          <p className="text-sm text-yellow-700">
+                            La estructura del índice solo puede seleccionarse
+                            una vez. Si deseas cambiarla después, necesitarás
+                            completar el formulario nuevamente.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      {INDEX_STRUCTURES.map((structure) => (
+                        <div
+                          key={structure.value}
+                          className={`p-4 rounded-lg border-2 transition-all cursor-pointer hover:bg-muted/30 ${
+                            formData.indexStructure === structure.value
+                              ? "border-primary bg-primary/10"
+                              : "border-transparent"
+                          }`}
+                          onClick={() =>
+                            setFormData({
+                              ...formData,
+                              indexStructure: structure.value,
+                            })
+                          }
+                        >
+                          <div className="flex gap-4">
+                            <div className="flex items-center">
+                              <div
+                                className={`w-5 h-5 rounded-full border ${
+                                  formData.indexStructure === structure.value
+                                    ? "border-primary bg-primary"
+                                    : "border-gray-400"
+                                }`}
+                              >
+                                {formData.indexStructure ===
+                                  structure.value && (
+                                  <div className="w-3 h-3 rounded-full bg-white m-auto mt-1" />
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="space-y-2 flex-1">
+                              <div className="flex items-center gap-2">
+                                {structure.icon}
+                                <span className="font-medium text-lg">
+                                  {structure.label}
+                                </span>
+                              </div>
+                              <p className="text-muted-foreground text-sm">
+                                {structure.description}
+                              </p>
+
+                              {/* Ejemplos visuales */}
+                              <div className="mt-3 p-3 bg-muted/40 rounded-md text-sm border border-muted font-mono">
+                                {structure.value === "estandar" ? (
+                                  <>
+                                    <div className="text-primary-foreground/80">
+                                      Título del documento
+                                    </div>
+                                    <div className="ml-2">1. Introducción</div>
+                                    <div className="ml-2">2. Desarrollo</div>
+                                    <div className="ml-4">
+                                      2.1 Subtema principal
+                                    </div>
+                                    <div className="ml-4">2.2 Análisis</div>
+                                    <div className="ml-2">3. Conclusiones</div>
+                                    <div className="ml-2">
+                                      4. Referencias bibliográficas
+                                    </div>
+                                  </>
+                                ) : structure.value === "capitulos" ? (
+                                  <>
+                                    <div className="text-primary-foreground/80">
+                                      Título del documento
+                                    </div>
+                                    <div className="ml-2">CAPITULO I</div>
+                                    <div className="ml-4">
+                                      1.1 Introducción al tema
+                                    </div>
+                                    <div className="ml-4">
+                                      1.2 Contexto histórico
+                                    </div>
+                                    <div className="ml-2">CAPITULO II</div>
+                                    <div className="ml-4">
+                                      2.1 Desarrollo conceptual
+                                    </div>
+                                    <div className="ml-4">
+                                      2.2 Análisis detallado
+                                    </div>
+                                    <div className="ml-2">CAPITULO III</div>
+                                    <div className="ml-4">3.1 Conclusiones</div>
+                                    <div className="ml-4">
+                                      3.2 Recomendaciones
+                                    </div>
+                                    <div className="ml-2">
+                                      Referencias bibliográficas
+                                    </div>
+                                  </>
+                                ) : (
+                                  <>
+                                    <div className="text-primary-foreground/80">
+                                      Título del documento
+                                    </div>
+                                    <div className="ml-2">I. Introducción</div>
+                                    <div className="ml-4">
+                                      1.1 Planteamiento del problema
+                                    </div>
+                                    <div className="ml-4">
+                                      1.2 Justificación
+                                    </div>
+                                    <div className="ml-2">II. Objetivos</div>
+                                    <div className="ml-4">
+                                      2.1 Objetivo general
+                                    </div>
+                                    <div className="ml-4">
+                                      2.2 Objetivos específicos
+                                    </div>
+                                    <div className="ml-2">
+                                      III. Marco Teórico
+                                    </div>
+                                    <div className="ml-4">3.1 Antecedentes</div>
+                                    <div className="ml-4">
+                                      3.2 Bases teóricas
+                                    </div>
+                                    <div className="ml-2">IV. Metodología</div>
+                                    <div className="ml-4">
+                                      4.1 Tipo de investigación
+                                    </div>
+                                    <div className="ml-4">
+                                      4.2 Técnicas e instrumentos
+                                    </div>
+                                    <div className="ml-2">V. Conclusiones</div>
+                                    <div className="ml-2">
+                                      VI. Referencias Bibliográficas
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {errors.indexStructure && (
+                      <p className="text-red-500 text-sm">
+                        {errors.indexStructure}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Step 5: Final Details (ahora es el paso 5, antes era el 4) */}
+              {currentStep === 4 && (
                 <div className="space-y-4 sm:space-y-6 animate-fade-in">
                   <div className="space-y-4">
                     <div className="space-y-2">
@@ -575,7 +830,7 @@ export default function AcademicForm() {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => setCurrentStep((prev) => prev - 1)}
+                    onClick={handleBack}
                     className="gap-1 sm:gap-2 text-sm sm:text-base px-3 sm:px-4 py-2 sm:py-2 hover:bg-muted/80"
                   >
                     <ChevronLeft className="w-4 h-4" />
@@ -586,11 +841,7 @@ export default function AcademicForm() {
                 {currentStep < steps.length - 1 ? (
                   <Button
                     type="button"
-                    onClick={() => {
-                      if (validateStep()) {
-                        setCurrentStep((prev) => prev + 1);
-                      }
-                    }}
+                    onClick={handleNextStep}
                     className="ml-auto gap-1 sm:gap-2 text-sm sm:text-base px-3 sm:px-4 py-2 sm:py-2 hover:bg-primary/90"
                   >
                     Siguiente
@@ -616,6 +867,7 @@ export default function AcademicForm() {
             </form>
           </CardContent>
         </Card>
+
         {/* Panel de resumen versión desktop */}
         <div className="hidden lg:block">
           <SummaryPanel />

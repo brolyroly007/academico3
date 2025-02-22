@@ -1,12 +1,15 @@
 // src/services/googleSheets.js
-const API_URL = "https://academico3.onrender.com";
+// Define la URL de la API - ajústala según tu entorno
+const API_URL = "https://academico3.vercel.app/api";
+// Si estás trabajando localmente y quieres apuntar a producción, usa:
+// const API_URL = "https://academico3.onrender.com/api";
 
 export async function appendToSheet(data) {
   try {
-    console.log("API URL siendo usada:", API_URL);
     console.log("Enviando datos al servidor:", data);
 
-    const response = await fetch(`${API_URL}/api/append-to-sheet`, {
+    // Usar la URL completa para asegurarnos de que apunta al lugar correcto
+    const response = await fetch(`${API_URL}/append-to-sheet`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -14,17 +17,48 @@ export async function appendToSheet(data) {
       body: JSON.stringify(data),
     });
 
+    // Manejo de respuesta no exitosa
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Error response:", errorText);
-      throw new Error(errorText || "Error al guardar en Google Sheets");
+      let errorMessage;
+      try {
+        // Intenta leer el cuerpo de error como JSON
+        const errorData = await response.json();
+        errorMessage =
+          errorData.error || `Error ${response.status}: ${response.statusText}`;
+      } catch (_) {
+        // Si no es JSON, usa el texto de error o el status
+        try {
+          const errorText = await response.text();
+          errorMessage =
+            errorText || `Error ${response.status}: ${response.statusText}`;
+        } catch (_) {
+          errorMessage = `Error ${response.status}: ${response.statusText}`;
+        }
+      }
+
+      throw new Error(errorMessage);
     }
 
-    const result = await response.json();
-    console.log("Respuesta del servidor:", result);
-    return result;
+    // Si la respuesta está vacía o no tiene contenido
+    if (
+      !response.headers.get("content-length") ||
+      response.headers.get("content-length") === "0"
+    ) {
+      return { success: true };
+    }
+
+    // Intentar parsear la respuesta como JSON
+    try {
+      const result = await response.json();
+      console.log("Respuesta del servidor:", result);
+      return result;
+    } catch (_) {
+      // Si no se puede parsear como JSON, devolver éxito genérico
+      console.warn("No se pudo parsear la respuesta como JSON");
+      return { success: true, warning: "No se pudo parsear la respuesta" };
+    }
   } catch (error) {
     console.error("Error en appendToSheet:", error);
-    throw error;
+    throw error; // Propagar el error para que la UI pueda manejarlo
   }
 }

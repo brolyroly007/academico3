@@ -90,7 +90,9 @@ app.get("/api/health", (req, res) => {
 });
 
 const auth = new google.auth.GoogleAuth({
-  credentials: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS || "{}"),
+  credentials: process.env.GOOGLE_APPLICATION_CREDENTIALS
+    ? JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS)
+    : undefined,
   scopes: ["https://www.googleapis.com/auth/spreadsheets"],
 });
 
@@ -99,8 +101,13 @@ const sheets = google.sheets({ version: "v4", auth });
 async function setupSheet(sheets, spreadsheetId) {
   try {
     if (!spreadsheetId) {
-      console.warn("No se proporcionó ID de hoja de cálculo");
+      console.warn("❌ No se proporcionó ID de hoja de cálculo");
       return;
+    }
+
+    // Verificación de credenciales
+    if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+      throw new Error("❌ Credenciales de Google no configuradas");
     }
 
     const headers = [
@@ -167,6 +174,13 @@ async function setupSheet(sheets, spreadsheetId) {
     console.log("✅ Hoja de cálculo configurada correctamente");
   } catch (error) {
     console.error("❌ Error configurando la hoja:", error);
+
+    // Log detallado para diagnóstico
+    console.error("Detalles del error:", {
+      message: error.message,
+      credentialsPresent: !!process.env.GOOGLE_APPLICATION_CREDENTIALS,
+      spreadsheetId: spreadsheetId,
+    });
   }
 }
 

@@ -1,6 +1,3 @@
-// Interceptor de API - DEBE IMPORTARSE PRIMERO
-import "./utils/apiInterceptor.js";
-
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
