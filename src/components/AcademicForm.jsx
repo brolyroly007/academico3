@@ -114,7 +114,7 @@ export default function AcademicForm() {
     name: "",
     countryCode: "+51",
     phoneNumber: "",
-    indexStructure: "estandar",
+    indexStructure: "",
   };
 
   // Estados
@@ -273,9 +273,9 @@ export default function AcademicForm() {
             <div>
               <span className="font-medium">Estructura del Índice:</span>
               <p className="text-muted-foreground">
-                {formData.indexStructure === "estandar"
-                  ? "Estructura Estándar"
-                  : "Por Capítulos"}
+                {INDEX_STRUCTURES.find(
+                  (s) => s.value === formData.indexStructure
+                )?.label || "Estructura Estándar"}
               </p>
             </div>
           )}
