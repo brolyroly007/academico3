@@ -130,95 +130,94 @@ function IndexPreview() {
   const generateLocalIndex = useCallback(() => {
     if (!formData) return;
 
-    let template = "";
-    switch (formData.indexStructure) {
-      case "academica":
-        template = `${formData.topic.toUpperCase()}
+    const isLongDocument = formData.length === "largo";
+    const title = formData.topic.toUpperCase();
+
+    // Usar un objeto con las estructuras predefinidas
+    const structures = {
+      estandar: `${title}
+
+1. Introducción
+   1.1 Contextualización
+   1.2 Objetivos
+   1.3 Justificación
+
+2. Desarrollo
+   2.1 Subtema principal
+   2.2 Análisis detallado
+   ${
+     isLongDocument
+       ? "2.3 Desarrollo extendido\n   2.4 Análisis complementario"
+       : ""
+   }
+
+3. Conclusiones
+   3.1 Síntesis de hallazgos
+   3.2 Consideraciones finales
+   ${isLongDocument ? "3.3 Recomendaciones" : ""}
+
+4. Referencias bibliográficas`,
+
+      capitulos: `${title}
+
+CAPITULO I: ASPECTOS INTRODUCTORIOS
+1.1 Introducción al tema
+1.2 Contexto histórico
+${isLongDocument ? "1.3 Antecedentes relevantes" : ""}
+
+CAPITULO II: DESARROLLO CONCEPTUAL
+2.1 Desarrollo conceptual
+2.2 Análisis detallado
+${isLongDocument ? "2.3 Profundización temática" : ""}
+
+CAPITULO III: ANÁLISIS Y DISCUSIÓN
+3.1 Análisis de resultados
+3.2 Discusión de hallazgos
+${isLongDocument ? "3.3 Interpretación extendida" : ""}
+
+CAPITULO IV: CONCLUSIONES
+4.1 Conclusiones
+4.2 Recomendaciones
+${isLongDocument ? "4.3 Perspectivas futuras" : ""}
+
+Referencias bibliográficas`,
+
+      academica: `${title}
 
 I. INTRODUCCIÓN
    1.1 Planteamiento del problema
    1.2 Justificación
-   1.3 Alcance y limitaciones
+   ${isLongDocument ? "1.3 Alcance del estudio" : ""}
 
 II. OBJETIVOS
    2.1 Objetivo general
    2.2 Objetivos específicos
 
 III. MARCO TEÓRICO
-   3.1 Antecedentes de la investigación
+   3.1 Antecedentes
    3.2 Bases teóricas
-   3.3 Marco conceptual
-   3.4 Hipótesis (si aplica)
+   ${isLongDocument ? "3.3 Estado del arte" : ""}
 
 IV. METODOLOGÍA
-   4.1 Tipo y diseño de investigación
-   4.2 Población y muestra
-   4.3 Técnicas e instrumentos
-   4.4 Procedimientos
+   4.1 Tipo de investigación
+   4.2 Técnicas e instrumentos
+   ${isLongDocument ? "4.3 Procedimientos metodológicos" : ""}
 
 V. RESULTADOS Y DISCUSIÓN
-   5.1 Análisis de resultados
-   5.2 Interpretación de hallazgos
-   5.3 Discusión
+   5.1 Presentación de resultados
+   5.2 Análisis de hallazgos
+   ${isLongDocument ? "5.3 Discusión extendida" : ""}
 
 VI. CONCLUSIONES
    6.1 Conclusiones
    6.2 Recomendaciones
+   ${isLongDocument ? "6.3 Líneas futuras de investigación" : ""}
 
-VII. REFERENCIAS BIBLIOGRÁFICAS`;
-        break;
-      case "capitulos":
-        template = `${formData.topic.toUpperCase()}
+VII. REFERENCIAS BIBLIOGRÁFICAS`,
+    };
 
-I. INTRODUCCIÓN
-   1.1 Planteamiento del problema
-   1.2 Justificación 
-   1.3 Objetivos
-
-II. MARCO TEÓRICO
-   2.1 Antecedentes
-   2.2 Fundamentos
-   2.3 Estado actual
-
-III. METODOLOGÍA
-   3.1 Enfoque
-   3.2 Técnicas
-   3.3 Instrumentos
-
-IV. DESARROLLO Y ANÁLISIS
-   4.1 Hallazgos principales
-   4.2 Interpretación
-   4.3 Discusión
-
-V. CONCLUSIONES
-   5.1 Conclusiones principales
-   5.2 Recomendaciones
-   5.3 Limitaciones
-
-VI. REFERENCIAS BIBLIOGRÁFICAS`;
-        break;
-      default:
-        template = `${formData.topic}
-
-1. Introducción
-   1.1 Contexto y antecedentes
-   1.2 Objetivos del estudio 
-   1.3 Justificación
-
-2. Desarrollo
-   2.1 Marco conceptual
-   2.2 Análisis de los principales aspectos
-   2.3 Discusión de perspectivas
-   2.4 Implicaciones
-
-3. Conclusiones
-   3.1 Síntesis de hallazgos
-   3.2 Reflexiones finales
-   3.3 Recomendaciones
-
-4. Referencias bibliográficas`;
-    }
-
+    // Seleccionar la estructura basada en indexStructure
+    const template = structures[formData.indexStructure] || structures.estandar;
     setGeneratedIndex(template);
   }, [formData]);
 
@@ -228,26 +227,26 @@ VI. REFERENCIAS BIBLIOGRÁFICAS`;
 
       try {
         setIsLoading(true);
+        const apiUrl = import.meta.env.VITE_API_URL || "/api";
 
-        const API_URL =
-          import.meta.env.VITE_API_URL || "https://academico3.vercel.app/api";
+        console.log("Enviando datos:", {
+          ...formData,
+          indexStructure: formData.indexStructure, // Asegurarnos de que se envía
+        });
 
-        console.log("Enviando datos:", formData);
-        console.log("URL:", `${API_URL}/generate-index`);
-
-        const response = await fetch(`${API_URL}/generate-index`, {
+        const response = await fetch(`${apiUrl}/generate-index`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(formData),
+          body: JSON.stringify({
+            ...formData,
+            indexStructure: formData.indexStructure, // Asegurarnos de que se envía
+          }),
         });
-
-        console.log("Respuesta status:", response.status);
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error("Detalles del error:", errorText);
           throw new Error(
             `Error al generar índice: ${response.status} - ${errorText}`
           );
@@ -260,7 +259,7 @@ VI. REFERENCIAS BIBLIOGRÁFICAS`;
         );
       } catch (error) {
         console.error("Error al generar índice:", error);
-        generateLocalIndex(); // Método de respaldo
+        generateLocalIndex(); // Fallback a generación local
         setApiError(error.message || "No se pudo generar el índice");
       } finally {
         setIsLoading(false);
@@ -268,7 +267,7 @@ VI. REFERENCIAS BIBLIOGRÁFICAS`;
     };
 
     generateIndex();
-  }, [formData, generateLocalIndex]);
+  }, [formData]);
 
   const handleConfirm = async () => {
     setIsSubmitting(true);
