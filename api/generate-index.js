@@ -4,81 +4,133 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+function generateFallbackIndex({
+  documentType,
+  topic,
+  length,
+  indexStructure,
+}) {
+  const title = topic.toUpperCase();
+  const isLongDocument = length.toLowerCase().includes("largo");
+
+  // Estructuras predefinidas según el tipo seleccionado
+  const structures = {
+    estandar: `${title}
+
+1. Introducción
+   1.1 Contextualización
+   1.2 Objetivos
+   1.3 Justificación
+
+2. Desarrollo
+   2.1 Subtema principal
+   2.2 Análisis detallado
+   ${
+     isLongDocument
+       ? "2.3 Desarrollo extendido\n   2.4 Análisis complementario"
+       : ""
+   }
+
+3. Conclusiones
+   3.1 Síntesis de hallazgos
+   3.2 Consideraciones finales
+   ${isLongDocument ? "3.3 Recomendaciones" : ""}
+
+4. Referencias bibliográficas`,
+
+    capitulos: `${title}
+
+CAPITULO I: ASPECTOS INTRODUCTORIOS
+1.1 Introducción al tema
+1.2 Contexto histórico
+${isLongDocument ? "1.3 Antecedentes relevantes" : ""}
+
+CAPITULO II: DESARROLLO CONCEPTUAL
+2.1 Desarrollo conceptual
+2.2 Análisis detallado
+${isLongDocument ? "2.3 Profundización temática" : ""}
+
+CAPITULO III: ANÁLISIS Y DISCUSIÓN
+3.1 Análisis de resultados
+3.2 Discusión de hallazgos
+${isLongDocument ? "3.3 Interpretación extendida" : ""}
+
+CAPITULO IV: CONCLUSIONES
+4.1 Conclusiones
+4.2 Recomendaciones
+${isLongDocument ? "4.3 Perspectivas futuras" : ""}
+
+Referencias bibliográficas`,
+
+    academica: `${title}
+
+I. INTRODUCCIÓN
+   1.1 Planteamiento del problema
+   1.2 Justificación
+   ${isLongDocument ? "1.3 Alcance del estudio" : ""}
+
+II. OBJETIVOS
+   2.1 Objetivo general
+   2.2 Objetivos específicos
+
+III. MARCO TEÓRICO
+   3.1 Antecedentes
+   3.2 Bases teóricas
+   ${isLongDocument ? "3.3 Estado del arte" : ""}
+
+IV. METODOLOGÍA
+   4.1 Tipo de investigación
+   4.2 Técnicas e instrumentos
+   ${isLongDocument ? "4.3 Procedimientos metodológicos" : ""}
+
+V. RESULTADOS Y DISCUSIÓN
+   5.1 Presentación de resultados
+   5.2 Análisis de hallazgos
+   ${isLongDocument ? "5.3 Discusión extendida" : ""}
+
+VI. CONCLUSIONES
+   6.1 Conclusiones
+   6.2 Recomendaciones
+   ${isLongDocument ? "6.3 Líneas futuras de investigación" : ""}
+
+VII. REFERENCIAS BIBLIOGRÁFICAS`,
+  };
+
+  return structures[indexStructure] || structures.estandar;
+}
+
 export default async function handler(req, res) {
   // Establecer cabeceras CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
-  // Manejar las solicitudes OPTIONS para CORS
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
 
-  // Verificar que sea una solicitud POST
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Método no permitido" });
   }
 
   try {
-    const { documentType, topic, length, additionalInfo } = req.body;
+    const { documentType, topic, length, indexStructure, additionalInfo } =
+      req.body;
 
-    // Validar campos requeridos
-    if (!documentType || !topic || !length) {
+    if (!documentType || !topic || !length || !indexStructure) {
       return res.status(400).json({
         error: "Campos requeridos faltantes",
         received: req.body,
       });
     }
 
-    // Verificar API key
-    if (!process.env.CLAUDE_API_KEY) {
-      console.error("CLAUDE_API_KEY no configurada");
-      return res.status(500).json({
-        error: "Error de configuración del servidor",
-        details: "API key no configurada",
-      });
-    }
+    const structurePrompt =
+      indexStructure === "estandar"
+        ? "usa numeración decimal (1., 1.1, etc.) y estructura básica con Introducción, Desarrollo, Conclusiones"
+        : indexStructure === "capitulos"
+        ? "usa CAPITULO I, II, etc. con subsecciones decimales (1.1, 1.2, etc.)"
+        : "usa numeración romana para secciones principales (I., II., etc.) y decimal para subsecciones";
 
-    // Generar el prompt basado en el tipo de documento
-    const prompt =
-      documentType.toLowerCase() === "ensayo"
-        ? `Genera un índice para un ${documentType} sobre "${topic}". 
-         El documento será de ${length}. 
-         
-         Usa esta estructura:
-         [Título principal]
-             1. Introducción
-             2. Desarrollo
-                 [3-4 Subtemas específicos]
-             3. Conclusiones
-             4. Bibliografía
-         
-         Información adicional a considerar: ${
-           additionalInfo || "No hay información adicional"
-         }
-         
-         Genera un índice específico al tema y mantén coherencia.
-         Solo entrega el índice, sin explicaciones adicionales.`
-        : `Genera un índice para un ${documentType} sobre "${topic}". 
-         El documento será de ${length}. 
-         
-         Usa una estructura más detallada con:
-         - 4-6 secciones principales en numeración romana
-         - 2-3 subsecciones por sección en numeración arábiga
-         - Formato: 
-           I. Sección principal
-               1.1 Subsección
-               1.2 Subsección
-         
-         Información adicional a considerar: ${
-           additionalInfo || "No hay información adicional"
-         }
-         
-         Genera un índice específico al tema y mantén coherencia.
-         Solo entrega el índice, sin explicaciones adicionales.`;
-
-    // Realizar solicitud a Claude
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -92,105 +144,43 @@ export default async function handler(req, res) {
         messages: [
           {
             role: "user",
-            content: prompt,
+            content: `Genera un índice para un ${documentType} sobre "${topic}". 
+            El documento será de ${length}.
+            
+            Usa estrictamente esta estructura de formato: ${structurePrompt}
+            
+            Información adicional a considerar: ${
+              additionalInfo || "No hay información adicional"
+            }
+            
+            Genera solo el índice, sin explicaciones adicionales.`,
           },
         ],
       }),
     });
 
-    // Verificar respuesta de Claude
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Error de Claude:", errorText);
-      throw new Error(
-        `Error en la API de Claude: ${response.status} - ${errorText}`
-      );
+      console.error("Error de Claude:", response.status);
+      // Si Claude falla, usar el índice de respaldo
+      const fallbackIndex = generateFallbackIndex(req.body);
+      return res.status(200).json({
+        index: fallbackIndex,
+        source: "fallback",
+      });
     }
 
     const data = await response.json();
-
-    // Generar respuesta exitosa
     return res.status(200).json({
-      success: true,
       index: data.content[0].text,
       source: "claude",
     });
   } catch (error) {
-    // Log detallado del error
-    console.error("Error completo en generación de índice:", error);
-
-    // Intentar generar un índice de respaldo
-    try {
-      const fallbackIndex = generateFallbackIndex(req.body);
-      return res.status(200).json({
-        success: true,
-        index: fallbackIndex,
-        source: "fallback",
-        warning:
-          "Se utilizó el generador de respaldo debido a un error con Claude",
-      });
-    } catch (fallbackError) {
-      return res.status(500).json({
-        error: "Error al generar índice",
-        details: error.message,
-        fullError: error.toString(),
-      });
-    }
-  }
-}
-
-// Función de respaldo para generar índices
-function generateFallbackIndex({ documentType, topic, length }) {
-  const title = topic.toUpperCase();
-  const isLongDocument = length.toLowerCase().includes("largo");
-
-  if (documentType.toLowerCase() === "ensayo") {
-    return `${title}
-
-1. INTRODUCCIÓN
-   1.1 Contextualización
-   1.2 Objetivos
-   1.3 Justificación
-
-2. DESARROLLO
-   2.1 Marco teórico
-   2.2 Análisis del tema
-   2.3 Argumentación principal
-   ${isLongDocument ? "2.4 Perspectivas adicionales\n   2.5 Implicaciones" : ""}
-
-3. CONCLUSIONES
-   3.1 Síntesis de ideas principales
-   3.2 Reflexiones finales
-   ${isLongDocument ? "3.3 Recomendaciones" : ""}
-
-4. REFERENCIAS BIBLIOGRÁFICAS`;
-  } else {
-    return `${title}
-
-I. INTRODUCCIÓN
-   1.1 Planteamiento del tema
-   1.2 Objetivos
-   1.3 Metodología
-
-II. MARCO TEÓRICO
-   2.1 Antecedentes
-   2.2 Fundamentos conceptuales
-   ${isLongDocument ? "2.3 Estado del arte" : ""}
-
-III. DESARROLLO
-   3.1 Análisis principal
-   3.2 Hallazgos
-   ${isLongDocument ? "3.3 Discusión extendida" : ""}
-
-IV. RESULTADOS
-   4.1 Presentación de resultados
-   4.2 Interpretación
-   ${isLongDocument ? "4.3 Implicaciones" : ""}
-
-V. CONCLUSIONES
-   5.1 Conclusiones principales
-   5.2 Recomendaciones
-
-VI. REFERENCIAS BIBLIOGRÁFICAS`;
+    console.error("Error generando índice:", error);
+    // En caso de cualquier error, usar el índice de respaldo
+    const fallbackIndex = generateFallbackIndex(req.body);
+    return res.status(200).json({
+      index: fallbackIndex,
+      source: "fallback",
+    });
   }
 }
