@@ -202,8 +202,8 @@ export default async function handler(req, res) {
     const { documentType, topic, length, indexStructure, additionalInfo } =
       req.body;
 
-    // Log datos recibidos
-    console.log("Datos recibidos en el backend:", {
+    // Log detallado de los datos recibidos
+    console.log("Datos recibidos:", {
       documentType,
       topic,
       length,
@@ -211,14 +211,28 @@ export default async function handler(req, res) {
       additionalInfo,
     });
 
-    if (!documentType || !topic || !length || !indexStructure) {
+    // Validación específica de la estructura
+    if (
+      !indexStructure ||
+      !["estandar", "capitulos", "academica"].includes(indexStructure)
+    ) {
+      console.error("Estructura inválida o no especificada:", indexStructure);
+      return res.status(400).json({
+        error: "Estructura de índice inválida",
+        received: indexStructure,
+        valid: ["estandar", "capitulos", "academica"],
+      });
+    }
+
+    // Validación de otros campos requeridos
+    if (!documentType || !topic || !length) {
       return res.status(400).json({
         error: "Campos requeridos faltantes",
         received: req.body,
       });
     }
 
-    // Generar prompt según la estructura seleccionada
+    // Generar prompt específico para la estructura
     const prompt = getPromptForStructure(
       indexStructure,
       documentType,
@@ -251,16 +265,16 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       console.error("Error de Claude:", response.status);
-      // Usar el fallback con la estructura correcta
       const fallbackIndex = generateFallbackIndex({
         documentType,
         topic,
         length,
-        indexStructure,
+        indexStructure, // Pasar la estructura al fallback
       });
       return res.status(200).json({
         index: fallbackIndex,
         source: "fallback",
+        structureUsed: indexStructure, // Incluir la estructura usada en la respuesta
       });
     }
 
@@ -268,14 +282,15 @@ export default async function handler(req, res) {
     return res.status(200).json({
       index: data.content[0].text,
       source: "claude",
+      structureUsed: indexStructure, // Incluir la estructura usada en la respuesta
     });
   } catch (error) {
     console.error("Error generando índice:", error);
-    // En caso de cualquier error, usar el índice de respaldo
     const fallbackIndex = generateFallbackIndex(req.body);
     return res.status(200).json({
       index: fallbackIndex,
       source: "fallback",
+      error: error.message,
     });
   }
 }

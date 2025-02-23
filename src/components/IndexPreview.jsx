@@ -229,10 +229,11 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
         setIsLoading(true);
         const apiUrl = import.meta.env.VITE_API_URL || "/api";
 
-        // Log para verificar que se envían todos los datos necesarios
-        console.log("Enviando datos al backend:", {
+        // Log explícito de la estructura seleccionada
+        console.log("Estructura seleccionada:", formData.indexStructure);
+        console.log("Datos completos a enviar:", {
           ...formData,
-          indexStructure: formData.indexStructure, // Verificar que esto se envía
+          indexStructure: formData.indexStructure, // Asegurar que este campo existe
         });
 
         const response = await fetch(`${apiUrl}/generate-index`, {
@@ -241,27 +242,28 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            ...formData,
-            indexStructure: formData.indexStructure,
             documentType: formData.documentType,
             topic: formData.topic,
             length: formData.length,
+            indexStructure: formData.indexStructure, // Asegurar que se envía
+            course: formData.course,
+            career: formData.career,
+            essayTone: formData.essayTone,
             additionalInfo: formData.additionalInfo,
           }),
         });
 
-        console.log("Respuesta status:", response.status);
-
         if (!response.ok) {
           const errorText = await response.text();
-          console.error("Detalles del error:", errorText);
           throw new Error(
             `Error al generar índice: ${response.status} - ${errorText}`
           );
         }
 
         const data = await response.json();
-        console.log("Índice generado:", data);
+
+        // Log de la respuesta
+        console.log("Respuesta del servidor:", data);
 
         setGeneratedIndex(data.index);
         setApiError(
@@ -269,7 +271,7 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
         );
       } catch (error) {
         console.error("Error al generar índice:", error);
-        generateLocalIndex(); // Método de respaldo
+        generateLocalIndex();
         setApiError(error.message || "No se pudo generar el índice");
       } finally {
         setIsLoading(false);
@@ -277,7 +279,7 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
     };
 
     generateIndex();
-  }, [formData, generateLocalIndex]);
+  }, [formData]);
 
   const handleConfirm = async () => {
     setIsSubmitting(true);
