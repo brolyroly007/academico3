@@ -63,68 +63,6 @@ function IndexPreview() {
     };
   };
 
-  // Función para generar el índice usando la API de Claude
-  const generateIndexWithClaude = useCallback(async () => {
-    if (!formData) return;
-
-    try {
-      let structurePrompt = "";
-      switch (formData.indexStructure) {
-        case "academica":
-          structurePrompt =
-            "académica formal con introducción, objetivos, marco teórico, metodología, resultados y conclusiones";
-          break;
-        case "capitulos":
-          structurePrompt =
-            "por capítulos con numeración romana y subsecciones detalladas";
-          break;
-        default:
-          structurePrompt = "estándar con numeración decimal";
-      }
-
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-API-Key": CLAUDE_API_KEY,
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify({
-          model: "claude-3-haiku-20240307",
-          max_tokens: 4096,
-          messages: [
-            {
-              role: "user",
-              content: `Genera un índice detallado usando estructura ${structurePrompt} para un ${
-                formData.documentType
-              } sobre "${formData.topic}".
-            Especificaciones adicionales:
-            - Longitud: ${formData.length}
-            - Formato de citación: ${formData.citationFormat}
-            - Tono de redacción: ${formData.essayTone}
-            - Curso: ${formData.course}
-            - Área de estudio: ${formData.career}
-            ${
-              formData.additionalInfo
-                ? `- Instrucciones específicas: ${formData.additionalInfo}`
-                : ""
-            }`,
-            },
-          ],
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error al conectar con Claude: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data.content[0].text;
-    } catch (error) {
-      console.error("Error al generar índice con Claude:", error);
-      throw error;
-    }
-  }, [formData]);
 
   // Función para generar índice local como respaldo
   const generateLocalIndex = useCallback(() => {
@@ -230,47 +168,57 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
         const apiUrl = import.meta.env.VITE_API_URL || "/api";
 
         // Log explícito de la estructura seleccionada
-        console.log("Estructura seleccionada:", formData.indexStructure);
-        console.log("Datos completos a enviar:", {
-          ...formData,
-          indexStructure: formData.indexStructure, // Asegurar que este campo existe
-        });
+        console.log(
+          "Estructura seleccionada en el frontend:",
+          formData.indexStructure
+        );
+
+        const requestData = {
+          documentType: formData.documentType,
+          topic: formData.topic,
+          length: formData.length,
+          indexStructure: formData.indexStructure, // Asegurar que se envía
+          course: formData.course,
+          career: formData.career,
+          essayTone: formData.essayTone,
+          additionalInfo: formData.additionalInfo,
+        };
+
+        console.log("Datos a enviar al backend:", requestData);
 
         const response = await fetch(`${apiUrl}/generate-index`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            documentType: formData.documentType,
-            topic: formData.topic,
-            length: formData.length,
-            indexStructure: formData.indexStructure, // Asegurar que se envía
-            course: formData.course,
-            career: formData.career,
-            essayTone: formData.essayTone,
-            additionalInfo: formData.additionalInfo,
-          }),
+          body: JSON.stringify(requestData),
         });
 
         if (!response.ok) {
           const errorText = await response.text();
+          console.error("Error response:", errorText);
           throw new Error(
             `Error al generar índice: ${response.status} - ${errorText}`
           );
         }
 
         const data = await response.json();
-
-        // Log de la respuesta
         console.log("Respuesta del servidor:", data);
+
+        // Validar que la estructura devuelta es la correcta
+        if (data.structureUsed !== formData.indexStructure) {
+          console.warn(
+            `Estructura recibida (${data.structureUsed}) no coincide con la solicitada (${formData.indexStructure})`
+          );
+        }
 
         setGeneratedIndex(data.index);
         setApiError(
           data.source === "fallback" ? "Se usó un índice predeterminado" : null
         );
       } catch (error) {
-        console.error("Error al generar índice:", error);
+        console.error("Error completo al generar índice:", error);
+        // En caso de error, usar generateLocalIndex con la estructura correcta
         generateLocalIndex();
         setApiError(error.message || "No se pudo generar el índice");
       } finally {
@@ -279,7 +227,7 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
     };
 
     generateIndex();
-  }, [formData]);
+  }, [formData, generateLocalIndex]);
 
   const handleConfirm = async () => {
     setIsSubmitting(true);
