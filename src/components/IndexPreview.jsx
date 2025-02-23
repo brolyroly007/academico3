@@ -19,7 +19,7 @@ import { handleError, handleSuccess } from "../utils/errorHandler";
 
 // Configuración de la API de Claude
 const CLAUDE_API_KEY = import.meta.env.VITE_CLAUDE_API_KEY;
-const API_URL = import.meta.env.VITE_API_URL || "https://academico3.vercel.app/api";
+const API_URL = "/api"; // Simplificar la URL base
 
 // Definición de las estructuras disponibles
 const STRUCTURE_TYPES = {
@@ -165,7 +165,7 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
 
       try {
         setIsLoading(true);
-        const apiUrl = import.meta.env.VITE_API_URL || "/api";
+        const apiUrl = "/api"; // Simplificar la URL base
 
         // Log explícito de la estructura seleccionada
         console.log(

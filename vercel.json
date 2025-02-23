@@ -1,13 +1,28 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "installCommand": "npm install --legacy-peer-deps",
-  "framework": "vite",
+  "builds": [
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "dist" }
+    }
+  ],
   "routes": [
     {
+      "src": "/api/generate-index",
+      "dest": "/api/generate-index.js"
+    },
+    {
+      "src": "/api/append-to-sheet",
+      "dest": "/api/append-to-sheet.js"
+    },
+    {
       "src": "/api/(.*)",
-      "dest": "https://academico3.onrender.com/api/$1"
+      "dest": "/api/$1"
     },
     {
       "handle": "filesystem"
@@ -16,5 +31,9 @@
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ]
+  ],
+  "env": {
+    "CLAUDE_API_KEY": "@claude_api_key",
+    "GOOGLE_SHEETS_ID": "@google_sheets_id"
+  }
 }
