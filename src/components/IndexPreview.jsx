@@ -165,7 +165,7 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
 
       try {
         setIsLoading(true);
-        const apiUrl = "/api"; // Simplificar la URL base
+        const apiUrl = "/api";
 
         // Log explícito de la estructura seleccionada
         console.log(
@@ -177,7 +177,7 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
           documentType: formData.documentType,
           topic: formData.topic,
           length: formData.length,
-          indexStructure: formData.indexStructure, // Asegurar que se envía
+          indexStructure: formData.indexStructure,
           course: formData.course,
           career: formData.career,
           essayTone: formData.essayTone,
@@ -206,7 +206,10 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
         console.log("Respuesta del servidor:", data);
 
         // Validar que la estructura devuelta es la correcta
-        if (data.structureUsed !== formData.indexStructure) {
+        if (
+          data.structureUsed &&
+          data.structureUsed !== formData.indexStructure
+        ) {
           console.warn(
             `Estructura recibida (${data.structureUsed}) no coincide con la solicitada (${formData.indexStructure})`
           );

@@ -233,13 +233,45 @@ export default async function handler(req, res) {
     }
 
     // Generar prompt específico para la estructura
-    const prompt = getPromptForStructure(
+    function getPromptForStructure(
       indexStructure,
       documentType,
       topic,
       length,
       additionalInfo
-    );
+    ) {
+      const prompt = `Genera un índice para un ${documentType} sobre "${topic}". 
+      El documento será de ${length}.
+
+      IMPORTANTE: El índice DEBE seguir EXACTAMENTE esta estructura (${indexStructure}):
+      ${
+        indexStructure === "estandar"
+          ? `1. Introducción (con subsecciones 1.1, 1.2, etc)
+      2. Desarrollo (con subsecciones 2.1, 2.2, etc)
+      3. Conclusiones (con subsecciones 3.1, 3.2, etc)
+      4. Referencias bibliográficas`
+          : indexStructure === "capitulos"
+          ? `CAPITULO I: [Nombre] (con subsecciones 1.1, 1.2, etc)
+      CAPITULO II: [Nombre]
+      CAPITULO III: [Nombre]
+      CAPITULO IV: [Nombre]
+      Referencias bibliográficas`
+          : `I. Introducción
+      II. Objetivos
+      III. Marco Teórico
+      IV. Metodología
+      V. Resultados y Discusión
+      VI. Conclusiones
+      VII. Referencias Bibliográficas`
+      }
+
+      Información adicional: ${additionalInfo || "No hay información adicional"}
+
+      IMPORTANTE: Mantén EXACTAMENTE el formato de numeración y estructura indicados arriba.
+      NO agregues secciones adicionales ni cambies el orden.`;
+
+      return prompt;
+    }
 
     console.log("Estructura seleccionada:", indexStructure);
     console.log("Prompt generado:", prompt);
