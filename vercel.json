@@ -1,21 +1,10 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": { "distDir": "dist" }
-    }
-  ],
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "installCommand": "npm install --legacy-peer-deps",
+  "framework": "vite",
   "routes": [
-    {
-      "src": "/api/generate-index",
-      "dest": "https://academico3.onrender.com/api/generate-index"
-    },
-    {
-      "src": "/api/append-to-sheet",
-      "dest": "https://academico3.onrender.com/api/append-to-sheet"
-    },
     {
       "src": "/api/(.*)",
       "dest": "https://academico3.onrender.com/api/$1"
