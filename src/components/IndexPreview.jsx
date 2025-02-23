@@ -229,9 +229,10 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
         setIsLoading(true);
         const apiUrl = import.meta.env.VITE_API_URL || "/api";
 
-        console.log("Enviando datos:", {
+        // Log para verificar que se envían todos los datos necesarios
+        console.log("Enviando datos al backend:", {
           ...formData,
-          indexStructure: formData.indexStructure, // Asegurarnos de que se envía
+          indexStructure: formData.indexStructure, // Verificar que esto se envía
         });
 
         const response = await fetch(`${apiUrl}/generate-index`, {
@@ -241,25 +242,34 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
           },
           body: JSON.stringify({
             ...formData,
-            indexStructure: formData.indexStructure, // Asegurarnos de que se envía
+            indexStructure: formData.indexStructure,
+            documentType: formData.documentType,
+            topic: formData.topic,
+            length: formData.length,
+            additionalInfo: formData.additionalInfo,
           }),
         });
 
+        console.log("Respuesta status:", response.status);
+
         if (!response.ok) {
           const errorText = await response.text();
+          console.error("Detalles del error:", errorText);
           throw new Error(
             `Error al generar índice: ${response.status} - ${errorText}`
           );
         }
 
         const data = await response.json();
+        console.log("Índice generado:", data);
+
         setGeneratedIndex(data.index);
         setApiError(
           data.source === "fallback" ? "Se usó un índice predeterminado" : null
         );
       } catch (error) {
         console.error("Error al generar índice:", error);
-        generateLocalIndex(); // Fallback a generación local
+        generateLocalIndex(); // Método de respaldo
         setApiError(error.message || "No se pudo generar el índice");
       } finally {
         setIsLoading(false);
@@ -267,7 +277,7 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
     };
 
     generateIndex();
-  }, [formData]);
+  }, [formData, generateLocalIndex]);
 
   const handleConfirm = async () => {
     setIsSubmitting(true);
