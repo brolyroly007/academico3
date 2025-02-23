@@ -154,15 +154,48 @@ export default function AcademicForm() {
       if (!formData[field]) {
         newErrors[field] = "Este campo es obligatorio";
       }
+
+      // Validación específica para número de teléfono
       if (field === "phoneNumber" && formData[field]) {
         const phoneRegex = /^\d{9}$/;
         if (!phoneRegex.test(formData[field])) {
           newErrors[field] = "El número debe tener 9 dígitos";
         }
       }
+
+      // Validación específica para estructura de índice
+      if (
+        field === "indexStructure" &&
+        !["estandar", "capitulos", "academica"].includes(formData[field])
+      ) {
+        newErrors[field] = "Selecciona una estructura válida";
+      }
+
+      // Validación de longitud para el tema
+      if (field === "topic" && formData[field] && formData[field].length < 3) {
+        newErrors[field] = "El tema debe tener al menos 3 caracteres";
+      }
+
+      // Validación para el curso y carrera
+      if (
+        (field === "course" || field === "career") &&
+        formData[field] &&
+        formData[field].length < 2
+      ) {
+        newErrors[field] = "Este campo debe tener al menos 2 caracteres";
+      }
+
+      // Validación para el nombre
+      if (field === "name" && formData[field] && formData[field].length < 2) {
+        newErrors[field] = "El nombre debe tener al menos 2 caracteres";
+      }
     });
 
     setErrors(newErrors);
+    console.log("Errores de validación:", newErrors);
+    console.log("Campos actuales:", currentFields);
+    console.log("Datos del formulario:", formData);
+
     return Object.keys(newErrors).length === 0;
   };
 
@@ -192,7 +225,10 @@ export default function AcademicForm() {
       } else {
         setIsSubmitting(true);
         try {
-          // Al navegar a preview, incluimos el paso actual y el paso máximo alcanzado
+          console.log("Datos a enviar:", {
+            ...formData,
+            indexStructure: formData.indexStructure, // Verificar que existe
+          });
           navigate("/preview", {
             state: {
               formData,
@@ -593,12 +629,16 @@ export default function AcademicForm() {
                               ? "border-primary bg-primary/10"
                               : "border-transparent"
                           }`}
-                          onClick={() =>
+                          onClick={() => {
+                            console.log(
+                              "Estructura seleccionada:",
+                              structure.value
+                            );
                             setFormData({
                               ...formData,
                               indexStructure: structure.value,
-                            })
-                          }
+                            });
+                          }}
                         >
                           <div className="flex gap-4">
                             <div className="flex items-center">
