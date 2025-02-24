@@ -8,37 +8,10 @@ import {
   AlertCircle,
   ChevronLeft,
   List,
-  BookOpen,
-  FileText,
-  ClipboardList,
   Loader,
-  GraduationCap,
 } from "lucide-react";
 import { appendToSheet } from "../services/googleSheets";
 import { handleError, handleSuccess } from "../utils/errorHandler";
-
-// Configuración de la API de Claude
-const CLAUDE_API_KEY = import.meta.env.VITE_CLAUDE_API_KEY;
-const API_URL = "/api"; // Simplificar la URL base
-
-// Definición de las estructuras disponibles
-const STRUCTURE_TYPES = {
-  estandar: {
-    name: "Estructura Estándar",
-    icon: FileText,
-    description: "Organización tradicional con introducción, desarrollo y conclusiones",
-  },
-  capitulos: {
-    name: "Por Capítulos",
-    icon: BookOpen,
-    description: "División en capítulos numerados con subsecciones detalladas",
-  },
-  academica: {
-    name: "Estructura Académica",
-    icon: GraduationCap,
-    description: "Formato académico con objetivos, marco teórico y metodología",
-  },
-};
 
 function IndexPreview() {
   const navigate = useNavigate();
@@ -50,20 +23,6 @@ function IndexPreview() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState(null);
 
-  // Funciones para obtener información de la estructura
-  const getStructureInfo = () => {
-    const structureType = formData?.indexStructure || "estandar";
-    const structure = STRUCTURE_TYPES[structureType];
-    const Icon = structure.icon;
-
-    return {
-      name: structure.name,
-      icon: <Icon className="w-5 h-5" />,
-      description: structure.description,
-    };
-  };
-
-
   // Función para generar índice local como respaldo
   const generateLocalIndex = useCallback(() => {
     if (!formData) return;
@@ -71,7 +30,7 @@ function IndexPreview() {
     const isLongDocument = formData.length === "largo";
     const title = formData.topic.toUpperCase();
 
-    // Usar un objeto con las estructuras predefinidas
+    // Estructuras predefinidas según el tipo seleccionado
     const structures = {
       estandar: `${title}
 
@@ -154,9 +113,7 @@ VI. CONCLUSIONES
 VII. REFERENCIAS BIBLIOGRÁFICAS`,
     };
 
-    // Seleccionar la estructura basada en indexStructure
-    const template = structures[formData.indexStructure] || structures.estandar;
-    setGeneratedIndex(template);
+    return structures[formData.indexStructure] || structures.estandar;
   }, [formData]);
 
   useEffect(() => {
@@ -167,24 +124,18 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
         setIsLoading(true);
         const apiUrl = "/api";
 
-        // Log explícito de la estructura seleccionada
-        console.log(
-          "Estructura seleccionada en el frontend:",
-          formData.indexStructure
-        );
+        console.log("Enviando estructura:", formData.indexStructure);
 
         const requestData = {
           documentType: formData.documentType,
           topic: formData.topic,
           length: formData.length,
-          indexStructure: formData.indexStructure,
+          indexStructure: formData.indexStructure, // Aseguramos que se envíe la estructura
           course: formData.course,
           career: formData.career,
           essayTone: formData.essayTone,
           additionalInfo: formData.additionalInfo,
         };
-
-        console.log("Datos a enviar al backend:", requestData);
 
         const response = await fetch(`${apiUrl}/generate-index`, {
           method: "POST",
@@ -195,35 +146,24 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
         });
 
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error("Error response:", errorText);
-          throw new Error(
-            `Error al generar índice: ${response.status} - ${errorText}`
-          );
+          throw new Error(`Error al generar índice: ${response.status}`);
         }
 
         const data = await response.json();
-        console.log("Respuesta del servidor:", data);
 
-        // Validar que la estructura devuelta es la correcta
-        if (
-          data.structureUsed &&
-          data.structureUsed !== formData.indexStructure
-        ) {
-          console.warn(
-            `Estructura recibida (${data.structureUsed}) no coincide con la solicitada (${formData.indexStructure})`
-          );
+        if (data.source === "fallback") {
+          // Si es fallback, usar el generador local con la estructura correcta
+          const localIndex = generateLocalIndex();
+          setGeneratedIndex(localIndex);
+          setApiError("Se está usando un índice predeterminado");
+        } else {
+          setGeneratedIndex(data.index);
         }
-
-        setGeneratedIndex(data.index);
-        setApiError(
-          data.source === "fallback" ? "Se usó un índice predeterminado" : null
-        );
       } catch (error) {
-        console.error("Error completo al generar índice:", error);
-        // En caso de error, usar generateLocalIndex con la estructura correcta
-        generateLocalIndex();
-        setApiError(error.message || "No se pudo generar el índice");
+        console.error("Error generando índice:", error);
+        const localIndex = generateLocalIndex();
+        setGeneratedIndex(localIndex);
+        setApiError("Error en la generación del índice");
       } finally {
         setIsLoading(false);
       }
