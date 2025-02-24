@@ -13,7 +13,6 @@ function generateFallbackIndex({
   const title = topic.toUpperCase();
   const isLongDocument = length.toLowerCase().includes("largo");
 
-  // Estructuras predefinidas según el tipo seleccionado
   const structures = {
     estandar: `${title}
 
@@ -99,96 +98,18 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
   return structures[indexStructure] || structures.estandar;
 }
 
-function getPromptForStructure(
-  indexStructure,
-  documentType,
-  topic,
-  length,
-  additionalInfo
-) {
-  const basePrompt = `Genera un índice para un ${documentType} sobre "${topic}". 
-El documento será de ${length}.`;
-
-  const structureInstructions = {
-    estandar: `
-IMPORTANTE: Usa EXACTAMENTE esta estructura:
-[Título]
-1. Introducción
-   1.1 [Subtemas]
-2. Desarrollo
-   2.1 [Subtemas]
-3. Conclusiones
-   3.1 [Subtemas]
-4. Referencias bibliográficas`,
-
-    capitulos: `
-IMPORTANTE: Usa EXACTAMENTE esta estructura:
-[Título]
-CAPITULO I: [Nombre]
-1.1 [Subtemas]
-1.2 [Subtemas]
-
-CAPITULO II: [Nombre]
-2.1 [Subtemas]
-2.2 [Subtemas]
-
-CAPITULO III: [Nombre]
-3.1 [Subtemas]
-3.2 [Subtemas]
-
-CAPITULO IV: [Nombre]
-4.1 [Subtemas]
-4.2 [Subtemas]
-
-Referencias bibliográficas`,
-
-    academica: `
-IMPORTANTE: Usa EXACTAMENTE esta estructura:
-[Título]
-I. Introducción
-   1.1 Planteamiento del problema
-   1.2 Justificación
-
-II. Objetivos
-   2.1 Objetivo general
-   2.2 Objetivos específicos
-
-III. Marco Teórico
-    3.1 Antecedentes
-    3.2 Bases teóricas
-
-IV. Metodología
-    4.1 Tipo de investigación
-    4.2 Técnicas e instrumentos
-
-V. Resultados y Discusión
-   5.1 Presentación de resultados
-   5.2 Análisis de hallazgos
-
-VI. Conclusiones
-    6.1 Conclusiones
-    6.2 Recomendaciones
-
-VII. Referencias Bibliográficas`,
-  };
-
-  return `${basePrompt}
-  
-${structureInstructions[indexStructure] || structureInstructions.estandar}
-  
-Información adicional a considerar: ${
-    additionalInfo || "No hay información adicional"
-  }
-  
-IMPORTANTE: Mantén EXACTAMENTE la estructura y formato de numeración indicados arriba.
-Genera solo el índice, sin explicaciones adicionales.`;
-}
-
 export default async function handler(req, res) {
-  // Establecer cabeceras CORS
+  // Configurar CORS
+  res.setHeader("Access-Control-Allow-Credentials", true);
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET,OPTIONS,PATCH,DELETE,POST,PUT"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version"
+  );
 
   if (req.method === "OPTIONS") {
     return res.status(200).end();
@@ -202,7 +123,7 @@ export default async function handler(req, res) {
     const { documentType, topic, length, indexStructure, additionalInfo } =
       req.body;
 
-    // Log detallado de los datos recibidos
+    // Log detallado para debugging
     console.log("Datos recibidos:", {
       documentType,
       topic,
@@ -210,102 +131,110 @@ export default async function handler(req, res) {
       indexStructure,
       additionalInfo,
     });
+    console.log("CLAUDE_API_KEY presente:", !!process.env.CLAUDE_API_KEY);
 
-    // Validación específica de la estructura
-    if (
-      !indexStructure ||
-      !["estandar", "capitulos", "academica"].includes(indexStructure)
-    ) {
-      console.error("Estructura inválida o no especificada:", indexStructure);
-      return res.status(400).json({
-        error: "Estructura de índice inválida",
-        received: indexStructure,
-        valid: ["estandar", "capitulos", "academica"],
-      });
-    }
-
-    // Validación de otros campos requeridos
-    if (!documentType || !topic || !length) {
+    // Validar campos requeridos
+    if (!documentType || !topic || !length || !indexStructure) {
+      console.log("Faltan campos requeridos");
       return res.status(400).json({
         error: "Campos requeridos faltantes",
         received: req.body,
       });
     }
 
-    // Generar prompt específico para la estructura
-    const prompt = getPromptForStructure(
-      indexStructure,
-      documentType,
-      topic,
-      length,
-      additionalInfo
-    );
-
-    console.log("Estructura seleccionada:", indexStructure);
-    console.log("Prompt generado:", prompt);
-
-    // Verificar API key de Claude
+    // Verificar API key
     if (!process.env.CLAUDE_API_KEY) {
-      console.error("CLAUDE_API_KEY no configurada");
-      const fallbackIndex = generateFallbackIndex({
-        documentType,
-        topic,
-        length,
-        indexStructure,
-      });
+      console.log("API key no configurada, usando fallback");
       return res.status(200).json({
-        index: fallbackIndex,
+        index: generateFallbackIndex(req.body),
         source: "fallback",
-        structureUsed: indexStructure,
       });
     }
 
-    // Consulta a la API de Claude
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-API-Key": process.env.CLAUDE_API_KEY,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-3-haiku-20240307",
-        max_tokens: 4096,
-        messages: [
-          {
-            role: "user",
-            content: prompt,
+    try {
+      // Llamada a Claude
+      const claudeResponse = await fetch(
+        "https://api.anthropic.com/v1/messages",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": process.env.CLAUDE_API_KEY,
+            "anthropic-version": "2023-06-01",
           },
-        ],
-      }),
-    });
+          body: JSON.stringify({
+            model: "claude-3-haiku-20240307",
+            max_tokens: 4096,
+            messages: [
+              {
+                role: "user",
+                content: `Genera un índice para un ${documentType} sobre "${topic}". 
+              El documento será de ${length}.
+              
+              IMPORTANTE: El índice DEBE seguir EXACTAMENTE esta estructura (${indexStructure}):
+              ${
+                indexStructure === "estandar"
+                  ? `1. Introducción (con subsecciones 1.1, 1.2, etc)
+                   2. Desarrollo (con subsecciones 2.1, 2.2, etc)
+                   3. Conclusiones (con subsecciones 3.1, 3.2, etc)
+                   4. Referencias bibliográficas`
+                  : indexStructure === "capitulos"
+                  ? `CAPITULO I: [Nombre] (con subsecciones 1.1, 1.2, etc)
+                   CAPITULO II: [Nombre]
+                   CAPITULO III: [Nombre]
+                   CAPITULO IV: [Nombre]
+                   Referencias bibliográficas`
+                  : `I. Introducción
+                   II. Objetivos
+                   III. Marco Teórico
+                   IV. Metodología
+                   V. Resultados y Discusión
+                   VI. Conclusiones
+                   VII. Referencias Bibliográficas`
+              }
+              
+              Información adicional: ${
+                additionalInfo || "No hay información adicional"
+              }
+              
+              IMPORTANTE: Mantén EXACTAMENTE el formato de numeración y estructura indicados arriba.
+              Genera solo el índice, sin explicaciones adicionales.`,
+              },
+            ],
+          }),
+        }
+      );
 
-    if (!response.ok) {
-      console.error("Error de Claude:", response.status);
-      const fallbackIndex = generateFallbackIndex({
-        documentType,
-        topic,
-        length,
-        indexStructure,
-      });
+      // Log de la respuesta de Claude
+      console.log("Estado de respuesta Claude:", claudeResponse.status);
+
+      if (!claudeResponse.ok) {
+        const errorText = await claudeResponse.text();
+        console.error("Error de Claude:", errorText);
+        throw new Error(`Error en la API de Claude: ${claudeResponse.status}`);
+      }
+
+      const data = await claudeResponse.json();
+      console.log("Respuesta exitosa de Claude");
+
       return res.status(200).json({
-        index: fallbackIndex,
+        index: data.content[0].text,
+        source: "claude",
+      });
+    } catch (claudeError) {
+      console.error("Error en llamada a Claude:", claudeError);
+      // Si falla Claude, usar fallback
+      return res.status(200).json({
+        index: generateFallbackIndex(req.body),
         source: "fallback",
-        structureUsed: indexStructure,
+        error: claudeError.message,
       });
     }
-
-    const data = await response.json();
-    return res.status(200).json({
-      index: data.content[0].text,
-      source: "claude",
-      structureUsed: indexStructure,
-    });
   } catch (error) {
-    console.error("Error generando índice:", error);
-    const fallbackIndex = generateFallbackIndex(req.body);
+    console.error("Error general:", error);
+    // Error general, usar fallback
     return res.status(200).json({
-      index: fallbackIndex,
+      index: generateFallbackIndex(req.body),
       source: "fallback",
       error: error.message,
     });
