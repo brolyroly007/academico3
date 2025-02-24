@@ -8,10 +8,32 @@ import {
   AlertCircle,
   ChevronLeft,
   List,
+  FileText,
+  BookOpen,
+  GraduationCap,
   Loader,
 } from "lucide-react";
 import { appendToSheet } from "../services/googleSheets";
 import { handleError, handleSuccess } from "../utils/errorHandler";
+
+// Definición de las estructuras disponibles
+const STRUCTURE_TYPES = {
+  estandar: {
+    name: "Estructura Estándar",
+    icon: FileText,
+    description: "Organización tradicional con introducción, desarrollo y conclusiones",
+  },
+  capitulos: {
+    name: "Por Capítulos",
+    icon: BookOpen,
+    description: "División en capítulos numerados con subsecciones detalladas",
+  },
+  academica: {
+    name: "Estructura Académica",
+    icon: GraduationCap,
+    description: "Formato académico con objetivos, marco teórico y metodología",
+  },
+};
 
 function IndexPreview() {
   const navigate = useNavigate();
@@ -23,14 +45,27 @@ function IndexPreview() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState(null);
 
+  // Función para obtener información de la estructura
+  const getStructureInfo = () => {
+    const structureType = formData?.indexStructure || "estandar";
+    const structure = STRUCTURE_TYPES[structureType];
+    const Icon = structure.icon;
+
+    return {
+      name: structure.name,
+      icon: <Icon className="w-5 h-5" />,
+      description: structure.description,
+    };
+  };
+
   // Función para generar índice local como respaldo
   const generateLocalIndex = useCallback(() => {
-    if (!formData) return;
+    if (!formData) return "";
 
     const isLongDocument = formData.length === "largo";
     const title = formData.topic.toUpperCase();
 
-    // Estructuras predefinidas según el tipo seleccionado
+    // Usar un objeto con las estructuras predefinidas
     const structures = {
       estandar: `${title}
 
@@ -130,7 +165,7 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
           documentType: formData.documentType,
           topic: formData.topic,
           length: formData.length,
-          indexStructure: formData.indexStructure, // Aseguramos que se envíe la estructura
+          indexStructure: formData.indexStructure,
           course: formData.course,
           career: formData.career,
           essayTone: formData.essayTone,
@@ -152,7 +187,6 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
         const data = await response.json();
 
         if (data.source === "fallback") {
-          // Si es fallback, usar el generador local con la estructura correcta
           const localIndex = generateLocalIndex();
           setGeneratedIndex(localIndex);
           setApiError("Se está usando un índice predeterminado");
@@ -227,111 +261,6 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
             </div>
 
             {/* Resumen del pedido que muestra toda la información recopilada */}
-            <div className="bg-muted/20 rounded-lg p-6">
-              <h3 className="font-medium mb-4 flex items-center gap-2">
-                <ClipboardList className="w-5 h-5 text-primary" />
-                Resumen del pedido
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Información básica del documento */}
-                <div className="space-y-4">
-                  <div>
-                    <span className="text-sm font-medium">
-                      Tipo de Documento:
-                    </span>
-                    <p className="text-muted-foreground">
-                      {formData.documentType}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium">Tema:</span>
-                    <p className="text-muted-foreground">{formData.topic}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium">Formato:</span>
-                    <p className="text-muted-foreground">
-                      {formData.citationFormat}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium">Longitud:</span>
-                    <p className="text-muted-foreground">{formData.length}</p>
-                  </div>
-                </div>
-
-                {/* Información académica y estructura */}
-                <div className="space-y-4">
-                  <div>
-                    <span className="text-sm font-medium">Curso:</span>
-                    <p className="text-muted-foreground">{formData.course}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium">Carrera:</span>
-                    <p className="text-muted-foreground">{formData.career}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium">Tono:</span>
-                    <p className="text-muted-foreground">
-                      {formData.essayTone}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium">Estructura:</span>
-                    <div className="flex items-center gap-2 mt-1">
-                      {structureInfo.icon}
-                      <div>
-                        <p className="text-muted-foreground">
-                          {structureInfo.name}
-                        </p>
-                        <p className="text-xs text-muted-foreground/80">
-                          {structureInfo.description}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Información de contacto del usuario */}
-              <div className="border-t mt-4 pt-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <span className="text-sm font-medium">Nombre:</span>
-                    <p className="text-muted-foreground">{formData.name}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium">WhatsApp:</span>
-                    <p className="text-muted-foreground">
-                      {formData.countryCode} {formData.phoneNumber}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Instrucciones adicionales si existen */}
-              {formData.additionalInfo && (
-                <div className="border-t mt-4 pt-4">
-                  <span className="text-sm font-medium">
-                    Instrucciones adicionales:
-                  </span>
-                  <p className="text-muted-foreground mt-1">
-                    {formData.additionalInfo}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Mensaje de error si la API falla */}
-            {apiError && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <div className="flex items-center gap-2">
-                  <AlertCircle className="w-5 h-5 text-yellow-500" />
-                  <p className="text-yellow-700">{apiError}</p>
-                </div>
-              </div>
-            )}
-
-            {/* Área del índice con editor */}
             <div className="bg-muted/20 rounded-lg p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-medium flex items-center gap-2">
