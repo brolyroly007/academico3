@@ -225,7 +225,11 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
 
   const handleBack = () => {
     navigate("/configuracion", {
-      state: { formData, currentStep: 3 },
+      state: {
+        formData,
+        currentStep: 4, // Cambiamos a paso 4 (detalles finales)
+        maxVisitedStep: 4, // Importante para permitir la navegación
+      },
     });
   };
 
@@ -259,7 +263,91 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
                 Volver al formulario
               </Button>
             </div>
-
+            <div className="bg-muted/20 rounded-lg p-6">
+              <h3 className="font-medium mb-4 flex items-center gap-2">
+                <List className="w-5 h-5 text-primary" />
+                Resumen del pedido
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Información básica del documento */}
+                <div className="space-y-4">
+                  <div>
+                    <span className="text-sm font-medium">
+                      Tipo de Documento:
+                    </span>
+                    <p className="text-muted-foreground">
+                      {formData.documentType}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium">Tema:</span>
+                    <p className="text-muted-foreground">{formData.topic}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium">
+                      Formato de Citas:
+                    </span>
+                    <p className="text-muted-foreground">
+                      {formData.citationFormat}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium">Longitud:</span>
+                    <p className="text-muted-foreground">{formData.length}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium">
+                      Tono de Redacción:
+                    </span>
+                    <p className="text-muted-foreground">
+                      {formData.essayTone}
+                    </p>
+                  </div>
+                </div>
+                {/* Información académica y estructura */}
+                <div className="space-y-4">
+                  <div>
+                    <span className="text-sm font-medium">Curso:</span>
+                    <p className="text-muted-foreground">{formData.course}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium">
+                      Área de Estudio:
+                    </span>
+                    <p className="text-muted-foreground">{formData.career}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium">Estructura:</span>
+                    <div className="flex items-center gap-2 mt-1">
+                      {structureInfo.icon}
+                      <div>
+                        <p className="text-muted-foreground">
+                          {structureInfo.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground/80">
+                          {structureInfo.description}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* Información de contacto */}
+              <div className="border-t mt-4 pt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-sm font-medium">Nombre:</span>
+                    <p className="text-muted-foreground">{formData.name}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium">WhatsApp:</span>
+                    <p className="text-muted-foreground">
+                      {formData.countryCode} {formData.phoneNumber}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
             {/* Resumen del pedido que muestra toda la información recopilada */}
             <div className="bg-muted/20 rounded-lg p-6">
               <div className="flex items-center justify-between mb-4">

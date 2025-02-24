@@ -200,8 +200,14 @@ export default function AcademicForm() {
   };
 
   const handleStepChange = (step) => {
-    if (step <= maxStep && validateStep()) {
-      setCurrentStep(step);
+    // Validar el paso actual antes de permitir el cambio
+    if (validateStep()) {
+      if (step <= maxStep) {
+        setCurrentStep(step);
+      }
+    } else {
+      // Si no pasa la validación, mantener el paso actual
+      console.log("Validación fallida para el paso actual");
     }
   };
 
@@ -227,13 +233,12 @@ export default function AcademicForm() {
         try {
           console.log("Datos a enviar:", {
             ...formData,
-            indexStructure: formData.indexStructure, // Verificar que existe
           });
           navigate("/preview", {
             state: {
               formData,
-              currentStep: currentStep,
-              maxVisitedStep: maxStep,
+              currentStep: steps.length - 1, // Aseguramos que esté en el último paso
+              maxVisitedStep: steps.length - 1,
             },
           });
         } catch (error) {
