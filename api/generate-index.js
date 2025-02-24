@@ -4,6 +4,44 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+async function callClaudeAPI(prompt) {
+  try {
+    console.log("Llamando a Claude API con prompt:", prompt);
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "anthropic-version": "2023-06-01",
+        "x-api-key": process.env.CLAUDE_API_KEY,
+      },
+      body: JSON.stringify({
+        model: "claude-3-haiku-20240307",
+        messages: [
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+      }),
+    });
+
+    console.log("Respuesta de Claude status:", response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Error de Claude:", errorText);
+      throw new Error(`Error en Claude API: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    console.log("Respuesta exitosa de Claude:", data);
+    return data.content[0].text;
+  } catch (error) {
+    console.error("Error llamando a Claude:", error);
+    throw error;
+  }
+}
+
 function generateFallbackIndex({
   documentType,
   topic,
@@ -115,27 +153,20 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Método no permitido" });
-  }
-
   try {
+    console.log("Recibiendo solicitud:", req.body);
+
     const { documentType, topic, length, indexStructure, additionalInfo } =
       req.body;
 
-    // Log detallado para debugging
-    console.log("Datos recibidos:", {
-      documentType,
-      topic,
-      length,
-      indexStructure,
-      additionalInfo,
-    });
-    console.log("CLAUDE_API_KEY presente:", !!process.env.CLAUDE_API_KEY);
-
     // Validar campos requeridos
     if (!documentType || !topic || !length || !indexStructure) {
-      console.log("Faltan campos requeridos");
+      console.log("Campos faltantes:", {
+        documentType,
+        topic,
+        length,
+        indexStructure,
+      });
       return res.status(400).json({
         error: "Campos requeridos faltantes",
         received: req.body,
@@ -144,86 +175,55 @@ export default async function handler(req, res) {
 
     // Verificar API key
     if (!process.env.CLAUDE_API_KEY) {
-      console.log("API key no configurada, usando fallback");
+      console.log("API key de Claude no encontrada");
       return res.status(200).json({
         index: generateFallbackIndex(req.body),
         source: "fallback",
+        reason: "API key no configurada",
       });
     }
 
     try {
-      // Llamada a Claude
-      const claudeResponse = await fetch(
-        "https://api.anthropic.com/v1/messages",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-api-key": process.env.CLAUDE_API_KEY,
-            "anthropic-version": "2023-06-01",
-          },
-          body: JSON.stringify({
-            model: "claude-3-haiku-20240307",
-            max_tokens: 4096,
-            messages: [
-              {
-                role: "user",
-                content: `Genera un índice para un ${documentType} sobre "${topic}". 
-              El documento será de ${length}.
-              
-              IMPORTANTE: El índice DEBE seguir EXACTAMENTE esta estructura (${indexStructure}):
-              ${
-                indexStructure === "estandar"
-                  ? `1. Introducción (con subsecciones 1.1, 1.2, etc)
-                   2. Desarrollo (con subsecciones 2.1, 2.2, etc)
-                   3. Conclusiones (con subsecciones 3.1, 3.2, etc)
-                   4. Referencias bibliográficas`
-                  : indexStructure === "capitulos"
-                  ? `CAPITULO I: [Nombre] (con subsecciones 1.1, 1.2, etc)
-                   CAPITULO II: [Nombre]
-                   CAPITULO III: [Nombre]
-                   CAPITULO IV: [Nombre]
-                   Referencias bibliográficas`
-                  : `I. Introducción
-                   II. Objetivos
-                   III. Marco Teórico
-                   IV. Metodología
-                   V. Resultados y Discusión
-                   VI. Conclusiones
-                   VII. Referencias Bibliográficas`
-              }
-              
-              Información adicional: ${
-                additionalInfo || "No hay información adicional"
-              }
-              
-              IMPORTANTE: Mantén EXACTAMENTE el formato de numeración y estructura indicados arriba.
-              Genera solo el índice, sin explicaciones adicionales.`,
-              },
-            ],
-          }),
-        }
-      );
-
-      // Log de la respuesta de Claude
-      console.log("Estado de respuesta Claude:", claudeResponse.status);
-
-      if (!claudeResponse.ok) {
-        const errorText = await claudeResponse.text();
-        console.error("Error de Claude:", errorText);
-        throw new Error(`Error en la API de Claude: ${claudeResponse.status}`);
+      const prompt = `Genera un índice para un ${documentType} sobre "${topic}". 
+      El documento será de ${length}.
+      
+      IMPORTANTE: El índice DEBE seguir EXACTAMENTE esta estructura (${indexStructure}):
+      ${
+        indexStructure === "estandar"
+          ? `1. Introducción (con subsecciones 1.1, 1.2, etc)
+           2. Desarrollo (con subsecciones 2.1, 2.2, etc)
+           3. Conclusiones (con subsecciones 3.1, 3.2, etc)
+           4. Referencias bibliográficas`
+          : indexStructure === "capitulos"
+          ? `CAPITULO I: [Nombre] (con subsecciones 1.1, 1.2, etc)
+           CAPITULO II: [Nombre]
+           CAPITULO III: [Nombre]
+           CAPITULO IV: [Nombre]
+           Referencias bibliográficas`
+          : `I. Introducción
+           II. Objetivos
+           III. Marco Teórico
+           IV. Metodología
+           V. Resultados y Discusión
+           VI. Conclusiones
+           VII. Referencias Bibliográficas`
       }
+      
+      Información adicional: ${additionalInfo || "No hay información adicional"}
+      
+      IMPORTANTE: Mantén EXACTAMENTE el formato de numeración y estructura indicados arriba.
+      Genera solo el índice, sin explicaciones adicionales.`;
 
-      const data = await claudeResponse.json();
-      console.log("Respuesta exitosa de Claude");
+      console.log("Intentando generar índice con Claude");
+      const generatedIndex = await callClaudeAPI(prompt);
 
+      console.log("Índice generado exitosamente");
       return res.status(200).json({
-        index: data.content[0].text,
+        index: generatedIndex,
         source: "claude",
       });
     } catch (claudeError) {
-      console.error("Error en llamada a Claude:", claudeError);
-      // Si falla Claude, usar fallback
+      console.error("Error al llamar a Claude:", claudeError);
       return res.status(200).json({
         index: generateFallbackIndex(req.body),
         source: "fallback",
@@ -231,8 +231,7 @@ export default async function handler(req, res) {
       });
     }
   } catch (error) {
-    console.error("Error general:", error);
-    // Error general, usar fallback
+    console.error("Error general en el endpoint:", error);
     return res.status(200).json({
       index: generateFallbackIndex(req.body),
       source: "fallback",
