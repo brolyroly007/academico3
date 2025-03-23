@@ -1,14 +1,23 @@
 {
   "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "builds": [
     {
       "src": "api/**/*.js",
       "use": "@vercel/node"
     },
     {
+      "src": "backend/**/*.js",
+      "use": "@vercel/node"
+    },
+    {
       "src": "package.json",
       "use": "@vercel/static-build",
-      "config": { "distDir": "dist" }
+      "config": {
+        "distDir": "dist",
+        "buildCommand": "npm run build"
+      }
     }
   ],
   "routes": [
@@ -21,19 +30,19 @@
       "dest": "/api/append-to-sheet.js"
     },
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "src": "/api/health",
+      "dest": "/api/health.js"
     },
     {
       "handle": "filesystem"
     },
     {
+      "src": "/assets/(.*)",
+      "dest": "/dist/assets/$1"
+    },
+    {
       "src": "/(.*)",
-      "dest": "/index.html"
+      "dest": "/dist/index.html"
     }
-  ],
-  "env": {
-    "CLAUDE_API_KEY": "@claude_api_key",
-    "GOOGLE_SHEETS_ID": "@google_sheets_id"
-  }
+  ]
 }
