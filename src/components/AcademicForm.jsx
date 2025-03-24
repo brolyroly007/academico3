@@ -1,3 +1,4 @@
+// src/components/AcademicForm.jsx
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { CoverGenerator } from "./CoverGenerator";
 import { ProgressIndicator } from "./ProgressIndicator";
 import { handleError } from "../utils/errorHandler";
 import {
@@ -115,6 +117,9 @@ export default function AcademicForm() {
     countryCode: "+51",
     phoneNumber: "",
     indexStructure: "",
+    coverData: {
+      incluirCaratula: false,
+    },
   };
 
   // Estados
@@ -124,6 +129,14 @@ export default function AcademicForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [maxStep, setMaxStep] = useState(maxVisitedStep);
+
+  // Función para actualizar los datos de la carátula
+  const handleCoverDataChange = (coverData) => {
+    setFormData((prev) => ({
+      ...prev,
+      coverData,
+    }));
+  };
 
   const steps = [
     { title: "Tipo de Documento", fields: ["documentType", "citationFormat"] },
@@ -342,6 +355,22 @@ export default function AcademicForm() {
             <div>
               <span className="font-medium">Instrucciones Adicionales:</span>
               <p className="text-muted-foreground">{formData.additionalInfo}</p>
+            </div>
+          )}
+
+          {/* Mostrar si se incluye carátula */}
+          {formData.coverData && formData.coverData.incluirCaratula && (
+            <div>
+              <span className="font-medium">Carátula:</span>
+              <p className="text-muted-foreground">
+                {formData.coverData.tipoInstitucion === "colegio"
+                  ? "Colegio"
+                  : formData.coverData.tipoInstitucion === "universidad"
+                  ? "Universidad"
+                  : formData.coverData.tipoInstitucion === "instituto"
+                  ? "Instituto"
+                  : "Incluida"}
+              </p>
             </div>
           )}
         </div>
@@ -864,6 +893,17 @@ export default function AcademicForm() {
                         Campo opcional: puedes proporcionar detalles adicionales
                         si lo deseas
                       </p>
+                    </div>
+
+                    {/* Sección de carátula */}
+                    <div className="pt-6 border-t">
+                      <h3 className="text-lg font-medium mb-4">
+                        Opciones de Presentación
+                      </h3>
+                      <CoverGenerator
+                        setCoverData={handleCoverDataChange}
+                        coverData={formData.coverData || {}}
+                      />
                     </div>
                   </div>
                 </div>
