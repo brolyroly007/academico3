@@ -210,13 +210,24 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
   const handleConfirm = async () => {
     setIsSubmitting(true);
     try {
-      await appendToSheet({
+      // Asegurarnos de que el objeto formData está completo con todos los datos
+      const completeFormData = {
         ...formData,
         index: generatedIndex,
         timestamp: new Date().toISOString(),
-      });
+      };
+
+      // Registrar los datos que estamos enviando para depuración
+      console.log("Enviando datos a Google Sheets:", completeFormData);
+
+      await appendToSheet(completeFormData);
       handleSuccess("¡Tu solicitud ha sido guardada correctamente!");
-      navigate("/confirmacion", { state: { formData, index: generatedIndex } });
+      navigate("/confirmacion", {
+        state: {
+          formData: completeFormData,
+          index: generatedIndex,
+        },
+      });
     } catch (error) {
       handleError(error, "Error al procesar la solicitud");
     } finally {

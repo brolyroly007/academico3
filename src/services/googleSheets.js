@@ -8,26 +8,74 @@ export async function appendToSheet(data) {
   try {
     console.log("Enviando datos al servidor:", data);
 
-    // Preparar los datos para enviar, procesando los datos de carátula
-    const dataToSend = { ...data };
+    // Crear una copia profunda de los datos para no mutar el original
+    const dataToSend = JSON.parse(JSON.stringify(data));
 
-    // Si hay datos de carátula, los procesamos para que sean seguros para JSON
+    // Procesar los datos de carátula para el envío
     if (dataToSend.coverData) {
-      // Convertir datos complejos a string para enviar
-      dataToSend.hasCover = dataToSend.coverData.incluirCaratula;
-      dataToSend.coverTemplate = dataToSend.coverData.templateStyle || "";
-      dataToSend.coverInstitutionType =
-        dataToSend.coverData.tipoInstitucion || "";
+      // Extraer información básica de carátula a campos de primer nivel
+      dataToSend.incluirCaratula =
+        dataToSend.coverData.incluirCaratula || false;
+      dataToSend.tipoInstitucion = dataToSend.coverData.tipoInstitucion || "";
+      dataToSend.templateStyle = dataToSend.coverData.templateStyle || "";
 
-      // Eliminamos los archivos de logo ya que no se pueden enviar como JSON
-      const coverDataForSheet = { ...dataToSend.coverData };
-      delete coverDataForSheet.logoColegio;
-      delete coverDataForSheet.logoUniversidad;
-      delete coverDataForSheet.logoInstituto;
+      // Según el tipo de institución, extraer campos específicos
+      if (dataToSend.coverData.tipoInstitucion === "colegio") {
+        dataToSend.nombreInstitucion = dataToSend.coverData.nombreColegio || "";
+        dataToSend.tituloTrabajo =
+          dataToSend.coverData.tituloTrabajoColegio || "";
 
-      // Guardamos los datos restantes como JSON string
-      dataToSend.coverDetails = JSON.stringify(coverDataForSheet);
+        // Extraer nombres de estudiantes como una cadena separada por comas
+        if (
+          dataToSend.coverData.estudiantesColegio &&
+          dataToSend.coverData.estudiantesColegio.length > 0
+        ) {
+          dataToSend.estudiantes = dataToSend.coverData.estudiantesColegio
+            .map((est) => est.nombre)
+            .filter(Boolean)
+            .join(", ");
+        }
+      } else if (dataToSend.coverData.tipoInstitucion === "universidad") {
+        dataToSend.nombreInstitucion =
+          dataToSend.coverData.nombreUniversidad || "";
+        dataToSend.tituloTrabajo =
+          dataToSend.coverData.tituloTrabajoUniversidad || "";
+        dataToSend.facultad = dataToSend.coverData.facultad || "";
+
+        if (
+          dataToSend.coverData.estudiantesUniversidad &&
+          dataToSend.coverData.estudiantesUniversidad.length > 0
+        ) {
+          dataToSend.estudiantes = dataToSend.coverData.estudiantesUniversidad
+            .map((est) => est.nombre)
+            .filter(Boolean)
+            .join(", ");
+        }
+      } else if (dataToSend.coverData.tipoInstitucion === "instituto") {
+        dataToSend.nombreInstitucion =
+          dataToSend.coverData.nombreInstituto || "";
+        dataToSend.tituloTrabajo =
+          dataToSend.coverData.tituloTrabajoInstituto || "";
+
+        if (
+          dataToSend.coverData.estudiantesInstituto &&
+          dataToSend.coverData.estudiantesInstituto.length > 0
+        ) {
+          dataToSend.estudiantes = dataToSend.coverData.estudiantesInstituto
+            .map((est) => est.nombre)
+            .filter(Boolean)
+            .join(", ");
+        }
+      }
+
+      // Convertir objetos complejos a cadenas JSON
+      dataToSend.coverDetailsJSON = JSON.stringify(dataToSend.coverData);
+
+      // Eliminar objetos complejos y archivos que no pueden enviarse a la API
+      delete dataToSend.coverData;
     }
+
+    console.log("Datos procesados para enviar:", dataToSend);
 
     // Usar la URL completa para asegurarnos de que apunta al lugar correcto
     const response = await fetch(`${API_URL}/append-to-sheet`, {
