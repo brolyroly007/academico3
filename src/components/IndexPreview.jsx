@@ -351,6 +351,23 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
                         </div>
                       </div>
                     </div>
+                    {/* Información de carátula si está incluida */}
+                    {formData.coverData &&
+                      formData.coverData.incluirCaratula && (
+                        <div>
+                          <span className="text-xs sm:text-sm font-medium">
+                            Carátula:
+                          </span>
+                          <p className="text-muted-foreground text-sm">
+                            {formData.coverData.tipoInstitucion === "colegio"
+                              ? "Colegio"
+                              : formData.coverData.tipoInstitucion ===
+                                "universidad"
+                              ? "Universidad"
+                              : "Instituto"}
+                          </p>
+                        </div>
+                      )}
                   </div>
                 </div>
                 {/* Información de contacto */}

@@ -77,17 +77,71 @@ class DocumentService {
 
   async generateDocument(formData) {
     try {
-      const response = await fetch(`${this.baseURL}/generate-document`, {
-        method: "POST",
-        headers: this.headers,
-        body: JSON.stringify(formData),
-      });
+      // Preparar datos especiales como la carátula y archivos
+      const hasFiles =
+        formData.coverData &&
+        (formData.coverData.logoColegio ||
+          formData.coverData.logoUniversidad ||
+          formData.coverData.logoInstituto);
 
-      if (!response.ok) {
-        throw new Error(`Error generando documento: ${response.status}`);
+      // Si hay archivos, usar FormData para enviar
+      if (hasFiles) {
+        const formDataObj = new FormData();
+
+        // Añadir todos los datos básicos
+        Object.entries(formData).forEach(([key, value]) => {
+          if (key !== "coverData") {
+            formDataObj.append(
+              key,
+              typeof value === "object" ? JSON.stringify(value) : value
+            );
+          }
+        });
+
+        // Añadir datos de carátula
+        if (formData.coverData) {
+          Object.entries(formData.coverData).forEach(([key, value]) => {
+            // Si es un archivo, añadirlo directamente
+            if (key.startsWith("logo") && value instanceof File) {
+              formDataObj.append(key, value);
+            } else if (
+              typeof value === "object" &&
+              value !== null &&
+              !(value instanceof File)
+            ) {
+              // Si es un objeto (como arrays de estudiantes), convertirlo a JSON
+              formDataObj.append(key, JSON.stringify(value));
+            } else {
+              // Valores simples
+              formDataObj.append(key, value);
+            }
+          });
+        }
+
+        const response = await fetch(`${this.baseURL}/generate-document`, {
+          method: "POST",
+          body: formDataObj,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error generando documento: ${response.status}`);
+        }
+
+        return await response.blob();
+      } else {
+        // Sin archivos, usar JSON normal
+        const response = await fetch(`${this.baseURL}/generate-document`, {
+          method: "POST",
+          headers: this.headers,
+          body: JSON.stringify(formData),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error generando documento: ${response.status}`);
+        }
+
+        return await response.blob();
       }
-
-      return await response.blob();
     } catch (error) {
       console.error("Error en generación de documento:", error);
       throw error;

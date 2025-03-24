@@ -2,7 +2,13 @@
 import { useLocation, Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Calendar, FileText, Phone } from "lucide-react";
+import {
+  CheckCircle2,
+  Calendar,
+  FileText,
+  Phone,
+  BookOpen,
+} from "lucide-react";
 
 export default function Confirmation() {
   const { state } = useLocation();
@@ -50,6 +56,20 @@ export default function Confirmation() {
                     WhatsApp: {formData.countryCode} {formData.phoneNumber}
                   </span>
                 </div>
+
+                {formData.coverData && formData.coverData.incluirCaratula && (
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="w-5 h-5 text-primary" />
+                    <span>
+                      Incluye carátula:{" "}
+                      {formData.coverData.tipoInstitucion === "colegio"
+                        ? "Colegio"
+                        : formData.coverData.tipoInstitucion === "universidad"
+                        ? "Universidad"
+                        : "Instituto"}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 

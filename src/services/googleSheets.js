@@ -8,13 +8,34 @@ export async function appendToSheet(data) {
   try {
     console.log("Enviando datos al servidor:", data);
 
+    // Preparar los datos para enviar, procesando los datos de carátula
+    const dataToSend = { ...data };
+
+    // Si hay datos de carátula, los procesamos para que sean seguros para JSON
+    if (dataToSend.coverData) {
+      // Convertir datos complejos a string para enviar
+      dataToSend.hasCover = dataToSend.coverData.incluirCaratula;
+      dataToSend.coverTemplate = dataToSend.coverData.templateStyle || "";
+      dataToSend.coverInstitutionType =
+        dataToSend.coverData.tipoInstitucion || "";
+
+      // Eliminamos los archivos de logo ya que no se pueden enviar como JSON
+      const coverDataForSheet = { ...dataToSend.coverData };
+      delete coverDataForSheet.logoColegio;
+      delete coverDataForSheet.logoUniversidad;
+      delete coverDataForSheet.logoInstituto;
+
+      // Guardamos los datos restantes como JSON string
+      dataToSend.coverDetails = JSON.stringify(coverDataForSheet);
+    }
+
     // Usar la URL completa para asegurarnos de que apunta al lugar correcto
     const response = await fetch(`${API_URL}/append-to-sheet`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(dataToSend),
     });
 
     // Manejo de respuesta no exitosa
