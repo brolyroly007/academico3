@@ -14,15 +14,16 @@ export async function appendToSheet(data) {
     // Procesar los datos de carátula para el envío
     if (dataToSend.coverData) {
       // Extraer información básica de carátula a campos de primer nivel
-      dataToSend.incluirCaratula =
-        dataToSend.coverData.incluirCaratula || false;
-      dataToSend.tipoInstitucion = dataToSend.coverData.tipoInstitucion || "";
-      dataToSend.templateStyle = dataToSend.coverData.templateStyle || "";
+      // Mapear directamente a los nombres de columnas en la hoja de cálculo
+      dataToSend.Caratula = dataToSend.coverData.incluirCaratula ? "Sí" : "No";
+      dataToSend["Tipo Institucion"] =
+        dataToSend.coverData.tipoInstitucion || "";
+      dataToSend.Plantilla = dataToSend.coverData.templateStyle || "";
 
       // Según el tipo de institución, extraer campos específicos
       if (dataToSend.coverData.tipoInstitucion === "colegio") {
-        dataToSend.nombreInstitucion = dataToSend.coverData.nombreColegio || "";
-        dataToSend.tituloTrabajo =
+        dataToSend.Institucion = dataToSend.coverData.nombreColegio || "";
+        dataToSend["Titulo Trabajo"] =
           dataToSend.coverData.tituloTrabajoColegio || "";
 
         // Extraer nombres de estudiantes como una cadena separada por comas
@@ -30,38 +31,36 @@ export async function appendToSheet(data) {
           dataToSend.coverData.estudiantesColegio &&
           dataToSend.coverData.estudiantesColegio.length > 0
         ) {
-          dataToSend.estudiantes = dataToSend.coverData.estudiantesColegio
+          dataToSend.Estudiantes = dataToSend.coverData.estudiantesColegio
             .map((est) => est.nombre)
             .filter(Boolean)
             .join(", ");
         }
       } else if (dataToSend.coverData.tipoInstitucion === "universidad") {
-        dataToSend.nombreInstitucion =
-          dataToSend.coverData.nombreUniversidad || "";
-        dataToSend.tituloTrabajo =
+        dataToSend.Institucion = dataToSend.coverData.nombreUniversidad || "";
+        dataToSend["Titulo Trabajo"] =
           dataToSend.coverData.tituloTrabajoUniversidad || "";
-        dataToSend.facultad = dataToSend.coverData.facultad || "";
+        dataToSend.Facultad = dataToSend.coverData.facultad || "";
 
         if (
           dataToSend.coverData.estudiantesUniversidad &&
           dataToSend.coverData.estudiantesUniversidad.length > 0
         ) {
-          dataToSend.estudiantes = dataToSend.coverData.estudiantesUniversidad
+          dataToSend.Estudiantes = dataToSend.coverData.estudiantesUniversidad
             .map((est) => est.nombre)
             .filter(Boolean)
             .join(", ");
         }
       } else if (dataToSend.coverData.tipoInstitucion === "instituto") {
-        dataToSend.nombreInstitucion =
-          dataToSend.coverData.nombreInstituto || "";
-        dataToSend.tituloTrabajo =
+        dataToSend.Institucion = dataToSend.coverData.nombreInstituto || "";
+        dataToSend["Titulo Trabajo"] =
           dataToSend.coverData.tituloTrabajoInstituto || "";
 
         if (
           dataToSend.coverData.estudiantesInstituto &&
           dataToSend.coverData.estudiantesInstituto.length > 0
         ) {
-          dataToSend.estudiantes = dataToSend.coverData.estudiantesInstituto
+          dataToSend.Estudiantes = dataToSend.coverData.estudiantesInstituto
             .map((est) => est.nombre)
             .filter(Boolean)
             .join(", ");
@@ -69,7 +68,7 @@ export async function appendToSheet(data) {
       }
 
       // Convertir objetos complejos a cadenas JSON
-      dataToSend.coverDetailsJSON = JSON.stringify(dataToSend.coverData);
+      dataToSend["Detalles JSON"] = JSON.stringify(dataToSend.coverData);
 
       // Eliminar objetos complejos y archivos que no pueden enviarse a la API
       delete dataToSend.coverData;

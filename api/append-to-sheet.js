@@ -24,6 +24,8 @@ export default async function handler(req, res) {
   }
 
   try {
+    console.log("Datos recibidos en append-to-sheet:", req.body);
+
     const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_ID;
     if (!SPREADSHEET_ID) {
       throw new Error("GOOGLE_SHEETS_ID no configurado");
@@ -38,7 +40,7 @@ export default async function handler(req, res) {
     });
 
     const sheets = google.sheets({ version: "v4", auth });
-    const RANGE = "Hoja 1!A:U"; // Ampliamos el rango para más columnas
+    const RANGE = "Hoja 1!A:X"; // Rango ampliado para incluir todas las columnas
 
     // Obtener el último ID para generar uno nuevo
     const response = await sheets.spreadsheets.values.get({
@@ -52,15 +54,18 @@ export default async function handler(req, res) {
       nextId = parseInt(lastId) + 1;
     }
 
-    // Extraer campos de carátula (si existen)
-    const incluirCaratula = req.body.incluirCaratula || false;
-    const tipoInstitucion = req.body.tipoInstitucion || "";
-    const templateStyle = req.body.templateStyle || "";
-    const nombreInstitucion = req.body.nombreInstitucion || "";
-    const tituloTrabajo = req.body.tituloTrabajo || "";
-    const estudiantes = req.body.estudiantes || "";
-    const facultad = req.body.facultad || "";
-    const coverDetailsJSON = req.body.coverDetailsJSON || "";
+    // Extraer datos de carátula
+    const caratula = req.body.Caratula || req.body.caratula || "No";
+    const tipoInstitucion =
+      req.body["Tipo Institucion"] || req.body.tipoInstitucion || "";
+    const plantilla = req.body.Plantilla || req.body.plantilla || "";
+    const institucion = req.body.Institucion || req.body.institucion || "";
+    const tituloTrabajo =
+      req.body["Titulo Trabajo"] || req.body.tituloTrabajo || "";
+    const estudiantes = req.body.Estudiantes || req.body.estudiantes || "";
+    const facultad = req.body.Facultad || req.body.facultad || "";
+    const detallesJSON =
+      req.body["Detalles JSON"] || req.body.detallesJSON || "";
 
     // Preparar los datos para insertar
     const values = [
@@ -82,16 +87,18 @@ export default async function handler(req, res) {
         "",
         "",
         // Datos de carátula
-        incluirCaratula ? "Sí" : "No",
+        caratula,
         tipoInstitucion,
-        templateStyle,
-        nombreInstitucion,
+        plantilla,
+        institucion,
         tituloTrabajo,
         estudiantes,
         facultad,
-        coverDetailsJSON,
+        detallesJSON,
       ],
     ];
+
+    console.log("Enviando datos a la hoja:", values);
 
     // Añadir los datos a la hoja
     const result = await sheets.spreadsheets.values.append({
@@ -107,6 +114,7 @@ export default async function handler(req, res) {
       spreadsheetId: SPREADSHEET_ID,
       resource: {
         requests: [
+          // Formato para Status
           {
             updateCells: {
               range: {
@@ -130,6 +138,7 @@ export default async function handler(req, res) {
               fields: "userEnteredFormat.backgroundColor",
             },
           },
+          // Formato para Índice
           {
             updateCells: {
               range: {
@@ -154,33 +163,59 @@ export default async function handler(req, res) {
               fields: "userEnteredFormat(wrapStrategy,verticalAlignment)",
             },
           },
-          // Colorear las celdas de carátula si está habilitada
-          incluirCaratula
-            ? {
-                updateCells: {
-                  range: {
-                    sheetId: 0,
-                    startRowIndex: rowIndex,
-                    endRowIndex: rowIndex + 1,
-                    startColumnIndex: 16,
-                    endColumnIndex: 17,
-                  },
-                  rows: [
+          // Formato para Carátula si es "Sí"
+          {
+            updateCells: {
+              range: {
+                sheetId: 0,
+                startRowIndex: rowIndex,
+                endRowIndex: rowIndex + 1,
+                startColumnIndex: 16,
+                endColumnIndex: 17,
+              },
+              rows: [
+                {
+                  values: [
                     {
-                      values: [
-                        {
-                          userEnteredFormat: {
-                            backgroundColor: { red: 0.8, green: 0.9, blue: 1 },
-                          },
-                        },
-                      ],
+                      userEnteredFormat: {
+                        backgroundColor:
+                          caratula === "Sí"
+                            ? { red: 0.8, green: 0.9, blue: 0.8 } // Verde claro si es Sí
+                            : { red: 0.95, green: 0.95, blue: 0.95 }, // Gris claro si es No
+                      },
                     },
                   ],
-                  fields: "userEnteredFormat.backgroundColor",
                 },
-              }
-            : null,
-        ].filter(Boolean), // Eliminar nulls
+              ],
+              fields: "userEnteredFormat.backgroundColor",
+            },
+          },
+          // Formato para texto largo en Detalles JSON
+          {
+            updateCells: {
+              range: {
+                sheetId: 0,
+                startRowIndex: rowIndex,
+                endRowIndex: rowIndex + 1,
+                startColumnIndex: 23,
+                endColumnIndex: 24,
+              },
+              rows: [
+                {
+                  values: [
+                    {
+                      userEnteredFormat: {
+                        wrapStrategy: "WRAP",
+                        verticalAlignment: "TOP",
+                      },
+                    },
+                  ],
+                },
+              ],
+              fields: "userEnteredFormat(wrapStrategy,verticalAlignment)",
+            },
+          },
+        ],
       },
     });
 
