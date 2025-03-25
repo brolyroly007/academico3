@@ -67,10 +67,44 @@ export async function appendToSheet(data) {
         }
       }
 
-      // Convertir objetos complejos a cadenas JSON
-      dataToSend["Detalles JSON"] = JSON.stringify(dataToSend.coverData);
+      // Generar un JSON limpio y bien estructurado para la columna Detalles JSON
+      try {
+        // Crear un objeto simplificado con solo la información esencial
+        const detallesJSON = {
+          incluirCaratula: dataToSend.coverData.incluirCaratula,
+          tipoInstitucion: dataToSend.coverData.tipoInstitucion,
+          templateStyle: dataToSend.coverData.templateStyle,
+        };
 
-      // Eliminar objetos complejos y archivos que no pueden enviarse a la API
+        // Añadir los campos específicos según el tipo de institución
+        if (dataToSend.coverData.tipoInstitucion === "universidad") {
+          detallesJSON.nombreUniversidad =
+            dataToSend.coverData.nombreUniversidad || "";
+          detallesJSON.facultad = dataToSend.coverData.facultad || "";
+          detallesJSON.tituloTrabajo =
+            dataToSend.coverData.tituloTrabajoUniversidad || "";
+          detallesJSON.estudiantes = dataToSend.Estudiantes || "";
+        } else if (dataToSend.coverData.tipoInstitucion === "colegio") {
+          detallesJSON.nombreColegio = dataToSend.coverData.nombreColegio || "";
+          detallesJSON.tituloTrabajo =
+            dataToSend.coverData.tituloTrabajoColegio || "";
+          detallesJSON.estudiantes = dataToSend.Estudiantes || "";
+        } else if (dataToSend.coverData.tipoInstitucion === "instituto") {
+          detallesJSON.nombreInstituto =
+            dataToSend.coverData.nombreInstituto || "";
+          detallesJSON.tituloTrabajo =
+            dataToSend.coverData.tituloTrabajoInstituto || "";
+          detallesJSON.estudiantes = dataToSend.Estudiantes || "";
+        }
+
+        // Convertir a una cadena JSON simplificada (sin formato para reducir espacio)
+        dataToSend["Detalles JSON"] = JSON.stringify(detallesJSON);
+      } catch (e) {
+        console.error("Error generando JSON de detalles:", e);
+        dataToSend["Detalles JSON"] = "Error al generar detalles";
+      }
+
+      // Eliminar el objeto complejo original para evitar duplicación de datos
       delete dataToSend.coverData;
     }
 

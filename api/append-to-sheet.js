@@ -54,18 +54,50 @@ export default async function handler(req, res) {
       nextId = parseInt(lastId) + 1;
     }
 
-    // Extraer datos de carátula
+    // Extraer datos de carátula - buscar en múltiples formatos de nombres
     const caratula = req.body.Caratula || req.body.caratula || "No";
     const tipoInstitucion =
-      req.body["Tipo Institucion"] || req.body.tipoInstitucion || "";
+      req.body["Tipo Institucion"] ||
+      req.body.tipoInstitucion ||
+      req.body["Tipo Institución"] ||
+      "";
     const plantilla = req.body.Plantilla || req.body.plantilla || "";
-    const institucion = req.body.Institucion || req.body.institucion || "";
+    const institucion =
+      req.body.Institucion ||
+      req.body.institucion ||
+      req.body["Institución"] ||
+      "";
     const tituloTrabajo =
-      req.body["Titulo Trabajo"] || req.body.tituloTrabajo || "";
+      req.body["Titulo Trabajo"] ||
+      req.body.tituloTrabajo ||
+      req.body["Título Trabajo"] ||
+      "";
     const estudiantes = req.body.Estudiantes || req.body.estudiantes || "";
     const facultad = req.body.Facultad || req.body.facultad || "";
-    const detallesJSON =
-      req.body["Detalles JSON"] || req.body.detallesJSON || "";
+
+    // Procesar datos JSON
+    let detallesJSON = "{}";
+    try {
+      // Obtener el JSON desde la solicitud
+      const jsonData =
+        req.body["Detalles JSON"] || req.body.detallesJSON || "{}";
+
+      // Asegurarse de que es una cadena de texto
+      if (typeof jsonData === "string") {
+        detallesJSON = jsonData;
+      } else {
+        // Si es un objeto, convertirlo a cadena JSON
+        detallesJSON = JSON.stringify(jsonData);
+      }
+
+      // Limitar la longitud para evitar problemas con Google Sheets
+      if (detallesJSON.length > 50000) {
+        detallesJSON = detallesJSON.substring(0, 50000) + "... [truncado]";
+      }
+    } catch (e) {
+      console.error("Error procesando JSON:", e);
+      detallesJSON = `{"error": "Error al procesar JSON: ${e.message}"}`;
+    }
 
     // Preparar los datos para insertar
     const values = [
@@ -98,7 +130,7 @@ export default async function handler(req, res) {
       ],
     ];
 
-    console.log("Enviando datos a la hoja:", values);
+    console.log("Enviando datos a la hoja:", values[0].slice(0, 8)); // Log parcial para no saturar la consola
 
     // Añadir los datos a la hoja
     const result = await sheets.spreadsheets.values.append({
@@ -207,12 +239,17 @@ export default async function handler(req, res) {
                       userEnteredFormat: {
                         wrapStrategy: "WRAP",
                         verticalAlignment: "TOP",
+                        textFormat: {
+                          foregroundColor: { red: 0.4, green: 0.4, blue: 0.4 }, // Gris para mejor legibilidad
+                          fontSize: 8, // Tamaño más pequeño para el JSON
+                        },
                       },
                     },
                   ],
                 },
               ],
-              fields: "userEnteredFormat(wrapStrategy,verticalAlignment)",
+              fields:
+                "userEnteredFormat(wrapStrategy,verticalAlignment,textFormat)",
             },
           },
         ],
