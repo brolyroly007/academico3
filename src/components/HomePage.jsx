@@ -8,109 +8,83 @@ import {
   ClipboardList,
   Send,
   BadgeCheck,
-  Check,
-  ChevronDown,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import AnimatedBackground from "./AnimatedBackground";
 import SlideUpAnimation from "./SlideUpAnimation";
-import Felix from "./SimplifiedFelix";
+import Felix from "./Felix";
 
 export function HomePage() {
-  const features = [
-    {
-      icon: <Zap className="h-6 w-6" />,
-      title: "Generación Express",
-      description: "Entrega inmediata con confirmación por WhatsApp",
-      color: "bg-blue-100 text-blue-600",
-    },
-    {
-      icon: <LayoutTemplate className="h-6 w-6" />,
-      title: "Plantillas Académicas",
-      description: "Estructuras predefinidas para diferentes formatos",
-      color: "bg-yellow-100 text-yellow-600",
-    },
-    {
-      icon: <ClipboardList className="h-6 w-6" />,
-      title: "Edición Flexible",
-      description: "Personaliza índice y estructura previa a generación",
-      color: "bg-blue-100 text-blue-600",
-    },
-    {
-      icon: <BadgeCheck className="h-6 w-6" />,
-      title: "Cumplimiento Normativo",
-      description: "Formatos APA, Vancouver, MLA y Chicago",
-      color: "bg-yellow-100 text-yellow-600",
-    },
-  ];
-
   return (
     <AnimatedBackground>
       <div className="min-h-screen flex flex-col">
         <main className="flex-1 w-full px-6 py-8 md:py-16">
-          {/* Hero Section */}
-          <section className="text-center mb-16 md:mb-24 px-4 sm:px-6">
-            <div className="max-w-5xl mx-auto space-y-8">
-              <SlideUpAnimation delay={100}>
-                <div className="inline-flex items-center bg-primary/90 text-primary-foreground px-6 py-2.5 rounded-full text-sm font-medium mb-6 shadow-lg hover:shadow-xl transition-shadow">
-                  <Send className="h-4 w-4 mr-2" />
-                  Generación académica automatizada
-                </div>
-              </SlideUpAnimation>
-
-              <SlideUpAnimation delay={200}>
-                <h1 className="text-5xl md:text-6xl font-bold tracking-tighter text-white leading-tight [text-wrap:balance]">
-                  <span className="bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
-                    Precisión Automatizada
-                  </span>
-                  <br />
-                  en Redacción Académica
-                </h1>
-              </SlideUpAnimation>
-
-              <SlideUpAnimation delay={300}>
-                <p className="text-xl text-white/90 max-w-3xl mx-auto leading-relaxed [text-wrap:balance]">
-                  Sistema inteligente para creación de documentos académicos con
-                  estructuración automatizada y personalización avanzada.
-                </p>
-              </SlideUpAnimation>
-
-              <SlideUpAnimation delay={400}>
-                <div className="flex justify-center gap-6 mt-8">
-                  <Link to="/configuracion">
-                    <Button className="h-14 px-12 bg-white text-primary hover:bg-white/90 text-lg rounded-xl shadow-2xl hover:shadow-3xl transition-all hover:-translate-y-0.5">
-                      Iniciar Proyecto
-                      <span className="ml-2 opacity-90">→</span>
-                    </Button>
-                  </Link>
-                </div>
-              </SlideUpAnimation>
-            </div>
+          {/* Hero Section with Felix as the main attraction */}
+          <section className="mb-16 md:mb-24 px-4 sm:px-6 text-center">
+            <SlideUpAnimation delay={100}>
+              <div className="max-w-6xl mx-auto bg-black/30 backdrop-blur-lg rounded-3xl shadow-2xl overflow-hidden py-12 px-4">
+                {/* Felix asistente */}
+                <Felix />
+              </div>
+            </SlideUpAnimation>
           </section>
 
           {/* Features Grid */}
           <section className="w-full px-4 sm:px-6 mb-24">
-            <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {features.map((feature, index) => (
-                <SlideUpAnimation key={index} delay={500 + index * 100}>
-                  <Card className="relative overflow-hidden border-0 bg-white/10 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all group isolate">
-                    <div className="absolute inset-0 border-t-2 border-primary/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <CardHeader className="items-start p-6 pb-0 space-y-4">
-                      <div
-                        className={`mb-4 ${feature.color} p-4 rounded-xl w-fit shadow-inner`}
-                      >
-                        {feature.icon}
-                      </div>
-                      <CardTitle className="text-2xl font-semibold text-white">
-                        {feature.title}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-white/80 pb-6 px-6">
-                      <p className="leading-relaxed">{feature.description}</p>
-                    </CardContent>
-                  </Card>
-                </SlideUpAnimation>
-              ))}
+            <div className="max-w-7xl mx-auto">
+              <h2 className="text-4xl font-bold text-center mb-12 text-white [text-wrap:balance]">
+                Características Principales
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {[
+                  {
+                    icon: <Zap className="h-6 w-6" />,
+                    title: "Generación Express",
+                    description:
+                      "Entrega inmediata con confirmación por WhatsApp",
+                    color: "bg-blue-100 text-blue-600",
+                  },
+                  {
+                    icon: <LayoutTemplate className="h-6 w-6" />,
+                    title: "Plantillas Académicas",
+                    description:
+                      "Estructuras predefinidas para diferentes formatos",
+                    color: "bg-yellow-100 text-yellow-600",
+                  },
+                  {
+                    icon: <ClipboardList className="h-6 w-6" />,
+                    title: "Edición Flexible",
+                    description:
+                      "Personaliza índice y estructura previa a generación",
+                    color: "bg-blue-100 text-blue-600",
+                  },
+                  {
+                    icon: <BadgeCheck className="h-6 w-6" />,
+                    title: "Cumplimiento Normativo",
+                    description: "Formatos APA, Vancouver, MLA y Chicago",
+                    color: "bg-yellow-100 text-yellow-600",
+                  },
+                ].map((feature, index) => (
+                  <SlideUpAnimation key={index} delay={500 + index * 100}>
+                    <Card className="relative overflow-hidden border-0 bg-white/10 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all group isolate">
+                      <div className="absolute inset-0 border-t-2 border-primary/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <CardHeader className="items-start p-6 pb-0 space-y-4">
+                        <div
+                          className={`mb-4 ${feature.color} p-4 rounded-xl w-fit shadow-inner`}
+                        >
+                          {feature.icon}
+                        </div>
+                        <CardTitle className="text-2xl font-semibold text-white">
+                          {feature.title}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="text-white/80 pb-6 px-6">
+                        <p className="leading-relaxed">{feature.description}</p>
+                      </CardContent>
+                    </Card>
+                  </SlideUpAnimation>
+                ))}
+              </div>
             </div>
           </section>
 
@@ -211,18 +185,6 @@ export function HomePage() {
                     <div className="mt-2 h-2.5 bg-white/20 rounded-full w-1/2 animate-pulse" />
                   </div>
                 </div>
-              </div>
-            </SlideUpAnimation>
-          </section>
-
-          {/* Sección Felix / Asistente Personal */}
-          <section className="w-full px-4 sm:px-6 py-16 bg-black/30 backdrop-blur-sm my-24 rounded-xl shadow-xl mb-24">
-            <SlideUpAnimation delay={1700}>
-              <div className="max-w-5xl mx-auto">
-                <h2 className="text-4xl font-bold text-center mb-12 text-white">
-                  Tu Asistente Personal
-                </h2>
-                <Felix />
               </div>
             </SlideUpAnimation>
           </section>
