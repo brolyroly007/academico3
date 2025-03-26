@@ -10,13 +10,14 @@ import { Button } from "@/components/ui/button";
 import { FileText } from "lucide-react";
 import IndexPreview from "./components/IndexPreview";
 import Confirmation from "./components/Confirmation";
+import AnimatedBackground from "./components/AnimatedBackground";
 
 function App() {
   return (
     <ThemeProvider>
       <BrowserRouter>
         <DocumentProvider>
-          <div className="min-h-screen bg-background flex flex-col">
+          <div className="min-h-screen flex flex-col">
             {/* Header Unificado */}
             <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-primary/10 shadow-sm w-full">
               <div className="w-full px-4 sm:px-6">
@@ -61,9 +62,30 @@ function App() {
             <main className="flex-1 w-full">
               <Routes>
                 <Route path="/" element={<HomePage />} />
-                <Route path="/configuracion" element={<AcademicForm />} />
-                <Route path="/preview" element={<IndexPreview />} />
-                <Route path="/confirmacion" element={<Confirmation />} />
+                <Route
+                  path="/configuracion"
+                  element={
+                    <div className="bg-background">
+                      <AcademicForm />
+                    </div>
+                  }
+                />
+                <Route
+                  path="/preview"
+                  element={
+                    <div className="bg-background">
+                      <IndexPreview />
+                    </div>
+                  }
+                />
+                <Route
+                  path="/confirmacion"
+                  element={
+                    <div className="bg-background">
+                      <Confirmation />
+                    </div>
+                  }
+                />
               </Routes>
             </main>
             <Toaster />
