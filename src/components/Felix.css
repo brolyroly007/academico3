@@ -8,9 +8,14 @@
   flex-direction: column;
   width: 100%;
   padding: 2rem 0;
-  min-height: 400px;
+  min-height: 450px;
   position: relative;
   z-index: 1;
+  background-color: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(5px);
+  border-radius: 1rem;
+  margin: 2rem auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
 .felix-title {
@@ -193,6 +198,26 @@
   position: absolute;
   background-color: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(5px);
+}
+
+.close-button {
+  width: 50px;
+  height: 50px;
+  font-size: 20px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: transparent;
+  color: white;
+  box-shadow: 0 0 10px #fff, 0 0 5px #fff inset;
+  transition: 0.3s linear all;
+  cursor: pointer;
+}
+
+.close-button:hover {
+  border: 2px solid #f55;
+  box-shadow: 0 0 15px #f55, 0 0 5px #f55 inset;
+  color: #f55;
+  transform: scale(1.1);
 }
 
 .felix.active ~ .command-list > li {

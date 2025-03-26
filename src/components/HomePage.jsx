@@ -14,6 +14,7 @@ import {
 import { Link } from "react-router-dom";
 import AnimatedBackground from "./AnimatedBackground";
 import SlideUpAnimation from "./SlideUpAnimation";
+import Felix from "./Felix";
 
 export function HomePage() {
   const features = [

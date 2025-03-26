@@ -30,9 +30,7 @@ const ScrollAwareHeader = () => {
     <header
       className={`sticky top-0 z-50 transition-all duration-300 ${
         isHomePage
-          ? isAtTop
-            ? "bg-transparent border-transparent"
-            : "bg-black/30 backdrop-blur-xl border-b border-white/10"
+          ? "bg-black/30 backdrop-blur-xl border-b border-white/10"
           : "bg-background/95 backdrop-blur-md border-b border-primary/10"
       } shadow-lg w-full`}
     >
