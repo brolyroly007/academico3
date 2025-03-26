@@ -102,7 +102,36 @@
     100% { transform: translateX(100%); }
   }
 }
+@layer utilities {
+  .page-transition {
+    @apply transition-opacity duration-300 ease-in-out;
+  }
+  
+  .page-enter {
+    @apply opacity-0;
+  }
+  
+  .page-enter-active {
+    @apply opacity-100;
+  }
+  
+  .page-exit {
+    @apply opacity-100;
+  }
+  
+  .page-exit-active {
+    @apply opacity-0;
+  }
+}
 
+/* Clase para los encabezados en páginas con fondo animado */
+.header-glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
 @layer components {
   .edu-card {
     @apply bg-card p-6 rounded-xl border transition-all hover:shadow-lg;
