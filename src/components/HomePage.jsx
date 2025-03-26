@@ -14,7 +14,6 @@ import {
 import { Link } from "react-router-dom";
 import AnimatedBackground from "./AnimatedBackground";
 import SlideUpAnimation from "./SlideUpAnimation";
-import Felix from "./Felix";
 import Felix from "./SimplifiedFelix";
 
 export function HomePage() {
@@ -212,6 +211,18 @@ export function HomePage() {
                     <div className="mt-2 h-2.5 bg-white/20 rounded-full w-1/2 animate-pulse" />
                   </div>
                 </div>
+              </div>
+            </SlideUpAnimation>
+          </section>
+
+          {/* Sección Felix / Asistente Personal */}
+          <section className="w-full px-4 sm:px-6 py-16 bg-black/30 backdrop-blur-sm my-24 rounded-xl shadow-xl mb-24">
+            <SlideUpAnimation delay={1700}>
+              <div className="max-w-5xl mx-auto">
+                <h2 className="text-4xl font-bold text-center mb-12 text-white">
+                  Tu Asistente Personal
+                </h2>
+                <Felix />
               </div>
             </SlideUpAnimation>
           </section>
