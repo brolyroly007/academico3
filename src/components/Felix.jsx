@@ -111,28 +111,6 @@ const Felix = () => {
     };
   }, []);
   
-  // Añadir los iconos manualmente para evitar problemas de carga con Font Awesome
-  const renderIcon = (iconName) => {
-    switch(iconName) {
-      case 'cloud':
-        return "☁️";
-      case 'clock':
-        return "🕒";
-      case 'calendar':
-        return "📅";
-      case 'laugh':
-        return "😂";
-      case 'search':
-        return "🔍";
-      case 'bulb':
-        return "💡";
-      case 'times':
-        return "✖️";
-      default:
-        return "⚡";
-    }
-  };
-  
   return (
     <div className="felix-container">
       <h1 className="display-3 felix-title"><span>H</span>ola <span>a</span>migo!</h1>
@@ -151,19 +129,19 @@ const Felix = () => {
         </div>
         <div className="platform"></div>
         <ul className="command-list">
-          <li onClick={getWeather}>{renderIcon('cloud')}</li>
-          <li onClick={getTime}>{renderIcon('clock')}</li>
-          <li onClick={getDate}>{renderIcon('calendar')}</li>
-          <li onClick={tellJoke}>{renderIcon('laugh')}</li>
-          <li onClick={searchGoogle}>{renderIcon('search')}</li>
-          <li onClick={showInspiration}>{renderIcon('bulb')}</li>
+          <li onClick={getWeather}>☁️</li>
+          <li onClick={getTime}>🕒</li>
+          <li onClick={getDate}>📅</li>
+          <li onClick={tellJoke}>😂</li>
+          <li onClick={searchGoogle}>🔍</li>
+          <li onClick={showInspiration}>💡</li>
           <p className="hey-felix lead"></p>
         </ul>
       </div>
       
       <div className={`response-frame ${responseActive ? 'active' : ''}`}>
         <p className="lead response-message">{responseMessage}</p>
-        <button className="close-button" onClick={closeResponse}>{renderIcon('times')}</button>
+        <button className="close-button" onClick={closeResponse}>✖️</button>
       </div>
     </div>
   );
