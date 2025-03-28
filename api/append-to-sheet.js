@@ -40,7 +40,7 @@ export default async function handler(req, res) {
     });
 
     const sheets = google.sheets({ version: "v4", auth });
-    const RANGE = "Hoja 1!A:X"; // Rango ampliado para incluir todas las columnas
+    const RANGE = "Hoja 1!A:Y"; // Rango ampliado para incluir todas las columnas (Y)
 
     // Obtener el último ID para generar uno nuevo
     const response = await sheets.spreadsheets.values.get({
@@ -75,6 +75,9 @@ export default async function handler(req, res) {
     const estudiantes = req.body.Estudiantes || req.body.estudiantes || "";
     const facultad = req.body.Facultad || req.body.facultad || "";
 
+    // Obtener estructura del índice
+    const indexStructure = req.body.indexStructure || "estandar";
+
     // Procesar datos JSON
     let detallesJSON = "{}";
     try {
@@ -99,38 +102,38 @@ export default async function handler(req, res) {
       detallesJSON = `{"error": "Error al procesar JSON: ${e.message}"}`;
     }
 
-    // Preparar los datos para insertar
+    // Preparar los datos para insertar - Orden actualizado con la nueva columna
     const values = [
       [
-        nextId,
-        new Date().toISOString(),
-        req.body.documentType,
-        req.body.topic,
-        req.body.citationFormat,
-        req.body.length,
-        req.body.course,
-        req.body.career,
-        req.body.essayTone,
-        req.body.additionalInfo,
-        req.body.index,
-        req.body.name,
-        `${req.body.countryCode}${req.body.phoneNumber}`,
-        "Pendiente",
-        "",
-        "",
-        // Datos de carátula
-        caratula,
-        tipoInstitucion,
-        plantilla,
-        institucion,
-        tituloTrabajo,
-        estudiantes,
-        facultad,
-        detallesJSON,
+        nextId, // A - ID
+        new Date().toISOString(), // B - Fecha
+        req.body.documentType, // C - Tipo
+        req.body.topic, // D - Tema
+        req.body.citationFormat, // E - Formato
+        req.body.length, // F - Longitud
+        req.body.course, // G - Curso
+        req.body.career, // H - Carrera
+        req.body.essayTone, // I - Tono
+        indexStructure, // J - Estructura Índice (NUEVA COLUMNA)
+        req.body.additionalInfo, // K - Instrucciones (antes J)
+        req.body.index, // L - Índice (antes K)
+        req.body.name, // M - Contacto (antes L)
+        `${req.body.countryCode}${req.body.phoneNumber}`, // N - WhatsApp (antes M)
+        "Pendiente", // O - Status (antes N)
+        "Pendiente", // P - Estado Notificación (antes O)
+        nextId.toString(), // Q - Código de Pedido (antes P)
+        caratula, // R - Carátula (antes Q)
+        tipoInstitucion, // S - Tipo Institución (antes R)
+        plantilla, // T - Plantilla (antes S)
+        institucion, // U - Institución (antes T)
+        tituloTrabajo, // V - Título Trabajo (antes U)
+        estudiantes, // W - Estudiantes (antes V)
+        facultad, // X - Facultad (antes W)
+        detallesJSON, // Y - Detalles JSON (antes X)
       ],
     ];
 
-    console.log("Enviando datos a la hoja:", values[0].slice(0, 8)); // Log parcial para no saturar la consola
+    console.log("Enviando datos a la hoja:", values[0].slice(0, 10)); // Log parcial incluyendo la nueva columna
 
     // Añadir los datos a la hoja
     const result = await sheets.spreadsheets.values.append({
@@ -146,15 +149,15 @@ export default async function handler(req, res) {
       spreadsheetId: SPREADSHEET_ID,
       resource: {
         requests: [
-          // Formato para Status
+          // Formato para Status (ahora en columna O - índice 14)
           {
             updateCells: {
               range: {
                 sheetId: 0,
                 startRowIndex: rowIndex,
                 endRowIndex: rowIndex + 1,
-                startColumnIndex: 13,
-                endColumnIndex: 14,
+                startColumnIndex: 14,
+                endColumnIndex: 15,
               },
               rows: [
                 {
@@ -170,7 +173,145 @@ export default async function handler(req, res) {
               fields: "userEnteredFormat.backgroundColor",
             },
           },
-          // Formato para Índice
+          // Formato para Estructura Índice (columna J - índice 9)
+          {
+            updateCells: {
+              range: {
+                sheetId: 0,
+                startRowIndex: rowIndex,
+                endRowIndex: rowIndex + 1,
+                startColumnIndex: 9,
+                endColumnIndex: 10,
+              },
+              rows: [
+                {
+                  values: [
+                    {
+                      userEnteredFormat: {
+                        backgroundColor:
+                          indexStructure === "estandar"
+                            ? { red: 0.82, green: 0.88, blue: 0.99 } // Azul claro
+                            : indexStructure === "capitulos"
+                            ? { red: 0.99, green: 0.91, blue: 0.82 } // Naranja claro
+                            : { red: 0.88, green: 0.82, blue: 0.99 }, // Lavanda claro
+                      },
+                    },
+                  ],
+                },
+              ],
+              fields: "userEnteredFormat.backgroundColor",
+            },
+          },
+          // Formato para Índice (ahora en columna L - índice 11)
+          {
+            updateCells: {
+              range: {
+                sheetId: 0,
+                startRowIndex: rowIndex,
+                endRowIndex: rowIndex + 1,
+                startColumnIndex: 11,
+                endColumnIndex: 12,
+              },
+              rows: [
+                {
+                  values: [
+                    {
+                      userEnteredFormat: {
+                        wrapStrategy: "WRAP",
+                        verticalAlignment: "TOP",
+                      },
+                    },
+                  ],
+                },
+              ],
+              fields: "userEnteredFormat(wrapStrategy,verticalAlignment)",
+            },
+          },
+          // Formato para Carátula (ahora en columna R - índice 17)
+          {
+            updateCells: {
+              range: {
+                sheetId: 0,
+                startRowIndex: rowIndex,
+                endRowIndex: rowIndex + 1,
+                startColumnIndex: 17,
+                endColumnIndex: 18,
+              },
+              rows: [
+                {
+                  values: [
+                    {
+                      userEnteredFormat: {
+                        backgroundColor:
+                          caratula === "Sí"
+                            ? { red: 0.8, green: 0.9, blue: 0.8 } // Verde claro si es Sí
+                            : { red: 0.95, green: 0.95, blue: 0.95 }, // Gris claro si es No
+                      },
+                    },
+                  ],
+                },
+              ],
+              fields: "userEnteredFormat.backgroundColor",
+            },
+          },
+          // Formato para texto largo en Detalles JSON (ahora en columna Y - índice 24)
+          {
+            updateCells: {
+              range: {
+                sheetId: 0,
+                startRowIndex: rowIndex,
+                endRowIndex: rowIndex + 1,
+                startColumnIndex: 24,
+                endColumnIndex: 25,
+              },
+              rows: [
+                {
+                  values: [
+                    {
+                      userEnteredFormat: {
+                        wrapStrategy: "WRAP",
+                        verticalAlignment: "TOP",
+                        textFormat: {
+                          foregroundColor: { red: 0.4, green: 0.4, blue: 0.4 }, // Gris para mejor legibilidad
+                          fontSize: 8, // Tamaño más pequeño para el JSON
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+              fields:
+                "userEnteredFormat(wrapStrategy,verticalAlignment,textFormat)",
+            },
+          },
+          // Formato para Código de Pedido (ahora en columna Q - índice 16)
+          {
+            updateCells: {
+              range: {
+                sheetId: 0,
+                startRowIndex: rowIndex,
+                endRowIndex: rowIndex + 1,
+                startColumnIndex: 16,
+                endColumnIndex: 17,
+              },
+              rows: [
+                {
+                  values: [
+                    {
+                      userEnteredFormat: {
+                        horizontalAlignment: "CENTER",
+                        textFormat: {
+                          bold: true,
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+              fields: "userEnteredFormat(horizontalAlignment,textFormat)",
+            },
+          },
+          // Formato para Instrucciones (columna K - índice 10)
           {
             updateCells: {
               range: {
@@ -193,63 +334,6 @@ export default async function handler(req, res) {
                 },
               ],
               fields: "userEnteredFormat(wrapStrategy,verticalAlignment)",
-            },
-          },
-          // Formato para Carátula si es "Sí"
-          {
-            updateCells: {
-              range: {
-                sheetId: 0,
-                startRowIndex: rowIndex,
-                endRowIndex: rowIndex + 1,
-                startColumnIndex: 16,
-                endColumnIndex: 17,
-              },
-              rows: [
-                {
-                  values: [
-                    {
-                      userEnteredFormat: {
-                        backgroundColor:
-                          caratula === "Sí"
-                            ? { red: 0.8, green: 0.9, blue: 0.8 } // Verde claro si es Sí
-                            : { red: 0.95, green: 0.95, blue: 0.95 }, // Gris claro si es No
-                      },
-                    },
-                  ],
-                },
-              ],
-              fields: "userEnteredFormat.backgroundColor",
-            },
-          },
-          // Formato para texto largo en Detalles JSON
-          {
-            updateCells: {
-              range: {
-                sheetId: 0,
-                startRowIndex: rowIndex,
-                endRowIndex: rowIndex + 1,
-                startColumnIndex: 23,
-                endColumnIndex: 24,
-              },
-              rows: [
-                {
-                  values: [
-                    {
-                      userEnteredFormat: {
-                        wrapStrategy: "WRAP",
-                        verticalAlignment: "TOP",
-                        textFormat: {
-                          foregroundColor: { red: 0.4, green: 0.4, blue: 0.4 }, // Gris para mejor legibilidad
-                          fontSize: 8, // Tamaño más pequeño para el JSON
-                        },
-                      },
-                    },
-                  ],
-                },
-              ],
-              fields:
-                "userEnteredFormat(wrapStrategy,verticalAlignment,textFormat)",
             },
           },
         ],

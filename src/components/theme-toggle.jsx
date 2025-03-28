@@ -6,18 +6,16 @@ import { useTheme } from "./theme-provider";
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
 
-  // Determinar si estamos en la página de inicio
-  const isHomePage = window.location.pathname === "/";
-
   return (
     <Button
-      variant="ghost"
+      variant="outline"
       size="icon"
       onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-      className={isHomePage ? "bg-white/10 hover:bg-white/20 text-white" : ""}
+      className="relative h-9 w-9 bg-background border border-input hover:bg-accent hover:text-accent-foreground"
+      aria-label="Cambiar tema"
     >
-      <Sun className="h-5 w-5 rotate-0 scale-100 transition-transform dark:-rotate-90 dark:scale-0" />
-      <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-transform dark:rotate-0 dark:scale-100" />
+      <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-foreground" />
+      <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-foreground" />
       <span className="sr-only">Cambiar tema</span>
     </Button>
   );

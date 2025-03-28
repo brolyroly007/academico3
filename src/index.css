@@ -102,6 +102,25 @@
     100% { transform: translateX(100%); }
   }
 }
+
+@layer components {
+  .edu-card {
+    @apply bg-card p-6 rounded-xl border transition-all hover:shadow-lg;
+  }
+  
+  .accent-border {
+    @apply border-l-4 border-secondary;
+  }
+  
+  .highlight-text {
+    @apply relative px-1;
+    &::before {
+      content: '';
+      @apply absolute inset-0 -z-1 bg-yellow-100/50 transform -skew-x-12;
+    }
+  }
+}
+
 @layer utilities {
   .page-transition {
     @apply transition-opacity duration-300 ease-in-out;
@@ -122,9 +141,276 @@
   .page-exit-active {
     @apply opacity-0;
   }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
-/* Clase para los encabezados en páginas con fondo animado */
+/* ===== ANIMACIONES DE SCROLL ===== */
+
+/* Estilos base para elementos animados */
+.animate-on-scroll {
+  opacity: 0;
+  transition-property: opacity, transform, clip-path, filter;
+  transition-duration: 600ms;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform, clip-path, filter;
+}
+
+/* Clase que se añade cuando el elemento es visible */
+.animate-active {
+  opacity: 1 !important;
+  transform: translate(0, 0) scale(1) !important;
+  clip-path: inset(0 0 0 0) !important;
+  filter: blur(0) !important;
+}
+
+/* Variantes de animación */
+.fade-in {
+  opacity: 0;
+}
+
+.fade-up {
+  opacity: 0;
+  transform: translateY(80px);
+}
+
+.slide-right {
+  opacity: 0;
+  transform: translateX(-80px);
+}
+
+.scale-in {
+  opacity: 0;
+  transform: scale(0.7);
+}
+
+.clip-reveal {
+  opacity: 0;
+  clip-path: inset(100% 100% 0 0);
+}
+
+.blur-in {
+  opacity: 0;
+  filter: blur(15px);
+  transform: scale(1.1);
+  transition-property: opacity, filter, transform;
+}
+
+.rise-up {
+  opacity: 0;
+  transform: translateY(100%);
+}
+
+/* Clases de retardo */
+.delay-0 { transition-delay: 0ms; }
+.delay-100 { transition-delay: 100ms; }
+.delay-200 { transition-delay: 200ms; }
+.delay-300 { transition-delay: 300ms; }
+.delay-400 { transition-delay: 400ms; }
+.delay-500 { transition-delay: 500ms; }
+.delay-600 { transition-delay: 600ms; }
+.delay-800 { transition-delay: 800ms; }
+.delay-1000 { transition-delay: 1000ms; }
+
+/* Soporte para navegadores modernos con animation-timeline */
+@supports (animation-timeline: scroll()) {
+  .animate-on-scroll {
+    animation-duration: 600ms;
+    animation-fill-mode: both;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    animation-timeline: view();
+    animation-range: entry 0% cover 30%;
+  }
+  
+  .fade-in { animation-name: fadeIn; }
+  .fade-up { animation-name: fadeUp; }
+  .slide-right { animation-name: slideRight; }
+  .scale-in { animation-name: scaleIn; }
+  .clip-reveal { animation-name: clipReveal; }
+  .blur-in { animation-name: blurIn; }
+  .rise-up { animation-name: riseUp; }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(80px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes slideRight {
+    from {
+      opacity: 0;
+      transform: translateX(-80px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.7);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  @keyframes clipReveal {
+    from {
+      opacity: 0;
+      clip-path: inset(100% 100% 0 0);
+    }
+    to {
+      opacity: 1;
+      clip-path: inset(0 0 0 0);
+    }
+  }
+  
+  @keyframes blurIn {
+    from {
+      opacity: 0;
+      filter: blur(15px);
+      transform: scale(1.1);
+    }
+    to {
+      opacity: 1;
+      filter: blur(0);
+      transform: scale(1);
+    }
+  }
+  
+  @keyframes riseUp {
+    from {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Fallback para JS deshabilitado */
+.no-js .animate-on-scroll {
+  opacity: 1 !important;
+  transform: none !important;
+  clip-path: none !important;
+  filter: none !important;
+}
+
+/* Corrección específica para sección CTA */
+.cta-section {
+  opacity: 1 !important;
+  transform: none !important;
+  clip-path: inset(0 0 0 0) !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+}
+
+.cta-container {
+  width: 100% !important;
+  transform: none !important;
+  opacity: 1 !important;
+}
+
+/* ===== ESTILOS PARA TEMA ===== */
+
+/* Estilos para el botón de tema */
+.theme-toggle-icon {
+  color: var(--foreground) !important;
+}
+
+button[aria-label="Cambiar tema"] {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: var(--foreground) !important;
+}
+
+button[aria-label="Cambiar tema"]:hover {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Tema oscuro */
+.dark {
+  color-scheme: dark;
+}
+
+.dark body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+.dark header {
+  background-color: hsl(var(--background)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+.dark nav a {
+  color: hsl(var(--muted-foreground));
+}
+
+.dark nav a:hover,
+.dark nav a:focus {
+  color: hsl(var(--foreground));
+}
+
+.dark .bg-slate-50 {
+  background-color: hsl(var(--background));
+}
+
+.dark .moon-icon {
+  color: hsl(var(--foreground));
+}
+
+.light .sun-icon {
+  color: hsl(var(--foreground));
+}
+
+.dark .bg-white {
+  background-color: hsl(var(--card));
+}
+
+.dark .text-slate-900 {
+  color: hsl(var(--card-foreground));
+}
+
+.dark .text-slate-600 {
+  color: hsl(var(--muted-foreground));
+}
+
+/* Transiciones de tema */
+*, ::before, ::after {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+/* Clase para encabezados con fondo vidrio */
 .header-glass {
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(12px);
@@ -132,20 +418,63 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
-@layer components {
-  .edu-card {
-    @apply bg-card p-6 rounded-xl border transition-all hover:shadow-lg;
+
+/* ===== CORRECCIONES PARA OVERFLOW Y SCROLLBAR ===== */
+
+/* Prevenir overflow horizontal en toda la aplicación */
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Estilos para scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* Corrección específica para evitar saltos en transiciones de página */
+.page-container {
+  width: 100%;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Fix para el header en modo oscuro */
+.dark .header-bg {
+  background-color: hsl(var(--background) / 0.95) !important;
+}
+
+/* Corrección para evitar el desplazamiento del header al cambiar de página */
+@media (min-width: 768px) {
+  .header-width-fix {
+    margin-right: calc(100vw - 100%);
   }
-  
-  .accent-border {
-    @apply border-l-4 border-secondary;
-  }
-  
-  .highlight-text {
-    @apply relative px-1;
-    &::before {
-      content: '';
-      @apply absolute inset-0 -z-1 bg-yellow-100/50 transform -skew-x-12;
-    }
-  }
+}
+
+/* Ajuste para contenedores animados para evitar desbordamiento */
+.animate-on-scroll {
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+}
+
+/* Asegurarse de que todos los contenedores respeten el ancho total */
+.full-width-container {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
 }

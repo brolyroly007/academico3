@@ -1,4 +1,4 @@
-// src/App.jsx
+// src/App.jsx (con correcciones para header y tema)
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import { DocumentProvider } from "./contexts/DocumentContext";
 import { ThemeProvider } from "./components/theme-provider";
@@ -13,13 +13,13 @@ import Confirmation from "./components/Confirmation";
 
 function App() {
   return (
-    <ThemeProvider>
+    <ThemeProvider defaultTheme="light">
       <BrowserRouter>
         <DocumentProvider>
-          <div className="min-h-screen bg-background flex flex-col">
-            {/* Header Unificado */}
-            <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-primary/10 shadow-sm w-full">
-              <div className="w-full px-4 sm:px-6">
+          <div className="flex flex-col min-h-screen w-full overflow-x-hidden">
+            {/* Header - Con posición fija y ancho total para evitar desplazamientos */}
+            <header className="sticky top-0 z-50 w-full border-b border-border shadow-sm bg-background/95 backdrop-blur-md">
+              <div className="w-full px-4 sm:px-6 mx-auto">
                 <div className="flex items-center justify-between h-20 max-w-7xl mx-auto">
                   <Link to="/" className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
@@ -58,7 +58,7 @@ function App() {
               </div>
             </header>
 
-            <main className="flex-1 w-full">
+            <main className="flex-1 w-full bg-background text-foreground">
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/configuracion" element={<AcademicForm />} />
