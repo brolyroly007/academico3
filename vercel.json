@@ -34,15 +34,15 @@
       "dest": "/api/health.js"
     },
     {
+      "handle": "filesystem"
+    },
+    {
       "src": "/assets/(.*)",
       "dest": "/dist/assets/$1"
     },
     {
-      "handle": "filesystem"
-    },
-    {
       "src": "/(.*)",
-      "dest": "/index.html",
+      "dest": "/dist/index.html",
       "status": 200
     }
   ]
