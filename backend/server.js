@@ -6,7 +6,7 @@ function getPromptForStructure(
   additionalInfo
 ) {
   const basePrompt = `Genera un índice para un ${documentType} sobre "${topic}". 
-El documento será de ${length}.`;
+El documento será de ${length} páginas.`;
 
   const structureInstructions = {
     estandar: `
@@ -90,7 +90,9 @@ function generateFallbackIndex({
   indexStructure,
 }) {
   const title = topic.toUpperCase();
-  const isLongDocument = length.toLowerCase().includes("largo");
+
+  // Determinar si es un documento extenso basado en los nuevos rangos
+  const isLongDocument = length === "20-30" || length === "30-45";
 
   const structures = {
     estandar: `${title}

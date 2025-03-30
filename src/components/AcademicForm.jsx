@@ -1,4 +1,4 @@
-// src/components/AcademicForm.jsx
+// src/components/AcademicForm.jsx (con modificaciones para ensayo y formatos de citación)
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
@@ -39,16 +39,19 @@ const DOCUMENT_TYPES = [
   },
 ];
 
+// Formatos de citación modificados para incluir "Próximamente" y disponibilidad
 const CITATION_FORMATS = [
-  { value: "APA", label: "APA" },
-  { value: "MLA", label: "MLA" },
-  { value: "Chicago", label: "Chicago" },
+  { value: "APA", label: "APA 7", available: true },
+  { value: "MLA", label: "MLA (Próximamente)", available: false },
+  { value: "Chicago", label: "Chicago (Próximamente)", available: false },
+  { value: "Vancouver", label: "Vancouver (Próximamente)", available: false },
 ];
 
 const DOCUMENT_LENGTHS = [
-  { value: "corto", label: "Corto (2-4 páginas)" },
-  { value: "medio", label: "Medio (5-8 páginas)" },
-  { value: "largo", label: "Largo (9-12 páginas)" },
+  { value: "10-15", label: "10-15 páginas" },
+  { value: "15-20", label: "15-20 páginas" },
+  { value: "20-30", label: "20-30 páginas" },
+  { value: "30-45", label: "30-45 páginas" },
 ];
 
 const TONOS_REDACCIÓN = [
@@ -138,6 +141,7 @@ export default function AcademicForm() {
     }));
   };
 
+  // Definición de pasos del formulario
   const steps = [
     { title: "Tipo de Documento", fields: ["documentType", "citationFormat"] },
     { title: "Configuración", fields: ["length", "essayTone"] },
@@ -146,6 +150,7 @@ export default function AcademicForm() {
     { title: "Detalles Finales", fields: ["name", "phoneNumber"] },
   ];
 
+  // Efecto para actualizar sugerencias de temas
   useEffect(() => {
     if (currentStep === 2 && formData.topic) {
       const matches = SUGERIDOS_TEMAS.filter((tema) =>
@@ -155,8 +160,28 @@ export default function AcademicForm() {
     }
   }, [formData.topic, currentStep]);
 
+  // Efecto para asignar estructura estándar automáticamente cuando es ensayo
+  useEffect(() => {
+    if (formData.documentType === "ensayo" && !formData.indexStructure) {
+      setFormData((prev) => ({
+        ...prev,
+        indexStructure: "estandar",
+      }));
+    }
+  }, [formData.documentType]);
+
   const calculateProgress = () => {
-    return ((currentStep + 1) / steps.length) * 100;
+    // Calcular el total de pasos considerando si se debe omitir el paso de estructura para ensayos
+    const totalSteps =
+      formData.documentType === "ensayo" ? steps.length - 1 : steps.length;
+
+    // Ajustar el paso actual si es ensayo y está después del paso de estructura
+    let adjustedCurrentStep = currentStep;
+    if (formData.documentType === "ensayo" && currentStep > 3) {
+      adjustedCurrentStep -= 1;
+    }
+
+    return ((adjustedCurrentStep + 1) / totalSteps) * 100;
   };
 
   const validateStep = () => {
@@ -213,6 +238,17 @@ export default function AcademicForm() {
   };
 
   const handleStepChange = (step) => {
+    // No permitir seleccionar el paso de estructura si es ensayo
+    if (formData.documentType === "ensayo" && step === 3) {
+      // Si es ensayo e intenta ir al paso de estructura, saltar al siguiente paso
+      if (validateStep()) {
+        if (step + 1 <= maxStep) {
+          setCurrentStep(step + 1);
+        }
+      }
+      return;
+    }
+
     // Validar el paso actual antes de permitir el cambio
     if (validateStep()) {
       if (step <= maxStep) {
@@ -226,14 +262,27 @@ export default function AcademicForm() {
 
   const handleNextStep = () => {
     if (validateStep()) {
-      const nextStep = currentStep + 1;
+      let nextStep = currentStep + 1;
+
+      // Si es ensayo y el siguiente paso es estructura de índice, saltar ese paso
+      if (formData.documentType === "ensayo" && nextStep === 3) {
+        nextStep = 4; // Saltar al paso de detalles finales
+      }
+
       setCurrentStep(nextStep);
       setMaxStep(Math.max(maxStep, nextStep));
     }
   };
 
   const handleBack = () => {
-    setCurrentStep((prev) => prev - 1);
+    let prevStep = currentStep - 1;
+
+    // Si es ensayo y el paso anterior es estructura de índice, saltar ese paso
+    if (formData.documentType === "ensayo" && prevStep === 3) {
+      prevStep = 2;
+    }
+
+    setCurrentStep(prevStep);
   };
 
   const handleSubmit = async (e) => {
@@ -385,31 +434,40 @@ export default function AcademicForm() {
           <CardContent className="p-3 sm:p-6">
             <div className="mb-4 sm:mb-8">
               <div className="flex gap-2 sm:gap-4 mb-4 overflow-x-auto pb-2 scrollbar-hide">
-                {steps.map((step, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleStepChange(index)}
-                    disabled={index > maxStep}
-                    className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1 sm:py-2 rounded-lg transition-all flex-shrink-0 text-sm sm:text-base ${
-                      currentStep === index
-                        ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                        : index <= maxStep
-                        ? "bg-muted text-muted-foreground hover:bg-muted/80 cursor-pointer"
-                        : "bg-muted/50 text-muted-foreground/50 cursor-not-allowed"
-                    }`}
-                  >
-                    <span className="font-medium truncate">{step.title}</span>
-                    <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white/20 flex items-center justify-center text-sm">
-                      {index + 1}
-                    </div>
-                  </button>
-                ))}
+                {steps.map((step, index) => {
+                  // Ocultar el paso de estructura si el tipo es ensayo
+                  if (formData.documentType === "ensayo" && index === 3) {
+                    return null;
+                  }
+
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => handleStepChange(index)}
+                      disabled={index > maxStep}
+                      className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1 sm:py-2 rounded-lg transition-all flex-shrink-0 text-sm sm:text-base ${
+                        currentStep === index
+                          ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                          : index <= maxStep
+                          ? "bg-muted text-muted-foreground hover:bg-muted/80 cursor-pointer"
+                          : "bg-muted/50 text-muted-foreground/50 cursor-not-allowed"
+                      }`}
+                    >
+                      <span className="font-medium truncate">{step.title}</span>
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white/20 flex items-center justify-center text-sm">
+                        {index + 1}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
               <ProgressIndicator
                 progress={calculateProgress()}
-                status={`Paso ${currentStep + 1} de ${steps.length}: ${
-                  steps[currentStep].title
-                }`}
+                status={`Paso ${currentStep + 1} de ${
+                  formData.documentType === "ensayo"
+                    ? steps.length - 1
+                    : steps.length
+                }: ${steps[currentStep].title}`}
               />
             </div>
             <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
@@ -472,7 +530,12 @@ export default function AcademicForm() {
                             <SelectItem
                               key={format.value}
                               value={format.value}
-                              className="hover:bg-primary/10"
+                              disabled={!format.available}
+                              className={`hover:bg-primary/10 ${
+                                !format.available
+                                  ? "opacity-60 cursor-not-allowed"
+                                  : ""
+                              }`}
                             >
                               {format.label}
                             </SelectItem>
@@ -630,8 +693,8 @@ export default function AcademicForm() {
                 </div>
               )}
 
-              {/* Step 4: Index Structure (ahora es el paso 4 en lugar del 5) */}
-              {currentStep === 3 && (
+              {/* Step 4: Index Structure - Solo mostrar si NO es ensayo */}
+              {currentStep === 3 && formData.documentType !== "ensayo" && (
                 <div className="space-y-4 sm:space-y-6 animate-fade-in">
                   <div className="space-y-4">
                     <h3 className="text-xl font-semibold">
