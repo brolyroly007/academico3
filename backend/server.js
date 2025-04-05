@@ -5,82 +5,177 @@ function getPromptForStructure(
   length,
   additionalInfo
 ) {
-  const basePrompt = `Genera un índice para un ${documentType} sobre "${topic}". 
-El documento será de ${length} páginas.`;
+  // Extraer el número máximo de páginas del rango
+  const maxPages = parseInt(length.split("-")[1]);
 
-  const structureInstructions = {
-    estandar: `
-IMPORTANTE: Usa EXACTAMENTE esta estructura:
-[Título]
-1. Introducción
-   1.1 [Subtemas]
-2. Desarrollo
-   2.1 [Subtemas]
-3. Conclusiones
-   3.1 [Subtemas]
-4. Referencias bibliográficas`,
+  // Calcular el número de secciones y subsecciones basado en la cantidad de páginas
+  const numMainSections = Math.max(3, Math.min(15, Math.floor(maxPages / 4)));
+  const numLevel2Subsections = Math.max(
+    2,
+    Math.min(6, Math.floor(maxPages / 8))
+  );
+  const numLevel3Subsections = Math.max(
+    1,
+    Math.min(4, Math.floor(maxPages / 12))
+  );
+  const numLevel4Subsections = Math.max(
+    1,
+    Math.min(3, Math.floor(maxPages / 16))
+  );
 
-    capitulos: `
-IMPORTANTE: Usa EXACTAMENTE esta estructura:
-[Título]
-CAPITULO I: [Nombre]
-1.1 [Subtemas]
-1.2 [Subtemas]
+  // Manejo especial para ensayos
+  if (documentType.toLowerCase() === "ensayo") {
+    return `Genera un índice para un ensayo académico sobre "${topic}".
+    
+El índice debe seguir la siguiente estructura:
+I. INTRODUCCIÓN
+   1.1 Planteamiento del tema
+   1.2 Relevancia y contexto
+   1.3 Tesis o argumento principal
 
-CAPITULO II: [Nombre]
-2.1 [Subtemas]
-2.2 [Subtemas]
+II. DESARROLLO
+   2.1 Primer argumento
+      2.1.1 Evidencias y ejemplos
+      2.1.2 Análisis del argumento
+   
+   2.2 Segundo argumento
+      2.2.1 Evidencias y ejemplos
+      2.2.2 Análisis del argumento
+   
+   2.3 Tercer argumento
+      2.3.1 Evidencias y ejemplos
+      2.3.2 Análisis del argumento
+   
+   2.4 Contraargumentos
+      2.4.1 Presentación de posturas contrarias
+      2.4.2 Refutación de contraargumentos
 
-CAPITULO III: [Nombre]
-3.1 [Subtemas]
-3.2 [Subtemas]
+III. CONCLUSIÓN
+   3.1 Recapitulación de puntos principales
+   3.2 Síntesis del argumento global
+   3.3 Reflexiones finales y proyecciones
 
-CAPITULO IV: [Nombre]
-4.1 [Subtemas]
-4.2 [Subtemas]
+IV. REFERENCIAS BIBLIOGRÁFICAS
 
-Referencias bibliográficas`,
+Adapta los subtemas y argumentos específicamente al tema: "${topic}".
+No incluyas explicaciones adicionales, solo el índice.
+    
+Información adicional a considerar: ${
+      additionalInfo || "No hay información adicional"
+    }`;
+  }
 
-    academica: `
-IMPORTANTE: Usa EXACTAMENTE esta estructura:
-[Título]
-I. Introducción
+  // Para otros tipos de documentos, usar un prompt más parametrizado
+  const basePrompt = `Genera un índice detallado para un ${documentType} de ${length} páginas sobre el tema "${topic}".
+
+El índice debe seguir la siguiente estructura:
+- Aproximadamente ${numMainSections} secciones principales (nivel 1) en ROMANO
+- Cada sección principal debe tener ${numLevel2Subsections}-${
+    numLevel2Subsections + 1
+  } subsecciones de nivel 2 EN ARÁBICO
+- Algunas subsecciones de nivel 2 deben tener ${numLevel3Subsections}-${
+    numLevel3Subsections + 1
+  } subsecciones de nivel 3 EN ARÁBICO
+- Ocasionalmente, incluye ${numLevel4Subsections}-${
+    numLevel4Subsections + 1
+  } subsecciones de nivel 4 donde sea apropiado
+
+Asegúrate de incluir:
+- Una introducción al principio
+- Una conclusión al final
+- Referencias bibliográficas`;
+
+  // Añadir la estructura específica según el tipo
+  let structureExample = "";
+
+  if (indexStructure === "academica") {
+    structureExample = `
+Como ejemplo de formato, sigue este esquema pero adaptándolo al tema específico:
+I. INTRODUCCIÓN
    1.1 Planteamiento del problema
-   1.2 Justificación
-
-II. Objetivos
+   1.2 Justificación del estudio
+   
+II. OBJETIVOS
    2.1 Objetivo general
    2.2 Objetivos específicos
-
-III. Marco Teórico
-    3.1 Antecedentes
-    3.2 Bases teóricas
-
-IV. Metodología
-    4.1 Tipo de investigación
-    4.2 Técnicas e instrumentos
-
-V. Resultados y Discusión
+   
+III. MARCO TEÓRICO
+   3.1 Antecedentes
+   3.2 Bases teóricas
+   
+IV. METODOLOGÍA
+   4.1 Tipo de investigación
+   4.2 Técnicas e instrumentos
+   
+V. RESULTADOS Y DISCUSIÓN
    5.1 Presentación de resultados
    5.2 Análisis de hallazgos
+   
+VI. CONCLUSIONES
+   6.1 Conclusiones
+   6.2 Recomendaciones
+   
+VII. REFERENCIAS BIBLIOGRÁFICAS`;
+  } else if (indexStructure === "capitulos") {
+    structureExample = `
+Como ejemplo de formato, sigue este esquema pero adaptándolo al tema específico:
+CAPITULO I: [NOMBRE RELACIONADO A INTRODUCCIÓN]
+1.1 Introducción al tema
+1.2 Contexto histórico
 
-VI. Conclusiones
-    6.1 Conclusiones
-    6.2 Recomendaciones
+CAPITULO II: [NOMBRE RELACIONADO A DESARROLLO]
+2.1 Desarrollo conceptual
+2.2 Análisis detallado
 
-VII. Referencias Bibliográficas`,
-  };
+CAPITULO III: [NOMBRE RELACIONADO A ANÁLISIS]
+3.1 Análisis de resultados
+3.2 Discusión de hallazgos
+
+CAPITULO IV: [NOMBRE RELACIONADO A CONCLUSIONES]
+4.1 Conclusiones
+4.2 Recomendaciones
+
+Referencias bibliográficas`;
+  } else {
+    // estandar u otro
+    structureExample = `
+Como ejemplo de formato, sigue este esquema pero adaptándolo al tema específico:
+1. Introducción
+   1.1 Contextualización
+   1.2 Objetivos
+   1.3 Justificación
+   
+2. Desarrollo
+   2.1 [Subtemas según el tema]
+   2.2 [Análisis detallado]
+   
+3. Conclusiones
+   3.1 Síntesis
+   3.2 Consideraciones finales
+   
+4. Referencias bibliográficas`;
+  }
 
   return `${basePrompt}
-  
-${structureInstructions[indexStructure] || structureInstructions.estandar}
+
+${structureExample}
+
+CONSIDERACIONES SOBRE LA LONGITUD:
+- Para documentos de 10-15 páginas: Incluir solo las secciones y subsecciones esenciales.
+- Para documentos de 15-20 páginas: Añadir algunas subsecciones adicionales en las áreas principales.
+- Para documentos de 20-30 páginas: Incluir subsecciones más detalladas y considerar añadir 1-2 secciones adicionales en cada área temática.
+- Para documentos de 30-45 páginas: Desarrollar un índice completo con múltiples subsecciones y niveles de detalle.
+
+EL ÍNDICE DEBE REFLEJAR DIRECTAMENTE EL RANGO DE PÁGINAS ${length} EN SU EXTENSIÓN Y DETALLE.
   
 Información adicional a considerar: ${
     additionalInfo || "No hay información adicional"
   }
   
-IMPORTANTE: Mantén EXACTAMENTE la estructura y formato de numeración indicados arriba.
-Genera solo el índice, sin explicaciones adicionales.`;
+IMPORTANTE:
+- Adapta el índice específicamente al tema: "${topic}"
+- Ajusta la cantidad de secciones y subsecciones según la longitud del documento (${length} páginas)
+- Genera solo el índice, sin explicaciones adicionales`;
 }
 
 function generateFallbackIndex({
@@ -91,9 +186,47 @@ function generateFallbackIndex({
 }) {
   const title = topic.toUpperCase();
 
-  // Determinar si es un documento extenso basado en los nuevos rangos
-  const isLongDocument = length === "20-30" || length === "30-45";
+  // Determinar el nivel de detalle según la longitud
+  const isShortDocument = length === "10-15";
+  const isMediumDocument = length === "15-20";
+  const isLongDocument = length === "20-30";
+  const isVeryLongDocument = length === "30-45";
 
+  // Manejo especial para ensayos
+  if (documentType.toLowerCase() === "ensayo") {
+    return `${title}
+
+I. INTRODUCCIÓN
+   1.1 Planteamiento del tema
+   1.2 Relevancia y contexto
+   1.3 Tesis o argumento principal
+
+II. DESARROLLO
+   2.1 Primer argumento
+      2.1.1 Evidencias y ejemplos
+      2.1.2 Análisis del argumento
+   
+   2.2 Segundo argumento
+      2.2.1 Evidencias y ejemplos
+      2.2.2 Análisis del argumento
+   
+   2.3 Tercer argumento
+      2.3.1 Evidencias y ejemplos
+      2.3.2 Análisis del argumento
+   
+   2.4 Contraargumentos
+      2.4.1 Presentación de posturas contrarias
+      2.4.2 Refutación de contraargumentos
+
+III. CONCLUSIÓN
+   3.1 Recapitulación de puntos principales
+   3.2 Síntesis del argumento global
+   3.3 Reflexiones finales y proyecciones
+
+IV. REFERENCIAS BIBLIOGRÁFICAS`;
+  }
+
+  // Para otros tipos de documentos, usar estructuras adaptadas a la longitud
   const structures = {
     estandar: `${title}
 
@@ -101,20 +234,28 @@ function generateFallbackIndex({
    1.1 Contextualización
    1.2 Objetivos
    1.3 Justificación
+   ${isLongDocument || isVeryLongDocument ? "1.4 Alcance del estudio" : ""}
 
 2. Desarrollo
    2.1 Subtema principal
    2.2 Análisis detallado
    ${
-     isLongDocument
-       ? "2.3 Desarrollo extendido\n   2.4 Análisis complementario"
+     isMediumDocument || isLongDocument || isVeryLongDocument
+       ? "2.3 Desarrollo extendido"
        : ""
    }
+   ${isLongDocument || isVeryLongDocument ? "2.4 Análisis complementario" : ""}
+   ${isVeryLongDocument ? "2.5 Perspectivas adicionales" : ""}
 
 3. Conclusiones
    3.1 Síntesis de hallazgos
    3.2 Consideraciones finales
-   ${isLongDocument ? "3.3 Recomendaciones" : ""}
+   ${
+     isMediumDocument || isLongDocument || isVeryLongDocument
+       ? "3.3 Recomendaciones"
+       : ""
+   }
+   ${isVeryLongDocument ? "3.4 Limitaciones y trabajo futuro" : ""}
 
 4. Referencias bibliográficas`,
 
@@ -123,22 +264,49 @@ function generateFallbackIndex({
 CAPITULO I: ASPECTOS INTRODUCTORIOS
 1.1 Introducción al tema
 1.2 Contexto histórico
-${isLongDocument ? "1.3 Antecedentes relevantes" : ""}
+${
+  isMediumDocument || isLongDocument || isVeryLongDocument
+    ? "1.3 Antecedentes relevantes"
+    : ""
+}
+${isVeryLongDocument ? "1.4 Justificación del estudio" : ""}
 
 CAPITULO II: DESARROLLO CONCEPTUAL
 2.1 Desarrollo conceptual
 2.2 Análisis detallado
-${isLongDocument ? "2.3 Profundización temática" : ""}
+${
+  isMediumDocument || isLongDocument || isVeryLongDocument
+    ? "2.3 Profundización temática"
+    : ""
+}
+${isLongDocument || isVeryLongDocument ? "2.4 Marcos de referencia" : ""}
+${isVeryLongDocument ? "2.5 Estudios relacionados" : ""}
 
 CAPITULO III: ANÁLISIS Y DISCUSIÓN
 3.1 Análisis de resultados
 3.2 Discusión de hallazgos
-${isLongDocument ? "3.3 Interpretación extendida" : ""}
+${
+  isMediumDocument || isLongDocument || isVeryLongDocument
+    ? "3.3 Interpretación extendida"
+    : ""
+}
+${
+  isLongDocument || isVeryLongDocument
+    ? "3.4 Comparación con estudios previos"
+    : ""
+}
+${isVeryLongDocument ? "3.5 Implicaciones prácticas" : ""}
 
 CAPITULO IV: CONCLUSIONES
 4.1 Conclusiones
 4.2 Recomendaciones
-${isLongDocument ? "4.3 Perspectivas futuras" : ""}
+${
+  isMediumDocument || isLongDocument || isVeryLongDocument
+    ? "4.3 Perspectivas futuras"
+    : ""
+}
+${isVeryLongDocument ? "4.4 Limitaciones del estudio" : ""}
+${isVeryLongDocument ? "4.5 Propuestas para investigaciones futuras" : ""}
 
 Referencias bibliográficas`,
 
@@ -147,33 +315,71 @@ Referencias bibliográficas`,
 I. INTRODUCCIÓN
    1.1 Planteamiento del problema
    1.2 Justificación
-   ${isLongDocument ? "1.3 Alcance del estudio" : ""}
+   ${
+     isMediumDocument || isLongDocument || isVeryLongDocument
+       ? "1.3 Alcance del estudio"
+       : ""
+   }
+   ${isVeryLongDocument ? "1.4 Limitaciones de la investigación" : ""}
 
 II. OBJETIVOS
    2.1 Objetivo general
    2.2 Objetivos específicos
+   ${
+     isLongDocument || isVeryLongDocument
+       ? "2.3 Preguntas de investigación"
+       : ""
+   }
 
 III. MARCO TEÓRICO
    3.1 Antecedentes
    3.2 Bases teóricas
-   ${isLongDocument ? "3.3 Estado del arte" : ""}
+   ${
+     isMediumDocument || isLongDocument || isVeryLongDocument
+       ? "3.3 Estado del arte"
+       : ""
+   }
+   ${isLongDocument || isVeryLongDocument ? "3.4 Definición de términos" : ""}
+   ${isVeryLongDocument ? "3.5 Hipótesis de trabajo" : ""}
 
 IV. METODOLOGÍA
    4.1 Tipo de investigación
    4.2 Técnicas e instrumentos
-   ${isLongDocument ? "4.3 Procedimientos metodológicos" : ""}
+   ${
+     isMediumDocument || isLongDocument || isVeryLongDocument
+       ? "4.3 Procedimientos metodológicos"
+       : ""
+   }
+   ${isLongDocument || isVeryLongDocument ? "4.4 Población y muestra" : ""}
+   ${isVeryLongDocument ? "4.5 Análisis de datos" : ""}
 
 V. RESULTADOS Y DISCUSIÓN
    5.1 Presentación de resultados
    5.2 Análisis de hallazgos
-   ${isLongDocument ? "5.3 Discusión extendida" : ""}
+   ${
+     isMediumDocument || isLongDocument || isVeryLongDocument
+       ? "5.3 Discusión extendida"
+       : ""
+   }
+   ${
+     isLongDocument || isVeryLongDocument
+       ? "5.4 Interpretación de resultados"
+       : ""
+   }
+   ${isVeryLongDocument ? "5.5 Contrastación con otras investigaciones" : ""}
 
 VI. CONCLUSIONES
    6.1 Conclusiones
    6.2 Recomendaciones
-   ${isLongDocument ? "6.3 Líneas futuras de investigación" : ""}
+   ${
+     isMediumDocument || isLongDocument || isVeryLongDocument
+       ? "6.3 Líneas futuras de investigación"
+       : ""
+   }
+   ${isVeryLongDocument ? "6.4 Implicaciones prácticas y teóricas" : ""}
 
-VII. REFERENCIAS BIBLIOGRÁFICAS`,
+VII. REFERENCIAS BIBLIOGRÁFICAS
+${isLongDocument || isVeryLongDocument ? "\nVIII. ANEXOS" : ""}`,
   };
 
   return structures[indexStructure] || structures.estandar;

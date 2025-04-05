@@ -1,4 +1,4 @@
-// src/components/AcademicForm.jsx (con modificaciones para ensayo y formatos de citación)
+// src/components/AcademicForm.jsx
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
@@ -85,20 +85,138 @@ const INDEX_STRUCTURES = [
     description:
       "Organización tradicional con introducción, desarrollo y conclusiones",
     icon: <FileText className="h-5 w-5" />,
+    // Añadir ejemplo de visualización
+    example: `1. Introducción
+   1.1 Contextualización
+   1.2 Objetivos
+   1.3 Justificación
+
+2. Desarrollo
+   2.1 Subtema principal
+   2.2 Análisis detallado
+   2.3 Desarrollo extendido
+
+3. Conclusiones
+   3.1 Síntesis
+   3.2 Consideraciones finales
+
+4. Referencias bibliográficas`,
   },
   {
     value: "capitulos",
     label: "Por Capítulos",
     description: "División en capítulos numerados con subsecciones detalladas",
     icon: <ListTree className="h-5 w-5" />,
+    // Añadir ejemplo de visualización
+    example: `CAPITULO I: INTRODUCCIÓN
+1.1 Introducción al tema
+1.2 Contexto histórico
+1.3 Antecedentes relevantes
+
+CAPITULO II: DESARROLLO
+2.1 Desarrollo conceptual
+2.2 Análisis detallado
+2.3 Profundización temática
+
+CAPITULO III: ANÁLISIS
+3.1 Análisis de resultados
+3.2 Discusión de hallazgos
+3.3 Interpretación extendida
+
+CAPITULO IV: CONCLUSIONES
+4.1 Conclusiones
+4.2 Recomendaciones
+4.3 Perspectivas futuras
+
+Referencias bibliográficas`,
   },
   {
     value: "academica",
     label: "Estructura Académica",
     description: "Formato académico con objetivos, marco teórico y metodología",
     icon: <BookOpen className="h-5 w-5" />,
+    // Añadir ejemplo de visualización
+    example: `I. INTRODUCCIÓN
+   1.1 Planteamiento del problema
+   1.2 Justificación
+   1.3 Alcance del estudio
+
+II. OBJETIVOS
+   2.1 Objetivo general
+   2.2 Objetivos específicos
+   2.3 Preguntas de investigación
+
+III. MARCO TEÓRICO
+    3.1 Antecedentes
+    3.2 Bases teóricas
+    3.3 Estado del arte
+
+IV. METODOLOGÍA
+    4.1 Tipo de investigación
+    4.2 Técnicas e instrumentos
+    4.3 Procedimientos metodológicos
+
+V. RESULTADOS Y DISCUSIÓN
+   5.1 Presentación de resultados
+   5.2 Análisis de hallazgos
+   5.3 Discusión extendida
+
+VI. CONCLUSIONES
+    6.1 Conclusiones
+    6.2 Recomendaciones
+    6.3 Líneas futuras de investigación
+
+VII. REFERENCIAS BIBLIOGRÁFICAS`,
   },
 ];
+
+// Añadir una estructura especial para ensayos
+const ESSAY_STRUCTURE = {
+  value: "ensayo",
+  label: "Estructura de Ensayo",
+  description: "Formato específico para ensayos académicos",
+  icon: <FileText className="h-5 w-5" />,
+  example: `I. INTRODUCCIÓN
+   1.1 Planteamiento del tema
+   1.2 Relevancia y contexto
+   1.3 Tesis o argumento principal
+
+II. DESARROLLO
+   2.1 Primer argumento
+      2.1.1 Evidencias y ejemplos
+      2.1.2 Análisis del argumento
+   
+   2.2 Segundo argumento
+      2.2.1 Evidencias y ejemplos
+      2.2.2 Análisis del argumento
+   
+   2.3 Tercer argumento
+      2.3.1 Evidencias y ejemplos
+      2.3.2 Análisis del argumento
+   
+   2.4 Contraargumentos
+      2.4.1 Presentación de posturas contrarias
+      2.4.2 Refutación de contraargumentos
+
+III. CONCLUSIÓN
+   3.1 Recapitulación de puntos principales
+   3.2 Síntesis del argumento global
+   3.3 Reflexiones finales y proyecciones
+
+IV. REFERENCIAS BIBLIOGRÁFICAS`,
+};
+
+// Función para obtener el nivel de detalle basado en la longitud
+const getDetailLevelByLength = (length) => {
+  if (!length) return "básico";
+
+  const maxPages = parseInt(length.split("-")[1]);
+
+  if (maxPages <= 15) return "básico";
+  if (maxPages <= 20) return "intermedio";
+  if (maxPages <= 30) return "detallado";
+  return "muy detallado";
+};
 
 export default function AcademicForm() {
   const navigate = useNavigate();
@@ -376,9 +494,11 @@ export default function AcademicForm() {
             <div>
               <span className="font-medium">Estructura del Índice:</span>
               <p className="text-muted-foreground">
-                {INDEX_STRUCTURES.find(
-                  (s) => s.value === formData.indexStructure
-                )?.label || "Estructura Estándar"}
+                {formData.documentType === "ensayo"
+                  ? "Estructura de Ensayo"
+                  : INDEX_STRUCTURES.find(
+                      (s) => s.value === formData.indexStructure
+                    )?.label || "Estructura Estándar"}
               </p>
             </div>
           )}
@@ -694,7 +814,7 @@ export default function AcademicForm() {
               )}
 
               {/* Step 4: Index Structure - Solo mostrar si NO es ensayo */}
-              {currentStep === 3 && formData.documentType !== "ensayo" && (
+              {currentStep === 3 && (
                 <div className="space-y-4 sm:space-y-6 animate-fade-in">
                   <div className="space-y-4">
                     <h3 className="text-xl font-semibold">
@@ -709,151 +829,161 @@ export default function AcademicForm() {
                             Importante
                           </h4>
                           <p className="text-sm text-yellow-700">
-                            La estructura del índice solo puede seleccionarse
-                            una vez. Si deseas cambiarla después, necesitarás
-                            completar el formulario nuevamente.
+                            {formData.documentType === "ensayo"
+                              ? "Para ensayos, se utilizará una estructura especializada con introducción, desarrollo y conclusión."
+                              : "La estructura del índice se adaptará automáticamente según el número de páginas seleccionado (" +
+                                formData.length +
+                                "), con un nivel de detalle " +
+                                getDetailLevelByLength(formData.length) +
+                                "."}
                           </p>
                         </div>
                       </div>
                     </div>
 
                     <div className="space-y-4">
-                      {INDEX_STRUCTURES.map((structure) => (
+                      {formData.documentType === "ensayo" ? (
+                        // Mostrar solo la estructura de ensayo si es un ensayo
                         <div
-                          key={structure.value}
-                          className={`p-4 rounded-lg border-2 transition-all cursor-pointer hover:bg-muted/30 ${
-                            formData.indexStructure === structure.value
-                              ? "border-primary bg-primary/10"
-                              : "border-transparent"
-                          }`}
+                          className="p-4 rounded-lg border-2 border-primary bg-primary/10"
                           onClick={() => {
-                            console.log(
-                              "Estructura seleccionada:",
-                              structure.value
-                            );
+                            console.log("Estructura seleccionada: ensayo");
                             setFormData({
                               ...formData,
-                              indexStructure: structure.value,
+                              indexStructure: "estandar", // Usamos estandar como valor, pero mostramos la estructura de ensayo
                             });
                           }}
                         >
                           <div className="flex gap-4">
                             <div className="flex items-center">
-                              <div
-                                className={`w-5 h-5 rounded-full border ${
-                                  formData.indexStructure === structure.value
-                                    ? "border-primary bg-primary"
-                                    : "border-gray-400"
-                                }`}
-                              >
-                                {formData.indexStructure ===
-                                  structure.value && (
-                                  <div className="w-3 h-3 rounded-full bg-white m-auto mt-1" />
-                                )}
+                              <div className="w-5 h-5 rounded-full border border-primary bg-primary">
+                                <div className="w-3 h-3 rounded-full bg-white m-auto mt-1" />
                               </div>
                             </div>
 
                             <div className="space-y-2 flex-1">
                               <div className="flex items-center gap-2">
-                                {structure.icon}
+                                {ESSAY_STRUCTURE.icon}
                                 <span className="font-medium text-lg">
-                                  {structure.label}
+                                  {ESSAY_STRUCTURE.label}
                                 </span>
                               </div>
                               <p className="text-muted-foreground text-sm">
-                                {structure.description}
+                                {ESSAY_STRUCTURE.description}
                               </p>
 
-                              {/* Ejemplos visuales */}
+                              {/* Ejemplo visual */}
                               <div className="mt-3 p-3 bg-muted/40 rounded-md text-sm border border-muted font-mono">
-                                {structure.value === "estandar" ? (
-                                  <>
-                                    <div className="text-primary-foreground/80">
-                                      Título del documento
+                                {ESSAY_STRUCTURE.example
+                                  .split("\n")
+                                  .map((line, idx) => (
+                                    <div
+                                      key={idx}
+                                      className={`${
+                                        line.startsWith("I") ||
+                                        line.startsWith("II") ||
+                                        line.startsWith("III") ||
+                                        line.startsWith("IV")
+                                          ? "text-primary-foreground/80"
+                                          : ""
+                                      }`}
+                                    >
+                                      {line.startsWith("   ") ? (
+                                        <span className="ml-4">
+                                          {line.trim()}
+                                        </span>
+                                      ) : line.startsWith("      ") ? (
+                                        <span className="ml-8">
+                                          {line.trim()}
+                                        </span>
+                                      ) : (
+                                        line
+                                      )}
                                     </div>
-                                    <div className="ml-2">1. Introducción</div>
-                                    <div className="ml-2">2. Desarrollo</div>
-                                    <div className="ml-4">
-                                      2.1 Subtema principal
-                                    </div>
-                                    <div className="ml-4">2.2 Análisis</div>
-                                    <div className="ml-2">3. Conclusiones</div>
-                                    <div className="ml-2">
-                                      4. Referencias bibliográficas
-                                    </div>
-                                  </>
-                                ) : structure.value === "capitulos" ? (
-                                  <>
-                                    <div className="text-primary-foreground/80">
-                                      Título del documento
-                                    </div>
-                                    <div className="ml-2">CAPITULO I</div>
-                                    <div className="ml-4">
-                                      1.1 Introducción al tema
-                                    </div>
-                                    <div className="ml-4">
-                                      1.2 Contexto histórico
-                                    </div>
-                                    <div className="ml-2">CAPITULO II</div>
-                                    <div className="ml-4">
-                                      2.1 Desarrollo conceptual
-                                    </div>
-                                    <div className="ml-4">
-                                      2.2 Análisis detallado
-                                    </div>
-                                    <div className="ml-2">CAPITULO III</div>
-                                    <div className="ml-4">3.1 Conclusiones</div>
-                                    <div className="ml-4">
-                                      3.2 Recomendaciones
-                                    </div>
-                                    <div className="ml-2">
-                                      Referencias bibliográficas
-                                    </div>
-                                  </>
-                                ) : (
-                                  <>
-                                    <div className="text-primary-foreground/80">
-                                      Título del documento
-                                    </div>
-                                    <div className="ml-2">I. Introducción</div>
-                                    <div className="ml-4">
-                                      1.1 Planteamiento del problema
-                                    </div>
-                                    <div className="ml-4">
-                                      1.2 Justificación
-                                    </div>
-                                    <div className="ml-2">II. Objetivos</div>
-                                    <div className="ml-4">
-                                      2.1 Objetivo general
-                                    </div>
-                                    <div className="ml-4">
-                                      2.2 Objetivos específicos
-                                    </div>
-                                    <div className="ml-2">
-                                      III. Marco Teórico
-                                    </div>
-                                    <div className="ml-4">3.1 Antecedentes</div>
-                                    <div className="ml-4">
-                                      3.2 Bases teóricas
-                                    </div>
-                                    <div className="ml-2">IV. Metodología</div>
-                                    <div className="ml-4">
-                                      4.1 Tipo de investigación
-                                    </div>
-                                    <div className="ml-4">
-                                      4.2 Técnicas e instrumentos
-                                    </div>
-                                    <div className="ml-2">V. Conclusiones</div>
-                                    <div className="ml-2">
-                                      VI. Referencias Bibliográficas
-                                    </div>
-                                  </>
-                                )}
+                                  ))}
                               </div>
                             </div>
                           </div>
                         </div>
-                      ))}
+                      ) : (
+                        // Mostrar las opciones normales para otros tipos de documentos
+                        INDEX_STRUCTURES.map((structure) => (
+                          <div
+                            key={structure.value}
+                            className={`p-4 rounded-lg border-2 transition-all cursor-pointer hover:bg-muted/30 ${
+                              formData.indexStructure === structure.value
+                                ? "border-primary bg-primary/10"
+                                : "border-transparent"
+                            }`}
+                            onClick={() => {
+                              console.log(
+                                "Estructura seleccionada:",
+                                structure.value
+                              );
+                              setFormData({
+                                ...formData,
+                                indexStructure: structure.value,
+                              });
+                            }}
+                          >
+                            <div className="flex gap-4">
+                              <div className="flex items-center">
+                                <div
+                                  className={`w-5 h-5 rounded-full border ${
+                                    formData.indexStructure === structure.value
+                                      ? "border-primary bg-primary"
+                                      : "border-gray-400"
+                                  }`}
+                                >
+                                  {formData.indexStructure ===
+                                    structure.value && (
+                                    <div className="w-3 h-3 rounded-full bg-white m-auto mt-1" />
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="space-y-2 flex-1">
+                                <div className="flex items-center gap-2">
+                                  {structure.icon}
+                                  <span className="font-medium text-lg">
+                                    {structure.label}
+                                  </span>
+                                </div>
+                                <p className="text-muted-foreground text-sm">
+                                  {structure.description}
+                                </p>
+
+                                {/* Ejemplos visuales */}
+                                <div className="mt-3 p-3 bg-muted/40 rounded-md text-sm border border-muted font-mono">
+                                  {structure.example
+                                    .split("\n")
+                                    .map((line, idx) => (
+                                      <div
+                                        key={idx}
+                                        className={`${
+                                          line.includes("CAPITULO") ||
+                                          line.match(/^[IVX]+\./)
+                                            ? "text-primary-foreground/80"
+                                            : line.match(/^\d+\./)
+                                            ? "font-medium"
+                                            : ""
+                                        }`}
+                                      >
+                                        {line.startsWith("   ") ? (
+                                          <span className="ml-4">
+                                            {line.trim()}
+                                          </span>
+                                        ) : (
+                                          line
+                                        )}
+                                      </div>
+                                    ))}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
 
                     {errors.indexStructure && (
