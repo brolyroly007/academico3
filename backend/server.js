@@ -1,3 +1,39 @@
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import { google } from "googleapis";
+import morgan from "morgan";
+import fetch from "node-fetch";
+
+// Configuración inicial
+dotenv.config();
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// Middleware
+app.use(express.json());
+app.use(cors());
+app.use(morgan("dev")); // Logging para desarrollo
+
+/**
+ * Calcula la cantidad de secciones y subsecciones basado en la longitud del documento
+ * Esta función emula la lógica de content_generator.py
+ */
+function calcularEstructura(length) {
+  // Extraer el número máximo de páginas del rango
+  const maxPages = parseInt(length.split("-")[1]);
+
+  return {
+    numMainSections: Math.max(3, Math.min(15, Math.floor(maxPages / 4))),
+    numLevel2Subsections: Math.max(2, Math.min(6, Math.floor(maxPages / 8))),
+    numLevel3Subsections: Math.max(1, Math.min(4, Math.floor(maxPages / 12))),
+    numLevel4Subsections: Math.max(1, Math.min(3, Math.floor(maxPages / 16))),
+  };
+}
+
+/**
+ * Genera un prompt para Claude basado en la estructura seleccionada y longitud
+ */
 function getPromptForStructure(
   indexStructure,
   documentType,
@@ -5,50 +41,39 @@ function getPromptForStructure(
   length,
   additionalInfo
 ) {
-  // Extraer el número máximo de páginas del rango
-  const maxPages = parseInt(length.split("-")[1]);
-
-  // Calcular el número de secciones y subsecciones basado en la cantidad de páginas
-  const numMainSections = Math.max(3, Math.min(15, Math.floor(maxPages / 4)));
-  const numLevel2Subsections = Math.max(
-    2,
-    Math.min(6, Math.floor(maxPages / 8))
-  );
-  const numLevel3Subsections = Math.max(
-    1,
-    Math.min(4, Math.floor(maxPages / 12))
-  );
-  const numLevel4Subsections = Math.max(
-    1,
-    Math.min(3, Math.floor(maxPages / 16))
-  );
+  // Calcular estructura basada en la longitud
+  const {
+    numMainSections,
+    numLevel2Subsections,
+    numLevel3Subsections,
+    numLevel4Subsections,
+  } = calcularEstructura(length);
 
   // Manejo especial para ensayos
   if (documentType.toLowerCase() === "ensayo") {
+    // Determinar el número de subtemas basado en la longitud
+    const maxPages = parseInt(length.split("-")[1]);
+    let numSubtemas = 3; // Valor por defecto
+
+    if (maxPages <= 2) {
+      numSubtemas = 2;
+    } else if (maxPages <= 5) {
+      numSubtemas = 3;
+    } else if (maxPages <= 12) {
+      numSubtemas = 4;
+    } else {
+      numSubtemas = 5;
+    }
+
     return `Genera un índice para un ensayo académico sobre "${topic}".
     
-El índice debe seguir la siguiente estructura:
 I. INTRODUCCIÓN
    1.1 Planteamiento del tema
    1.2 Relevancia y contexto
    1.3 Tesis o argumento principal
 
 II. DESARROLLO
-   2.1 Primer argumento
-      2.1.1 Evidencias y ejemplos
-      2.1.2 Análisis del argumento
-   
-   2.2 Segundo argumento
-      2.2.1 Evidencias y ejemplos
-      2.2.2 Análisis del argumento
-   
-   2.3 Tercer argumento
-      2.3.1 Evidencias y ejemplos
-      2.3.2 Análisis del argumento
-   
-   2.4 Contraargumentos
-      2.4.1 Presentación de posturas contrarias
-      2.4.2 Refutación de contraargumentos
+   (Incluir exactamente ${numSubtemas} subtemas relevantes y específicos al tema)
 
 III. CONCLUSIÓN
    3.1 Recapitulación de puntos principales
@@ -57,103 +82,105 @@ III. CONCLUSIÓN
 
 IV. REFERENCIAS BIBLIOGRÁFICAS
 
-Adapta los subtemas y argumentos específicamente al tema: "${topic}".
-No incluyas explicaciones adicionales, solo el índice.
-    
-Información adicional a considerar: ${
-      additionalInfo || "No hay información adicional"
-    }`;
+INSTRUCCIONES:
+- El documento será de ${length} páginas.
+- Adapta los subtemas para que sean específicos y relevantes al tema "${topic}".
+- NO incluyas subtítulos genéricos como "Subtema 1", sino temas concretos.
+- Los subtemas de desarrollo NO deben llevar numeración.
+- Formato exacto para los subtemas: "      [Subtema específico]", con 6 espacios al inicio.
+- SOLAMENTE la sección "II. DESARROLLO" debe contener subtemas.
+- Mantén EXACTAMENTE la estructura y formato indicados arriba.
+
+${
+  additionalInfo ? `Información adicional a considerar: ${additionalInfo}` : ""
+}`;
   }
 
-  // Para otros tipos de documentos, usar un prompt más parametrizado
+  // Para otros tipos de documentos, usar la estructura apropiada
   const basePrompt = `Genera un índice detallado para un ${documentType} de ${length} páginas sobre el tema "${topic}".
 
 El índice debe seguir la siguiente estructura:
-- Aproximadamente ${numMainSections} secciones principales (nivel 1) en ROMANO
+- Aproximadamente ${numMainSections} secciones principales (nivel 1) ${
+    indexStructure === "estandar"
+      ? "numeradas en ARÁBIGO (1, 2, 3...)"
+      : "en ROMANO (I, II, III...)"
+  }
 - Cada sección principal debe tener ${numLevel2Subsections}-${
     numLevel2Subsections + 1
   } subsecciones de nivel 2 EN ARÁBICO
 - Algunas subsecciones de nivel 2 deben tener ${numLevel3Subsections}-${
     numLevel3Subsections + 1
   } subsecciones de nivel 3 EN ARÁBICO
-- Ocasionalmente, incluye ${numLevel4Subsections}-${
-    numLevel4Subsections + 1
-  } subsecciones de nivel 4 donde sea apropiado
-
-Asegúrate de incluir:
-- Una introducción al principio
-- Una conclusión al final
-- Referencias bibliográficas`;
+- Ocasionalmente, incluye ${numLevel4Subsections} subsecciones de nivel 4 donde sea apropiado`;
 
   // Añadir la estructura específica según el tipo
   let structureExample = "";
 
   if (indexStructure === "academica") {
     structureExample = `
-Como ejemplo de formato, sigue este esquema pero adaptándolo al tema específico:
+IMPORTANTE: El índice DEBE seguir EXACTAMENTE esta estructura:
 I. INTRODUCCIÓN
    1.1 Planteamiento del problema
-   1.2 Justificación del estudio
-   
+   1.2 Justificación
+
 II. OBJETIVOS
    2.1 Objetivo general
    2.2 Objetivos específicos
-   
+
 III. MARCO TEÓRICO
-   3.1 Antecedentes
-   3.2 Bases teóricas
-   
+    3.1 Antecedentes
+    3.2 Bases teóricas
+
 IV. METODOLOGÍA
-   4.1 Tipo de investigación
-   4.2 Técnicas e instrumentos
-   
+    4.1 Tipo de investigación
+    4.2 Técnicas e instrumentos
+
 V. RESULTADOS Y DISCUSIÓN
    5.1 Presentación de resultados
    5.2 Análisis de hallazgos
-   
+
 VI. CONCLUSIONES
-   6.1 Conclusiones
-   6.2 Recomendaciones
-   
+    6.1 Conclusiones
+    6.2 Recomendaciones
+
 VII. REFERENCIAS BIBLIOGRÁFICAS`;
   } else if (indexStructure === "capitulos") {
     structureExample = `
-Como ejemplo de formato, sigue este esquema pero adaptándolo al tema específico:
+IMPORTANTE: El índice DEBE seguir EXACTAMENTE esta estructura:
 CAPITULO I: [NOMBRE RELACIONADO A INTRODUCCIÓN]
-1.1 Introducción al tema
-1.2 Contexto histórico
+1.1 [Subtemas]
+1.2 [Subtemas]
 
 CAPITULO II: [NOMBRE RELACIONADO A DESARROLLO]
-2.1 Desarrollo conceptual
-2.2 Análisis detallado
+2.1 [Subtemas]
+2.2 [Subtemas]
 
 CAPITULO III: [NOMBRE RELACIONADO A ANÁLISIS]
-3.1 Análisis de resultados
-3.2 Discusión de hallazgos
+3.1 [Subtemas]
+3.2 [Subtemas]
 
 CAPITULO IV: [NOMBRE RELACIONADO A CONCLUSIONES]
-4.1 Conclusiones
-4.2 Recomendaciones
+4.1 [Subtemas]
+4.2 [Subtemas]
 
 Referencias bibliográficas`;
   } else {
     // estandar u otro
     structureExample = `
-Como ejemplo de formato, sigue este esquema pero adaptándolo al tema específico:
-1. Introducción
-   1.1 Contextualización
-   1.2 Objetivos
-   1.3 Justificación
+IMPORTANTE: El índice DEBE seguir EXACTAMENTE esta estructura:
+1. INTRODUCCIÓN
+   1.1 [Subtemas]
+   1.2 [Subtemas]
    
-2. Desarrollo
-   2.1 [Subtemas según el tema]
-   2.2 [Análisis detallado]
+2. DESARROLLO
+   2.1 [Subtemas]
+   2.2 [Subtemas]
    
-3. Conclusiones
-   3.1 Síntesis
-   3.2 Consideraciones finales
+3. CONCLUSIONES
+   3.1 [Subtemas]
+   3.2 [Subtemas]
    
-4. Referencias bibliográficas`;
+4. REFERENCIAS BIBLIOGRÁFICAS`;
   }
 
   return `${basePrompt}
@@ -167,17 +194,21 @@ CONSIDERACIONES SOBRE LA LONGITUD:
 - Para documentos de 30-45 páginas: Desarrollar un índice completo con múltiples subsecciones y niveles de detalle.
 
 EL ÍNDICE DEBE REFLEJAR DIRECTAMENTE EL RANGO DE PÁGINAS ${length} EN SU EXTENSIÓN Y DETALLE.
-  
+
 Información adicional a considerar: ${
     additionalInfo || "No hay información adicional"
   }
-  
+
 IMPORTANTE:
 - Adapta el índice específicamente al tema: "${topic}"
-- Ajusta la cantidad de secciones y subsecciones según la longitud del documento (${length} páginas)
-- Genera solo el índice, sin explicaciones adicionales`;
+- Ajusta la cantidad de secciones y subsecciones según la longitud exacta del documento (${length} páginas)
+- Genera solo el índice, sin explicaciones adicionales
+- Mantén EXACTAMENTE la estructura y formato de numeración indicados arriba`;
 }
 
+/**
+ * Genera un índice de respaldo en caso de fallo de la API
+ */
 function generateFallbackIndex({
   documentType,
   topic,
@@ -186,14 +217,34 @@ function generateFallbackIndex({
 }) {
   const title = topic.toUpperCase();
 
-  // Determinar el nivel de detalle según la longitud
+  // Determinar nivel de detalle basado en la longitud exacta
   const isShortDocument = length === "10-15";
   const isMediumDocument = length === "15-20";
   const isLongDocument = length === "20-30";
   const isVeryLongDocument = length === "30-45";
 
-  // Manejo especial para ensayos
+  // Manejar ensayos de forma diferente
   if (documentType.toLowerCase() === "ensayo") {
+    // Determinar el número de subtemas basado en la longitud
+    const maxPages = parseInt(length.split("-")[1]);
+    let numSubtemas = 3; // Valor por defecto
+
+    if (maxPages <= 2) {
+      numSubtemas = 2;
+    } else if (maxPages <= 5) {
+      numSubtemas = 3;
+    } else if (maxPages <= 12) {
+      numSubtemas = 4;
+    } else {
+      numSubtemas = 5;
+    }
+
+    // Generar subtemas básicos para el ensayo
+    const subtemas = [];
+    for (let i = 1; i <= numSubtemas; i++) {
+      subtemas.push(`        Subtema específico ${i} para "${topic}"`);
+    }
+
     return `${title}
 
 I. INTRODUCCIÓN
@@ -202,21 +253,7 @@ I. INTRODUCCIÓN
    1.3 Tesis o argumento principal
 
 II. DESARROLLO
-   2.1 Primer argumento
-      2.1.1 Evidencias y ejemplos
-      2.1.2 Análisis del argumento
-   
-   2.2 Segundo argumento
-      2.2.1 Evidencias y ejemplos
-      2.2.2 Análisis del argumento
-   
-   2.3 Tercer argumento
-      2.3.1 Evidencias y ejemplos
-      2.3.2 Análisis del argumento
-   
-   2.4 Contraargumentos
-      2.4.1 Presentación de posturas contrarias
-      2.4.2 Refutación de contraargumentos
+${subtemas.join("\n")}
 
 III. CONCLUSIÓN
    3.1 Recapitulación de puntos principales
@@ -226,17 +263,17 @@ III. CONCLUSIÓN
 IV. REFERENCIAS BIBLIOGRÁFICAS`;
   }
 
-  // Para otros tipos de documentos, usar estructuras adaptadas a la longitud
+  // Para otros tipos de documentos
   const structures = {
     estandar: `${title}
 
-1. Introducción
+1. INTRODUCCIÓN
    1.1 Contextualización
    1.2 Objetivos
    1.3 Justificación
    ${isLongDocument || isVeryLongDocument ? "1.4 Alcance del estudio" : ""}
 
-2. Desarrollo
+2. DESARROLLO
    2.1 Subtema principal
    2.2 Análisis detallado
    ${
@@ -247,7 +284,7 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
    ${isLongDocument || isVeryLongDocument ? "2.4 Análisis complementario" : ""}
    ${isVeryLongDocument ? "2.5 Perspectivas adicionales" : ""}
 
-3. Conclusiones
+3. CONCLUSIONES
    3.1 Síntesis de hallazgos
    3.2 Consideraciones finales
    ${
@@ -257,7 +294,7 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
    }
    ${isVeryLongDocument ? "3.4 Limitaciones y trabajo futuro" : ""}
 
-4. Referencias bibliográficas`,
+4. REFERENCIAS BIBLIOGRÁFICAS`,
 
     capitulos: `${title}
 
@@ -385,7 +422,7 @@ ${isLongDocument || isVeryLongDocument ? "\nVIII. ANEXOS" : ""}`,
   return structures[indexStructure] || structures.estandar;
 }
 
-// Modificación del endpoint de generación de índice
+// Ruta principal para generar índice
 app.post("/api/generate-index", async (req, res) => {
   try {
     console.log("🚀 Solicitud de generación de índice recibida");
@@ -492,3 +529,21 @@ app.post("/api/generate-index", async (req, res) => {
     });
   }
 });
+
+// Ruta para verificar la salud del API
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    status: "OK",
+    message: "API está funcionando correctamente",
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || "development",
+  });
+});
+
+// Iniciar el servidor
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
+  console.log(`🔗 Entorno: ${process.env.NODE_ENV || "development"}`);
+});
+
+export default app;

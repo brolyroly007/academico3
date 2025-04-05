@@ -403,32 +403,39 @@ export default function AcademicForm() {
     setCurrentStep(prevStep);
   };
 
-  const handleSubmit = async (e) => {
-    e?.preventDefault();
-    if (validateStep()) {
-      if (currentStep < steps.length - 1) {
-        handleNextStep();
-      } else {
-        setIsSubmitting(true);
-        try {
-          console.log("Datos a enviar:", {
-            ...formData,
-          });
-          navigate("/preview", {
-            state: {
-              formData,
-              currentStep: steps.length - 1, // Aseguramos que esté en el último paso
-              maxVisitedStep: steps.length - 1,
-            },
-          });
-        } catch (error) {
-          handleError(error, "Error al procesar el formulario");
-        } finally {
-          setIsSubmitting(false);
-        }
+const handleSubmit = async (e) => {
+  e?.preventDefault();
+  if (validateStep()) {
+    if (currentStep < steps.length - 1) {
+      handleNextStep();
+    } else {
+      setIsSubmitting(true);
+      try {
+        // Asegurar que la estructura de datos es compatible con el backend
+        const dataToSend = {
+          ...formData,
+          // Asegurar que la longitud está en el formato que espera content_generator.py
+          length: formData.length, // Ya debe estar en formato "10-15", "15-20", etc.
+          // Asegurar que el tipo de documento es uno de los esperados
+          documentType: formData.documentType.toLowerCase(), // Asegurar minúsculas
+        };
+
+        console.log("Datos a enviar:", dataToSend);
+        navigate("/preview", {
+          state: {
+            formData: dataToSend,
+            currentStep: steps.length - 1,
+            maxVisitedStep: steps.length - 1,
+          },
+        });
+      } catch (error) {
+        handleError(error, "Error al procesar el formulario");
+      } finally {
+        setIsSubmitting(false);
       }
     }
-  };
+  }
+};
 
   const SummaryPanel = () => (
     <Card className="bg-muted/50 border-primary/20 sticky top-8 h-fit">

@@ -1,3 +1,4 @@
+// src/components/IndexPreview.jsx
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,13 +27,13 @@ const STRUCTURE_TYPES = {
   },
   capitulos: {
     name: "Por Capítulos",
-    icon: BookOpen,
     description: "División en capítulos numerados con subsecciones detalladas",
+    icon: ListTree,
   },
   academica: {
     name: "Estructura Académica",
-    icon: GraduationCap,
     description: "Formato académico con objetivos, marco teórico y metodología",
+    icon: GraduationCap,
   },
 };
 
@@ -49,13 +50,23 @@ function IndexPreview() {
   // Función para obtener información de la estructura
   const getStructureInfo = () => {
     const structureType = formData?.indexStructure || "estandar";
+
+    // Para ensayos, mostrar información especial
+    if (formData?.documentType === "ensayo") {
+      return {
+        name: "Estructura de Ensayo",
+        icon: <FileText className="w-5 h-5" />,
+        description: "Formato específico para ensayos académicos",
+      };
+    }
+
     const structure = STRUCTURE_TYPES[structureType];
-    const Icon = structure.icon;
+    const Icon = structure?.icon || FileText;
 
     return {
-      name: structure.name,
+      name: structure?.name || "Estructura Estándar",
       icon: <Icon className="w-5 h-5" />,
-      description: structure.description,
+      description: structure?.description || "Estructura por defecto",
     };
   };
 
@@ -63,94 +74,214 @@ function IndexPreview() {
   const generateLocalIndex = useCallback(() => {
     if (!formData) return "";
 
-    const isLongDocument = formData.length === "largo";
+    // Extraer el número máximo de páginas del rango seleccionado
+    const paginas = formData.length;
+    let maxPages = 15; // Valor por defecto
+
+    if (paginas && paginas.includes("-")) {
+      const [_, maxPagesStr] = paginas.split("-");
+      maxPages = parseInt(maxPagesStr);
+    } else if (paginas) {
+      maxPages = parseInt(paginas);
+    }
+
+    // Para ensayos, usar una estructura específica
+    if (formData.documentType === "ensayo") {
+      return generateEssayIndex(formData.topic, maxPages);
+    }
+
+    // Calcular el número de secciones y subsecciones basado en la cantidad de páginas
+    // Esto emula la lógica de content_generator.py
+    const numMainSections = Math.max(3, Math.min(15, Math.floor(maxPages / 4)));
+    const numLevel2Subsections = Math.max(
+      2,
+      Math.min(6, Math.floor(maxPages / 8))
+    );
+    const numLevel3Subsections = Math.max(
+      1,
+      Math.min(4, Math.floor(maxPages / 12))
+    );
+
     const title = formData.topic.toUpperCase();
 
-    // Usar un objeto con las estructuras predefinidas
+    // Usar un objeto con las estructuras predefinidas, adaptadas según la cantidad calculada de secciones
     const structures = {
       estandar: `${title}
 
-1. Introducción
+1. INTRODUCCIÓN
    1.1 Contextualización
    1.2 Objetivos
    1.3 Justificación
+   ${maxPages >= 20 ? "1.4 Alcance del estudio" : ""}
+   ${maxPages >= 30 ? "1.5 Preguntas de investigación" : ""}
 
-2. Desarrollo
-   2.1 Subtema principal
-   2.2 Análisis detallado
-   ${
-     isLongDocument
-       ? "2.3 Desarrollo extendido\n   2.4 Análisis complementario"
-       : ""
-   }
+2. MARCO TEÓRICO
+   2.1 Antecedentes
+   2.2 Bases conceptuales
+   ${maxPages >= 15 ? "2.3 Revisión de literatura" : ""}
+   ${maxPages >= 20 ? "2.4 Enfoques teóricos relevantes" : ""}
+   ${maxPages >= 30 ? "2.5 Estado actual de la cuestión" : ""}
 
-3. Conclusiones
-   3.1 Síntesis de hallazgos
-   3.2 Consideraciones finales
-   ${isLongDocument ? "3.3 Recomendaciones" : ""}
+3. DESARROLLO
+   3.1 Análisis del tema principal
+   3.2 Argumentación
+   ${maxPages >= 15 ? "3.3 Evidencias y ejemplos" : ""}
+   ${maxPages >= 20 ? "3.4 Contrastes y comparaciones" : ""}
+   ${maxPages >= 30 ? "3.5 Interpretación de resultados" : ""}
+   ${maxPages >= 30 ? "3.6 Discusión de hallazgos" : ""}
 
-4. Referencias bibliográficas`,
+4. CONCLUSIONES
+   4.1 Síntesis de hallazgos
+   4.2 Consideraciones finales
+   ${maxPages >= 15 ? "4.3 Recomendaciones" : ""}
+   ${maxPages >= 20 ? "4.4 Limitaciones del estudio" : ""}
+   ${maxPages >= 30 ? "4.5 Líneas futuras de investigación" : ""}
+
+5. REFERENCIAS BIBLIOGRÁFICAS`,
 
       capitulos: `${title}
 
 CAPITULO I: ASPECTOS INTRODUCTORIOS
 1.1 Introducción al tema
 1.2 Contexto histórico
-${isLongDocument ? "1.3 Antecedentes relevantes" : ""}
+${maxPages >= 15 ? "1.3 Antecedentes relevantes" : ""}
+${maxPages >= 20 ? "1.4 Justificación del estudio" : ""}
+${maxPages >= 30 ? "1.5 Planteamiento del problema" : ""}
 
-CAPITULO II: DESARROLLO CONCEPTUAL
-2.1 Desarrollo conceptual
-2.2 Análisis detallado
-${isLongDocument ? "2.3 Profundización temática" : ""}
+CAPITULO II: FUNDAMENTOS TEÓRICOS
+2.1 Marco conceptual
+2.2 Teorías relacionadas
+${maxPages >= 15 ? "2.3 Revisión de literatura" : ""}
+${maxPages >= 20 ? "2.4 Modelos teóricos aplicables" : ""}
+${maxPages >= 30 ? "2.5 Estudios previos" : ""}
+${maxPages >= 30 ? "2.6 Definición de términos" : ""}
 
-CAPITULO III: ANÁLISIS Y DISCUSIÓN
-3.1 Análisis de resultados
-3.2 Discusión de hallazgos
-${isLongDocument ? "3.3 Interpretación extendida" : ""}
+CAPITULO III: DESARROLLO ANALÍTICO
+3.1 Metodología de análisis
+3.2 Presentación de hallazgos
+${maxPages >= 15 ? "3.3 Interpretación de datos" : ""}
+${maxPages >= 20 ? "3.4 Discusión temática" : ""}
+${maxPages >= 30 ? "3.5 Análisis comparativo" : ""}
+${maxPages >= 30 ? "3.6 Evaluación de resultados" : ""}
 
-CAPITULO IV: CONCLUSIONES
-4.1 Conclusiones
-4.2 Recomendaciones
-${isLongDocument ? "4.3 Perspectivas futuras" : ""}
+CAPITULO IV: ANÁLISIS Y DISCUSIÓN
+4.1 Análisis de resultados
+4.2 Discusión de hallazgos
+${maxPages >= 15 ? "4.3 Interpretación extendida" : ""}
+${maxPages >= 20 ? "4.4 Implicaciones de los resultados" : ""}
+${maxPages >= 30 ? "4.5 Contrastación con teorías previas" : ""}
 
-Referencias bibliográficas`,
+CAPITULO V: CONCLUSIONES
+5.1 Conclusiones generales
+5.2 Recomendaciones
+${maxPages >= 15 ? "5.3 Aplicaciones prácticas" : ""}
+${maxPages >= 20 ? "5.4 Limitaciones encontradas" : ""}
+${maxPages >= 30 ? "5.5 Propuestas para investigaciones futuras" : ""}
+
+REFERENCIAS BIBLIOGRÁFICAS
+${maxPages >= 20 ? "\nANEXOS" : ""}`,
 
       academica: `${title}
 
 I. INTRODUCCIÓN
    1.1 Planteamiento del problema
-   1.2 Justificación
-   ${isLongDocument ? "1.3 Alcance del estudio" : ""}
+   1.2 Justificación del estudio
+   ${maxPages >= 15 ? "1.3 Alcance de la investigación" : ""}
+   ${maxPages >= 20 ? "1.4 Delimitación del tema" : ""}
+   ${maxPages >= 30 ? "1.5 Limitaciones de la investigación" : ""}
 
 II. OBJETIVOS
    2.1 Objetivo general
    2.2 Objetivos específicos
+   ${maxPages >= 20 ? "2.3 Preguntas de investigación" : ""}
+   ${maxPages >= 30 ? "2.4 Hipótesis de trabajo" : ""}
 
 III. MARCO TEÓRICO
-   3.1 Antecedentes
+   3.1 Antecedentes de la investigación
    3.2 Bases teóricas
-   ${isLongDocument ? "3.3 Estado del arte" : ""}
+   ${maxPages >= 15 ? "3.3 Estado del arte" : ""}
+   ${maxPages >= 20 ? "3.4 Definición de términos fundamentales" : ""}
+   ${maxPages >= 30 ? "3.5 Corrientes teóricas relacionadas" : ""}
+   ${maxPages >= 30 ? "3.6 Marco conceptual" : ""}
 
 IV. METODOLOGÍA
-   4.1 Tipo de investigación
-   4.2 Técnicas e instrumentos
-   ${isLongDocument ? "4.3 Procedimientos metodológicos" : ""}
+   4.1 Tipo y diseño de investigación
+   4.2 Técnicas e instrumentos de recolección de datos
+   ${maxPages >= 15 ? "4.3 Procedimientos metodológicos" : ""}
+   ${maxPages >= 20 ? "4.4 Población y muestra" : ""}
+   ${maxPages >= 20 ? "4.5 Variables de estudio" : ""}
+   ${maxPages >= 30 ? "4.6 Técnicas de procesamiento de información" : ""}
+   ${maxPages >= 30 ? "4.7 Consideraciones éticas" : ""}
 
-V. RESULTADOS Y DISCUSIÓN
-   5.1 Presentación de resultados
-   5.2 Análisis de hallazgos
-   ${isLongDocument ? "5.3 Discusión extendida" : ""}
+V. RESULTADOS
+   5.1 Presentación de hallazgos
+   5.2 Análisis de datos obtenidos
+   ${maxPages >= 15 ? "5.3 Estadísticas descriptivas" : ""}
+   ${maxPages >= 20 ? "5.4 Pruebas estadísticas aplicadas" : ""}
+   ${maxPages >= 30 ? "5.5 Interpretación de resultados estadísticos" : ""}
 
-VI. CONCLUSIONES
-   6.1 Conclusiones
-   6.2 Recomendaciones
-   ${isLongDocument ? "6.3 Líneas futuras de investigación" : ""}
+VI. DISCUSIÓN
+   6.1 Interpretación de los hallazgos
+   6.2 Relación con investigaciones anteriores
+   ${maxPages >= 15 ? "6.3 Implicaciones teóricas" : ""}
+   ${maxPages >= 20 ? "6.4 Implicaciones prácticas" : ""}
+   ${maxPages >= 30 ? "6.5 Contrastación con hipótesis planteadas" : ""}
 
-VII. REFERENCIAS BIBLIOGRÁFICAS`,
+VII. CONCLUSIONES
+   7.1 Conclusiones generales
+   7.2 Conclusiones específicas
+   ${maxPages >= 15 ? "7.3 Recomendaciones" : ""}
+   ${maxPages >= 20 ? "7.4 Líneas futuras de investigación" : ""}
+   ${maxPages >= 30 ? "7.5 Aportes de la investigación" : ""}
+
+VIII. REFERENCIAS BIBLIOGRÁFICAS
+${maxPages >= 20 ? "\nIX. ANEXOS" : ""}
+${maxPages >= 30 ? "\nX. APÉNDICES" : ""}`,
     };
 
     return structures[formData.indexStructure] || structures.estandar;
   }, [formData]);
+
+  // Función específica para generar índice de ensayo
+  const generateEssayIndex = (topic, maxPages) => {
+    const title = topic.toUpperCase();
+
+    // Determinar el número de subtemas según el número de páginas
+    // siguiendo la lógica de content_generator.py
+    let numSubtemas = 3; // Valor por defecto
+    if (maxPages <= 2) {
+      numSubtemas = 2;
+    } else if (maxPages <= 5) {
+      numSubtemas = 3;
+    } else if (maxPages <= 12) {
+      numSubtemas = 4;
+    } else {
+      numSubtemas = 5;
+    }
+
+    // Generar subtemas genéricos
+    const subtemas = [];
+    for (let i = 1; i <= numSubtemas; i++) {
+      subtemas.push(`        Subtema del desarrollo ${i}`);
+    }
+
+    return `${title}
+
+I. INTRODUCCIÓN
+   1.1 Planteamiento del tema
+   1.2 Relevancia y contexto
+   1.3 Tesis o argumento principal
+
+II. DESARROLLO
+${subtemas.join("\n")}
+
+III. CONCLUSIÓN
+   3.1 Recapitulación de puntos principales
+   3.2 Síntesis del argumento global
+   3.3 Reflexiones finales y proyecciones
+
+IV. REFERENCIAS BIBLIOGRÁFICAS`;
+  };
 
   useEffect(() => {
     const generateIndex = async () => {
@@ -161,6 +292,8 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
         const apiUrl = "/api";
 
         console.log("Enviando estructura:", formData.indexStructure);
+        console.log("Enviando longitud:", formData.length);
+        console.log("Enviando tipo de documento:", formData.documentType);
 
         const requestData = {
           documentType: formData.documentType,
@@ -252,6 +385,21 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
 
   const structureInfo = getStructureInfo();
 
+  // Función para determinar nivel de detalle según cantidad de páginas
+  const getDetailLevelDescription = (length) => {
+    if (!length) return "estándar";
+
+    const maxPages = length.includes("-")
+      ? parseInt(length.split("-")[1])
+      : parseInt(length);
+
+    if (maxPages <= 5) return "básico (pocas secciones)";
+    if (maxPages <= 15)
+      return "intermedio (secciones principales bien desarrolladas)";
+    if (maxPages <= 30) return "detallado (múltiples niveles y subsecciones)";
+    return "muy detallado (estructura completa con múltiples niveles)";
+  };
+
   return (
     <div className="min-h-[100dvh] w-full px-2 sm:px-4 py-2 sm:py-8 flex flex-col">
       <div className="max-w-4xl mx-auto w-full flex-1 flex flex-col">
@@ -316,7 +464,11 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
                         Longitud:
                       </span>
                       <p className="text-muted-foreground text-sm">
-                        {formData.length}
+                        {formData.length} páginas
+                        <span className="text-xs text-muted-foreground/70 ml-1">
+                          (nivel de detalle{" "}
+                          {getDetailLevelDescription(formData.length)})
+                        </span>
                       </p>
                     </div>
                     <div>
@@ -428,10 +580,13 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
                     placeholder={isLoading ? "Generando índice..." : ""}
                   />
                   {isLoading && (
-                    <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-white/80 dark:bg-background/80 flex items-center justify-center">
                       <div className="flex items-center gap-2">
                         <Loader className="w-5 h-5 animate-spin" />
-                        <span>Generando índice personalizado...</span>
+                        <span>
+                          Generando índice personalizado basado en{" "}
+                          {formData.length} páginas...
+                        </span>
                       </div>
                     </div>
                   )}
@@ -440,20 +595,30 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
                   Puedes editar directamente el índice para ajustarlo a tus
                   necesidades específicas. Los cambios que realices aquí se
                   guardarán con tu pedido.
+                  {apiError && (
+                    <span className="block text-yellow-600 dark:text-yellow-400 mt-1">
+                      Nota: {apiError}. Puedes continuar con este índice o
+                      modificarlo manualmente.
+                    </span>
+                  )}
                 </p>
               </div>
 
               {/* Sección de acciones finales */}
               <div className="border-t pt-3 sm:pt-6">
                 <div className="flex flex-col gap-3 sm:gap-4">
-                  <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 sm:p-4">
+                  <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900 rounded-lg p-3 sm:p-4">
                     <div className="flex items-start gap-2 sm:gap-3">
-                      <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                      <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                       <div>
-                        <h4 className="font-medium text-blue-800 text-xs sm:text-sm">
+                        <h4 className="font-medium text-blue-800 dark:text-blue-300 text-xs sm:text-sm">
                           Importante antes de confirmar
                         </h4>
-                        <ul className="text-xs sm:text-sm text-blue-700 mt-1 space-y-0.5 sm:space-y-1">
+                        <ul className="text-xs sm:text-sm text-blue-700 dark:text-blue-400 mt-1 space-y-0.5 sm:space-y-1">
+                          <li>
+                            • El índice se ha generado para un documento de{" "}
+                            {formData.length} páginas
+                          </li>
                           <li>
                             • Revisa que la estructura del índice sea apropiada
                             para tu tema
@@ -463,12 +628,8 @@ VII. REFERENCIAS BIBLIOGRÁFICAS`,
                             incluidos
                           </li>
                           <li>
-                            • Asegúrate de que el orden de las secciones sea
-                            lógico
-                          </li>
-                          <li>
-                            • Comprueba que las subsecciones estén correctamente
-                            numeradas
+                            • Puedes añadir o eliminar subsecciones según tus
+                            necesidades
                           </li>
                         </ul>
                       </div>
