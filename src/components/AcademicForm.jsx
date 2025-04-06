@@ -45,12 +45,12 @@ const DOCUMENT_TYPES = [
   },
 ];
 
-// Formatos de citación modificados para incluir "Próximamente" y disponibilidad
+// Formatos de citación modificados - TODOS disponibles
 const CITATION_FORMATS = [
   { value: "APA", label: "APA 7", available: true },
-  { value: "MLA", label: "MLA (Próximamente)", available: false },
-  { value: "Chicago", label: "Chicago (Próximamente)", available: false },
-  { value: "Vancouver", label: "Vancouver (Próximamente)", available: false },
+  { value: "MLA", label: "MLA", available: true },
+  { value: "Chicago", label: "Chicago", available: true },
+  { value: "Vancouver", label: "Vancouver", available: true },
 ];
 
 const DOCUMENT_LENGTHS = [
@@ -299,6 +299,15 @@ export default function AcademicForm() {
       ...prev,
       privacyAccepted: accepted,
     }));
+
+    // Limpiar error de política de privacidad si se acepta
+    if (accepted) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.privacyAccepted;
+        return newErrors;
+      });
+    }
   };
 
   // Definición de pasos del formulario - NOTA: Sin requerir privacyAccepted en los campos
@@ -329,6 +338,41 @@ export default function AcademicForm() {
       }));
     }
   }, [formData.documentType]);
+
+  // Efecto para limpiar errores cuando se cambian los valores de los campos
+  useEffect(() => {
+    // Crear una función para limpiar los errores de los campos que cambian
+    const clearFieldErrors = () => {
+      const newErrors = { ...errors };
+
+      // Verificar cada campo del formulario
+      if (formData.name && errors.name) {
+        delete newErrors.name;
+      }
+
+      if (formData.phoneNumber && errors.phoneNumber) {
+        // Verificar formato del número telefónico
+        const phoneRegex = /^\d{9}$/;
+        if (phoneRegex.test(formData.phoneNumber)) {
+          delete newErrors.phoneNumber;
+        }
+      }
+
+      // Verificar otros campos
+      Object.keys(formData).forEach((key) => {
+        if (formData[key] && errors[key]) {
+          delete newErrors[key];
+        }
+      });
+
+      // Actualizar estado de errores solo si hay cambios
+      if (Object.keys(errors).length !== Object.keys(newErrors).length) {
+        setErrors(newErrors);
+      }
+    };
+
+    clearFieldErrors();
+  }, [formData, errors]);
 
   // Efecto para iniciar reCAPTCHA cuando llegamos al último paso
   useEffect(() => {
@@ -411,9 +455,6 @@ export default function AcademicForm() {
     }
 
     setErrors(newErrors);
-    console.log("Errores de validación:", newErrors);
-    console.log("Campos actuales:", currentFields);
-    console.log("Datos del formulario:", formData);
 
     return Object.keys(newErrors).length === 0;
   };
@@ -694,9 +735,13 @@ export default function AcademicForm() {
                       </Label>
                       <Select
                         value={formData.documentType}
-                        onValueChange={(value) =>
-                          setFormData({ ...formData, documentType: value })
-                        }
+                        onValueChange={(value) => {
+                          setFormData({ ...formData, documentType: value });
+                          // Limpiar el error al seleccionar un valor
+                          if (errors.documentType) {
+                            setErrors({ ...errors, documentType: undefined });
+                          }
+                        }}
                       >
                         <SelectTrigger className="h-10 sm:h-12 hover:border-primary/80 transition-colors">
                           <SelectValue placeholder="Seleccionar tipo" />
@@ -730,9 +775,13 @@ export default function AcademicForm() {
                       </Label>
                       <Select
                         value={formData.citationFormat}
-                        onValueChange={(value) =>
-                          setFormData({ ...formData, citationFormat: value })
-                        }
+                        onValueChange={(value) => {
+                          setFormData({ ...formData, citationFormat: value });
+                          // Limpiar el error al seleccionar un valor
+                          if (errors.citationFormat) {
+                            setErrors({ ...errors, citationFormat: undefined });
+                          }
+                        }}
                       >
                         <SelectTrigger className="h-10 sm:h-12 hover:border-primary/80 transition-colors">
                           <SelectValue placeholder="Seleccionar formato" />
@@ -775,9 +824,13 @@ export default function AcademicForm() {
                       </Label>
                       <Select
                         value={formData.length}
-                        onValueChange={(value) =>
-                          setFormData({ ...formData, length: value })
-                        }
+                        onValueChange={(value) => {
+                          setFormData({ ...formData, length: value });
+                          // Limpiar el error al seleccionar un valor
+                          if (errors.length) {
+                            setErrors({ ...errors, length: undefined });
+                          }
+                        }}
                       >
                         <SelectTrigger className="h-10 sm:h-12 hover:border-primary/80 transition-colors">
                           <SelectValue placeholder="Seleccionar longitud" />
@@ -806,9 +859,13 @@ export default function AcademicForm() {
                       </Label>
                       <Select
                         value={formData.essayTone}
-                        onValueChange={(value) =>
-                          setFormData({ ...formData, essayTone: value })
-                        }
+                        onValueChange={(value) => {
+                          setFormData({ ...formData, essayTone: value });
+                          // Limpiar el error al seleccionar un valor
+                          if (errors.essayTone) {
+                            setErrors({ ...errors, essayTone: undefined });
+                          }
+                        }}
                       >
                         <SelectTrigger className="h-10 sm:h-12 hover:border-primary/80 transition-colors">
                           <SelectValue placeholder="Seleccionar tono" />
@@ -845,9 +902,13 @@ export default function AcademicForm() {
                       </Label>
                       <Input
                         value={formData.topic}
-                        onChange={(e) =>
-                          setFormData({ ...formData, topic: e.target.value })
-                        }
+                        onChange={(e) => {
+                          setFormData({ ...formData, topic: e.target.value });
+                          // Limpiar el error si el campo tiene al menos 3 caracteres
+                          if (e.target.value.length >= 3 && errors.topic) {
+                            setErrors({ ...errors, topic: undefined });
+                          }
+                        }}
                         placeholder="Comience a escribir para ver sugerencias..."
                         className="h-10 sm:h-12 hover:border-primary/80 transition-colors"
                         list="sugerencias-temas"
@@ -869,9 +930,16 @@ export default function AcademicForm() {
                         </Label>
                         <Input
                           value={formData.course}
-                          onChange={(e) =>
-                            setFormData({ ...formData, course: e.target.value })
-                          }
+                          onChange={(e) => {
+                            setFormData({
+                              ...formData,
+                              course: e.target.value,
+                            });
+                            // Limpiar el error si el campo tiene al menos 2 caracteres
+                            if (e.target.value.length >= 2 && errors.course) {
+                              setErrors({ ...errors, course: undefined });
+                            }
+                          }}
                           placeholder="Nombre del curso"
                           className="h-10 sm:h-12 hover:border-primary/80 transition-colors"
                         />
@@ -888,9 +956,16 @@ export default function AcademicForm() {
                         </Label>
                         <Input
                           value={formData.career}
-                          onChange={(e) =>
-                            setFormData({ ...formData, career: e.target.value })
-                          }
+                          onChange={(e) => {
+                            setFormData({
+                              ...formData,
+                              career: e.target.value,
+                            });
+                            // Limpiar el error si el campo tiene al menos 2 caracteres
+                            if (e.target.value.length >= 2 && errors.career) {
+                              setErrors({ ...errors, career: undefined });
+                            }
+                          }}
                           placeholder="Nombre de la carrera"
                           className="h-10 sm:h-12 hover:border-primary/80 transition-colors"
                         />
@@ -944,6 +1019,13 @@ export default function AcademicForm() {
                               ...formData,
                               indexStructure: "estandar", // Usamos estandar como valor, pero mostramos la estructura de ensayo
                             });
+                            // Limpiar error de estructura
+                            if (errors.indexStructure) {
+                              setErrors({
+                                ...errors,
+                                indexStructure: undefined,
+                              });
+                            }
                           }}
                         >
                           <div className="flex gap-4">
@@ -1018,6 +1100,13 @@ export default function AcademicForm() {
                                 ...formData,
                                 indexStructure: structure.value,
                               });
+                              // Limpiar error de estructura
+                              if (errors.indexStructure) {
+                                setErrors({
+                                  ...errors,
+                                  indexStructure: undefined,
+                                });
+                              }
                             }}
                           >
                             <div className="flex gap-4">
@@ -1105,9 +1194,14 @@ export default function AcademicForm() {
                       </Label>
                       <Input
                         value={formData.name}
-                        onChange={(e) =>
-                          setFormData({ ...formData, name: e.target.value })
-                        }
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setFormData({ ...formData, name: value });
+                          // Limpiar error si el campo es válido
+                          if (value.length >= 2 && errors.name) {
+                            setErrors({ ...errors, name: undefined });
+                          }
+                        }}
                         placeholder="¿Cómo te gustaría que te llamemos?"
                         className="h-10 sm:h-12 hover:border-primary/80 transition-colors"
                       />
@@ -1141,18 +1235,24 @@ export default function AcademicForm() {
                         </Select>
                         <Input
                           value={formData.phoneNumber}
-                          onChange={(e) =>
+                          onChange={(e) => {
+                            const value = e.target.value
+                              .replace(/\D/g, "")
+                              .slice(0, 9);
                             setFormData({
                               ...formData,
-                              phoneNumber: e.target.value
-                                .replace(/\D/g, "")
-                                .slice(0, 9),
-                            })
-                          }
+                              phoneNumber: value,
+                            });
+                            // Limpiar error si el número tiene 9 dígitos
+                            if (value.length === 9 && errors.phoneNumber) {
+                              setErrors({ ...errors, phoneNumber: undefined });
+                            }
+                          }}
                           placeholder="Número de WhatsApp (9 dígitos)"
                           className="flex-1 h-10 sm:h-12"
                           type="tel"
                           maxLength={9}
+                          pattern="[0-9]{9}"
                         />
                       </div>
                       {errors.phoneNumber && (

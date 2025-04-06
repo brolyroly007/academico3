@@ -1,5 +1,5 @@
 // src/components/PrivacyTerms.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -14,10 +14,19 @@ import { AlertCircle, X, Lock, Shield, Eye } from "lucide-react";
  */
 const PrivacyTerms = ({ value = false, onChange }) => {
   const [modalOpen, setModalOpen] = useState(false);
+  const [localChecked, setLocalChecked] = useState(value);
+
+  // Mantener sincronizado el estado local con el prop value
+  useEffect(() => {
+    setLocalChecked(value);
+  }, [value]);
 
   // Manejar cambio en el checkbox
   const handleCheckboxChange = (checked) => {
-    if (onChange) onChange(checked);
+    setLocalChecked(checked);
+    if (onChange) {
+      onChange(checked);
+    }
   };
 
   // Abrir modal con términos completos
@@ -33,7 +42,10 @@ const PrivacyTerms = ({ value = false, onChange }) => {
 
   // Aceptar términos desde el modal
   const acceptTerms = () => {
-    if (onChange) onChange(true);
+    setLocalChecked(true);
+    if (onChange) {
+      onChange(true);
+    }
     setModalOpen(false);
   };
 
@@ -42,7 +54,7 @@ const PrivacyTerms = ({ value = false, onChange }) => {
       <div className="flex items-start space-x-2">
         <Checkbox
           id="privacy-terms"
-          checked={value}
+          checked={localChecked}
           onCheckedChange={handleCheckboxChange}
           className="mt-1"
         />
