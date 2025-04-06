@@ -34,6 +34,7 @@ import {
 // Importamos los nuevos componentes de seguridad
 import ReCaptcha from "./ReCaptcha";
 import PrivacyTerms from "./PrivacyTerms";
+import { useTheme } from "./theme-provider"; // Importamos el hook de tema
 
 const DOCUMENT_TYPES = [
   { value: "ensayo", label: "Ensayo", icon: <FileText className="w-4 h-4" /> },
@@ -226,6 +227,8 @@ const getDetailLevelByLength = (length) => {
 export default function AcademicForm() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme } = useTheme(); // Accedemos al tema actual
+  const isDark = theme === "dark";
 
   // Recuperar el paso y datos guardados
   const savedStep = location.state?.currentStep ?? 0;
@@ -260,8 +263,12 @@ export default function AcademicForm() {
   const [maxStep, setMaxStep] = useState(maxVisitedStep);
 
   // Estados para seguridad
-  const [recaptchaToken, setRecaptchaToken] = useState("");
-  const [privacyAccepted, setPrivacyAccepted] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState(
+    savedFormData.recaptchaToken || ""
+  );
+  const [privacyAccepted, setPrivacyAccepted] = useState(
+    savedFormData.privacyAccepted || false
+  );
   const [recaptchaError, setRecaptchaError] = useState(false);
   const [securitySectionExpanded, setSecuritySectionExpanded] = useState(false);
 
@@ -294,16 +301,13 @@ export default function AcademicForm() {
     }));
   };
 
-  // Definición de pasos del formulario
+  // Definición de pasos del formulario - NOTA: Sin requerir privacyAccepted en los campos
   const steps = [
     { title: "Tipo de Documento", fields: ["documentType", "citationFormat"] },
     { title: "Configuración", fields: ["length", "essayTone"] },
     { title: "Contenido", fields: ["topic", "course", "career"] },
     { title: "Estructura de Índice", fields: ["indexStructure"] },
-    {
-      title: "Detalles Finales",
-      fields: ["name", "phoneNumber", "privacyAccepted"],
-    },
+    { title: "Detalles Finales", fields: ["name", "phoneNumber"] }, // Removimos privacyAccepted de aquí
   ];
 
   // Efecto para actualizar sugerencias de temas
@@ -391,17 +395,19 @@ export default function AcademicForm() {
       if (field === "name" && formData[field] && formData[field].length < 2) {
         newErrors[field] = "El nombre debe tener al menos 2 caracteres";
       }
-
-      // Validación para la aceptación de políticas de privacidad
-      if (field === "privacyAccepted" && !privacyAccepted) {
-        newErrors[field] = "Debes aceptar la política de privacidad";
-      }
     });
 
-    // Si estamos en el último paso, verificar si tenemos un token de reCAPTCHA
-    if (currentStep === steps.length - 1 && !recaptchaToken) {
-      setRecaptchaError(true);
-      newErrors.recaptcha = "Error en la verificación de seguridad";
+    // En el último paso, validar la aceptación de política (pero fuera del bucle fields)
+    if (currentStep === steps.length - 1) {
+      if (!privacyAccepted) {
+        newErrors.privacyAccepted = "Debes aceptar la política de privacidad";
+      }
+
+      // Si estamos en el último paso, verificar si tenemos un token de reCAPTCHA
+      if (!recaptchaToken) {
+        setRecaptchaError(true);
+        newErrors.recaptcha = "Error en la verificación de seguridad";
+      }
     }
 
     setErrors(newErrors);
@@ -907,14 +913,14 @@ export default function AcademicForm() {
                       Elige la estructura para tu índice
                     </h3>
 
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                    <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-900 rounded-lg p-4 mb-6">
                       <div className="flex gap-3">
-                        <AlertTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                        <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-500 flex-shrink-0 mt-0.5" />
                         <div>
-                          <h4 className="font-medium text-yellow-800 mb-1">
+                          <h4 className="font-medium text-yellow-800 dark:text-yellow-400 mb-1">
                             Importante
                           </h4>
-                          <p className="text-sm text-yellow-700">
+                          <p className="text-sm text-yellow-700 dark:text-yellow-500">
                             {formData.documentType === "ensayo"
                               ? "Para ensayos, se utilizará una estructura especializada con introducción, desarrollo y conclusión."
                               : "La estructura del índice se adaptará automáticamente según el número de páginas seleccionado (" +
@@ -958,7 +964,7 @@ export default function AcademicForm() {
                                 {ESSAY_STRUCTURE.description}
                               </p>
 
-                              {/* Ejemplo visual */}
+                              {/* Ejemplo visual - Mejorado para contraste */}
                               <div className="mt-3 p-3 bg-muted/40 rounded-md text-sm border border-muted font-mono">
                                 {ESSAY_STRUCTURE.example
                                   .split("\n")
@@ -970,7 +976,9 @@ export default function AcademicForm() {
                                         line.startsWith("II") ||
                                         line.startsWith("III") ||
                                         line.startsWith("IV")
-                                          ? "text-primary-foreground/80"
+                                          ? isDark
+                                            ? "text-blue-300 font-semibold"
+                                            : "text-blue-600 font-semibold"
                                           : ""
                                       }`}
                                     >
@@ -1039,7 +1047,7 @@ export default function AcademicForm() {
                                   {structure.description}
                                 </p>
 
-                                {/* Ejemplos visuales */}
+                                {/* Ejemplos visuales - Mejorado para contraste */}
                                 <div className="mt-3 p-3 bg-muted/40 rounded-md text-sm border border-muted font-mono">
                                   {structure.example
                                     .split("\n")
@@ -1047,9 +1055,14 @@ export default function AcademicForm() {
                                       <div
                                         key={idx}
                                         className={`${
-                                          line.includes("CAPITULO") ||
-                                          line.match(/^[IVX]+\./)
-                                            ? "text-primary-foreground/80"
+                                          line.includes("CAPITULO")
+                                            ? isDark
+                                              ? "text-blue-300 font-semibold"
+                                              : "text-blue-600 font-semibold"
+                                            : line.match(/^[IVX]+\./)
+                                            ? isDark
+                                              ? "text-blue-300 font-semibold"
+                                              : "text-blue-600 font-semibold"
                                             : line.match(/^\d+\./)
                                             ? "font-medium"
                                             : ""
@@ -1250,11 +1263,11 @@ export default function AcademicForm() {
                         />
 
                         {recaptchaError && (
-                          <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
+                          <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-900 rounded-md">
                             <div className="flex items-start gap-2">
                               <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
                               <div>
-                                <p className="text-sm text-red-700">
+                                <p className="text-sm text-red-700 dark:text-red-400">
                                   Error en la verificación de seguridad. Por
                                   favor, recarga la página e inténtalo de nuevo.
                                 </p>
@@ -1264,11 +1277,11 @@ export default function AcademicForm() {
                         )}
 
                         {recaptchaToken && (
-                          <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-md">
+                          <div className="mt-2 p-2 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-900 rounded-md">
                             <div className="flex items-start gap-2">
                               <Shield className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
                               <div>
-                                <p className="text-sm text-green-700">
+                                <p className="text-sm text-green-700 dark:text-green-400">
                                   Verificación de seguridad completada
                                   correctamente
                                 </p>
