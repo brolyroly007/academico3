@@ -347,10 +347,9 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
       // Asegurarnos de que el objeto formData está completo con todos los datos
       const completeFormData = {
         ...formData,
-        index: generatedIndex,
+        index: generatedIndex, // Asegúrate de que esto se está estableciendo correctamente
         timestamp: new Date().toISOString(),
       };
-
       // Registrar los datos que estamos enviando para depuración
       console.log("Enviando datos a Google Sheets:", completeFormData);
 
