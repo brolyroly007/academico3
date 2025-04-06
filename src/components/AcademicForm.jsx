@@ -36,21 +36,28 @@ import ReCaptcha from "./ReCaptcha";
 import PrivacyTerms from "./PrivacyTerms";
 import { useTheme } from "./theme-provider"; // Importamos el hook de tema
 
+// Tipos de documento - Ensayo marcado como "Próximamente"
 const DOCUMENT_TYPES = [
-  { value: "ensayo", label: "Ensayo", icon: <FileText className="w-4 h-4" /> },
   {
     value: "monografia",
     label: "Monografía",
     icon: <BookOpen className="w-4 h-4" />,
+    available: true,
+  },
+  {
+    value: "ensayo",
+    label: "Ensayo (Próximamente)",
+    icon: <FileText className="w-4 h-4" />,
+    available: false, // Marcado como no disponible
   },
 ];
 
-// Formatos de citación modificados - TODOS disponibles
+// Formatos de citación - Solo APA disponible
 const CITATION_FORMATS = [
   { value: "APA", label: "APA 7", available: true },
-  { value: "MLA", label: "MLA", available: true },
-  { value: "Chicago", label: "Chicago", available: true },
-  { value: "Vancouver", label: "Vancouver", available: true },
+  { value: "MLA", label: "MLA (Próximamente)", available: false },
+  { value: "Chicago", label: "Chicago (Próximamente)", available: false },
+  { value: "Vancouver", label: "Vancouver (Próximamente)", available: false },
 ];
 
 const DOCUMENT_LENGTHS = [
@@ -284,7 +291,8 @@ export default function AcademicForm() {
   const handleRecaptchaVerify = (token) => {
     setRecaptchaToken(token);
     setRecaptchaError(false);
-    // Actualizar formData con el token
+
+    // Actualizar formData con el token real
     setFormData((prev) => ({
       ...prev,
       recaptchaToken: token,
@@ -309,15 +317,6 @@ export default function AcademicForm() {
       });
     }
   };
-
-  // Definición de pasos del formulario - NOTA: Sin requerir privacyAccepted en los campos
-  const steps = [
-    { title: "Tipo de Documento", fields: ["documentType", "citationFormat"] },
-    { title: "Configuración", fields: ["length", "essayTone"] },
-    { title: "Contenido", fields: ["topic", "course", "career"] },
-    { title: "Estructura de Índice", fields: ["indexStructure"] },
-    { title: "Detalles Finales", fields: ["name", "phoneNumber"] }, // Removimos privacyAccepted de aquí
-  ];
 
   // Efecto para actualizar sugerencias de temas
   useEffect(() => {
@@ -373,14 +372,6 @@ export default function AcademicForm() {
 
     clearFieldErrors();
   }, [formData, errors]);
-
-  // Efecto para iniciar reCAPTCHA cuando llegamos al último paso
-  useEffect(() => {
-    if (currentStep === steps.length - 1) {
-      // Intentar verificar reCAPTCHA automáticamente
-      // La verificación ocurrirá cuando el componente ReCaptcha se monte
-    }
-  }, [currentStep]);
 
   const calculateProgress = () => {
     // Calcular el total de pasos considerando si se debe omitir el paso de estructura para ensayos
@@ -447,7 +438,7 @@ export default function AcademicForm() {
         newErrors.privacyAccepted = "Debes aceptar la política de privacidad";
       }
 
-      // Si estamos en el último paso, verificar si tenemos un token de reCAPTCHA
+      // Verificar si tenemos un token de reCAPTCHA
       if (!recaptchaToken) {
         setRecaptchaError(true);
         newErrors.recaptcha = "Error en la verificación de seguridad";
@@ -543,6 +534,15 @@ export default function AcademicForm() {
       }
     }
   };
+
+  // Definición de pasos del formulario
+  const steps = [
+    { title: "Tipo de Documento", fields: ["documentType", "citationFormat"] },
+    { title: "Configuración", fields: ["length", "essayTone"] },
+    { title: "Contenido", fields: ["topic", "course", "career"] },
+    { title: "Estructura de Índice", fields: ["indexStructure"] },
+    { title: "Detalles Finales", fields: ["name", "phoneNumber"] },
+  ];
 
   const SummaryPanel = () => (
     <Card className="bg-muted/50 border-primary/20 sticky top-8 h-fit">
@@ -736,10 +736,16 @@ export default function AcademicForm() {
                       <Select
                         value={formData.documentType}
                         onValueChange={(value) => {
-                          setFormData({ ...formData, documentType: value });
-                          // Limpiar el error al seleccionar un valor
-                          if (errors.documentType) {
-                            setErrors({ ...errors, documentType: undefined });
+                          // Solo permitir seleccionar tipos disponibles
+                          const selectedType = DOCUMENT_TYPES.find(
+                            (type) => type.value === value
+                          );
+                          if (selectedType && selectedType.available) {
+                            setFormData({ ...formData, documentType: value });
+                            // Limpiar el error al seleccionar un valor
+                            if (errors.documentType) {
+                              setErrors({ ...errors, documentType: undefined });
+                            }
                           }
                         }}
                       >
@@ -751,7 +757,12 @@ export default function AcademicForm() {
                             <SelectItem
                               key={type.value}
                               value={type.value}
-                              className="hover:bg-primary/10 transition-colors"
+                              disabled={!type.available}
+                              className={`hover:bg-primary/10 transition-colors ${
+                                !type.available
+                                  ? "opacity-60 cursor-not-allowed"
+                                  : ""
+                              }`}
                             >
                               <div className="flex items-center gap-3">
                                 {type.icon}
@@ -776,10 +787,19 @@ export default function AcademicForm() {
                       <Select
                         value={formData.citationFormat}
                         onValueChange={(value) => {
-                          setFormData({ ...formData, citationFormat: value });
-                          // Limpiar el error al seleccionar un valor
-                          if (errors.citationFormat) {
-                            setErrors({ ...errors, citationFormat: undefined });
+                          // Solo permitir seleccionar formatos disponibles
+                          const selectedFormat = CITATION_FORMATS.find(
+                            (format) => format.value === value
+                          );
+                          if (selectedFormat && selectedFormat.available) {
+                            setFormData({ ...formData, citationFormat: value });
+                            // Limpiar el error al seleccionar un valor
+                            if (errors.citationFormat) {
+                              setErrors({
+                                ...errors,
+                                citationFormat: undefined,
+                              });
+                            }
                           }
                         }}
                       >
@@ -1376,10 +1396,10 @@ export default function AcademicForm() {
                           </div>
                         )}
 
-                        {recaptchaToken && (
+                        {recaptchaToken && !recaptchaError && (
                           <div className="mt-2 p-2 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-900 rounded-md">
                             <div className="flex items-start gap-2">
-                              <Shield className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                              <Shield className="w-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
                               <div>
                                 <p className="text-sm text-green-700 dark:text-green-400">
                                   Verificación de seguridad completada
@@ -1390,17 +1410,17 @@ export default function AcademicForm() {
                           </div>
                         )}
                       </div>
-                    </div>
 
-                    {/* Sección de carátula */}
-                    <div className="pt-6 border-t">
-                      <h3 className="text-lg font-medium mb-4">
-                        Opciones de Presentación
-                      </h3>
-                      <CoverGenerator
-                        setCoverData={handleCoverDataChange}
-                        coverData={formData.coverData || {}}
-                      />
+                      {/* Sección de carátula - Comentada para ocultarla */}
+                      {/* <div className="pt-6 border-t">
+                        <h3 className="text-lg font-medium mb-4">
+                          Opciones de Presentación
+                        </h3>
+                        <CoverGenerator
+                          setCoverData={handleCoverDataChange}
+                          coverData={formData.coverData || {}}
+                        />
+                      </div> */}
                     </div>
                   </div>
                 </div>

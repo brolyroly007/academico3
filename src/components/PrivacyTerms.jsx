@@ -24,7 +24,9 @@ const PrivacyTerms = ({ value = false, onChange }) => {
   // Manejar cambio en el checkbox
   const handleCheckboxChange = (checked) => {
     setLocalChecked(checked);
+    // Siempre llamar al onChange aquí para evitar problemas de sincronización
     if (onChange) {
+      // Es fundamental pasar checked aquí, no localChecked
       onChange(checked);
     }
   };
@@ -42,7 +44,9 @@ const PrivacyTerms = ({ value = false, onChange }) => {
 
   // Aceptar términos desde el modal
   const acceptTerms = () => {
+    // Primero actualizar estado local
     setLocalChecked(true);
+    // Luego notificar al padre
     if (onChange) {
       onChange(true);
     }
