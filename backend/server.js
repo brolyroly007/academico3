@@ -4,16 +4,234 @@ import cors from "cors";
 import { google } from "googleapis";
 import morgan from "morgan";
 import fetch from "node-fetch";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import slowDown from "express-slow-down";
+import xss from "xss-clean";
+import hpp from "hpp";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
+// Configurar __dirname en módulos ES
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Configuración inicial
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(express.json());
-app.use(cors());
-app.use(morgan("dev")); // Logging para desarrollo
+// Directorio para logs
+const logDir = process.env.LOG_DIR || path.join(__dirname, "logs");
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir, { recursive: true });
+}
+
+// Stream para logs de acceso
+const accessLogStream = fs.createWriteStream(path.join(logDir, "access.log"), {
+  flags: "a",
+});
+
+// Middleware de logging
+app.use(morgan("combined", { stream: accessLogStream }));
+app.use(morgan("dev")); // Logging en consola para desarrollo
+
+// Verificar credenciales requeridas
+const requiredEnvVars = ["GOOGLE_SHEETS_ID", "CLAUDE_API_KEY"];
+
+const missingVars = requiredEnvVars.filter((varName) => !process.env[varName]);
+if (missingVars.length > 0) {
+  console.error(`⚠️ Faltan variables de entorno: ${missingVars.join(", ")}`);
+  process.exit(1);
+}
+
+// Función para enmascarar API keys en logs
+const maskApiKey = (apiKey) => {
+  if (!apiKey) return "undefined-key";
+  if (apiKey.length < 8) return "****";
+  return apiKey.substring(0, 4) + "****" + apiKey.substring(apiKey.length - 4);
+};
+
+// Configurar rate limiter
+const limiter = rateLimit({
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutos por defecto
+  max: parseInt(process.env.RATE_LIMIT_MAX) || 100, // 100 solicitudes por IP por ventana
+  standardHeaders: process.env.RATE_LIMIT_STANDARDIZE === "true", // Headers estándar
+  legacyHeaders: false,
+  message: {
+    status: 429,
+    error: "Demasiadas solicitudes. Por favor, inténtalo de nuevo más tarde.",
+  },
+});
+
+// Speed limiter - ralentización progresiva
+const speedLimiter = slowDown({
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
+  delayAfter: parseInt(process.env.RATE_LIMIT_MAX) / 2 || 50,
+  delayMs: (hits) => hits * 100, // Incremento de 100ms por cada solicitud sobre el límite
+});
+
+// Middleware de seguridad
+app.use(helmet()); // Headers de seguridad
+app.use(xss()); // Previene XSS attacks
+app.use(hpp()); // Previene HTTP Parameter Pollution
+
+// Limitar tamaño de payload
+app.use(express.json({ limit: "500kb" }));
+app.use(express.urlencoded({ extended: true, limit: "500kb" }));
+
+// Configurar CORS con dominios permitidos
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || "")
+  .split(",")
+  .filter(Boolean);
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Permitir solicitudes sin origin (como apps móviles o curl)
+      if (!origin) return callback(null, true);
+
+      // En desarrollo, permitir localhost
+      if (process.env.NODE_ENV !== "production") {
+        return callback(null, true);
+      }
+
+      // En producción, verificar contra lista de dominios permitidos
+      if (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("No permitido por CORS"));
+      }
+    },
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+// Aplicar rate limiting y speed limiting a todas las rutas
+app.use(limiter);
+app.use(speedLimiter);
+
+// Middleware para verificar reCAPTCHA
+// Importamos el módulo solo si está habilitado en la configuración
+const verifyCaptcha = async (req, res, next) => {
+  try {
+    // Omitir verificación en desarrollo si está configurado así
+    if (
+      process.env.NODE_ENV !== "production" &&
+      process.env.SKIP_CAPTCHA_IN_DEV === "true"
+    ) {
+      console.log(
+        "⚠️ Omitiendo verificación de CAPTCHA en entorno de desarrollo"
+      );
+      return next();
+    }
+
+    // Verificar si CAPTCHA está deshabilitado globalmente
+    if (process.env.DISABLE_CAPTCHA === "true") {
+      return next();
+    }
+
+    // Obtener token del cuerpo de la solicitud
+    const { recaptchaToken } = req.body;
+
+    // Verificar que existe un token
+    if (!recaptchaToken) {
+      return res.status(400).json({
+        success: false,
+        message: "Se requiere verificación reCAPTCHA",
+      });
+    }
+
+    // Verificar que existe la clave secreta
+    if (!process.env.RECAPTCHA_SECRET_KEY) {
+      console.error("❌ No se ha configurado RECAPTCHA_SECRET_KEY");
+      // En este caso, permitimos la solicitud pero registramos el error
+      console.error(
+        "⚠️ Continuando sin verificación de CAPTCHA debido a configuración faltante"
+      );
+      return next();
+    }
+
+    // Preparar datos para la solicitud a Google
+    const verificationURL = "https://www.google.com/recaptcha/api/siteverify";
+    const formData = new URLSearchParams();
+    formData.append("secret", process.env.RECAPTCHA_SECRET_KEY);
+    formData.append("response", recaptchaToken);
+    formData.append("remoteip", req.ip);
+
+    // Enviar solicitud a la API de Google
+    const response = await fetch(verificationURL, {
+      method: "POST",
+      body: formData,
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    });
+
+    // Procesar respuesta
+    const data = await response.json();
+    console.log("reCAPTCHA response:", data);
+
+    // Verificar si la puntuación es aceptable (umbral configurable)
+    const threshold = parseFloat(process.env.RECAPTCHA_THRESHOLD) || 0.5;
+
+    if (!data.success) {
+      return res.status(400).json({
+        success: false,
+        message: "Error de verificación reCAPTCHA",
+        errors: data["error-codes"],
+      });
+    }
+
+    if (data.score < threshold) {
+      console.warn(
+        `⚠️ Puntuación reCAPTCHA baja: ${data.score} < ${threshold}`
+      );
+      return res.status(403).json({
+        success: false,
+        message: "Verificación de seguridad fallida",
+      });
+    }
+
+    // Almacenar puntuación en la solicitud para posible uso posterior
+    req.recaptchaScore = data.score;
+    next();
+  } catch (error) {
+    console.error("Error verificando reCAPTCHA:", error);
+    // Si hay un error en la verificación, permitimos la solicitud pero registramos el error
+    console.error(
+      "⚠️ Continuando sin verificación completa de CAPTCHA debido a error:",
+      error.message
+    );
+    next();
+  }
+};
+
+// Middleware para verificar aceptación de política de privacidad
+const verifyPrivacyAcceptance = (req, res, next) => {
+  // Omitir verificación en desarrollo si está configurado así
+  if (
+    process.env.NODE_ENV !== "production" &&
+    process.env.SKIP_PRIVACY_CHECK_IN_DEV === "true"
+  ) {
+    return next();
+  }
+
+  if (!req.body.privacyAccepted) {
+    return res.status(400).json({
+      error: "Debes aceptar nuestra política de privacidad para continuar",
+    });
+  }
+  next();
+};
+
+// Log de inicio seguro (sin mostrar credenciales completas)
+console.log(
+  `Usando API Key de Claude: ${maskApiKey(process.env.CLAUDE_API_KEY)}`
+);
+console.log(
+  `Usando Google Sheets ID: ${maskApiKey(process.env.GOOGLE_SHEETS_ID)}`
+);
 
 /**
  * Calcula la cantidad de secciones y subsecciones basado en la longitud del documento
@@ -422,113 +640,144 @@ ${isLongDocument || isVeryLongDocument ? "\nVIII. ANEXOS" : ""}`,
   return structures[indexStructure] || structures.estandar;
 }
 
-// Ruta principal para generar índice
-app.post("/api/generate-index", async (req, res) => {
-  try {
-    console.log("🚀 Solicitud de generación de índice recibida");
-    console.log("📦 Datos recibidos:", JSON.stringify(req.body, null, 2));
-    console.log("🔍 Origen:", req.get("origin"));
+// Middleware de validación básica
+const validateGenerateIndex = (req, res, next) => {
+  const { documentType, topic, length, indexStructure } = req.body;
 
-    // Establecer cabeceras CORS explícitamente
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Credentials", "true");
-    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-    res.header(
-      "Access-Control-Allow-Headers",
-      "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-    );
+  const errors = [];
 
-    const {
-      documentType,
-      topic,
-      length,
-      indexStructure = "estandar",
-      additionalInfo = "",
-    } = req.body;
+  if (!documentType) errors.push("El tipo de documento es requerido");
+  if (!topic || topic.length < 3)
+    errors.push("El tema debe tener al menos 3 caracteres");
+  if (!length) errors.push("La longitud es requerida");
+  if (!indexStructure) errors.push("La estructura de índice es requerida");
 
-    // Validación de campos requeridos
-    if (!documentType || !topic || !length || !indexStructure) {
-      console.error("❌ Campos requeridos faltantes");
-      return res.status(400).json({
-        error: "Campos requeridos faltantes",
-        received: req.body,
-      });
-    }
-
-    // Verificar API key de Claude
-    if (!process.env.CLAUDE_API_KEY) {
-      console.error("❌ CLAUDE_API_KEY no configurada");
-      return res.status(500).json({
-        error: "Error de configuración del servidor",
-        details: "API key no configurada",
-      });
-    }
-
-    // Generar prompt específico para la estructura
-    const prompt = getPromptForStructure(
-      indexStructure,
-      documentType,
-      topic,
-      length,
-      additionalInfo
-    );
-
-    console.log("Prompt generado:", prompt);
-
-    // Consulta a la API de Claude
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-API-Key": process.env.CLAUDE_API_KEY,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-3-haiku-20240307",
-        max_tokens: 4096,
-        messages: [
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-      }),
+  if (errors.length > 0) {
+    return res.status(400).json({
+      error: "Datos de entrada inválidos",
+      details: errors,
     });
+  }
 
-    // Manejo de respuesta de Claude
-    if (!response.ok) {
-      console.error("Error de Claude:", response.status);
-      // Usar fallback con la estructura correcta
-      const fallbackIndex = generateFallbackIndex({
+  next();
+};
+
+// Ruta principal para generar índice
+app.post(
+  "/api/generate-index",
+  validateGenerateIndex,
+  // Middleware condicional para CAPTCHA - omitir si está deshabilitado
+  (req, res, next) => {
+    if (process.env.DISABLE_CAPTCHA === "true") {
+      return next();
+    }
+    verifyCaptcha(req, res, next);
+  },
+  // Middleware para términos - omitir si está deshabilitado
+  (req, res, next) => {
+    if (process.env.DISABLE_PRIVACY_CHECK === "true") {
+      return next();
+    }
+    verifyPrivacyAcceptance(req, res, next);
+  },
+  async (req, res) => {
+    try {
+      console.log("🚀 Solicitud de generación de índice recibida");
+      console.log("📦 Datos recibidos:", JSON.stringify(req.body, null, 2));
+      console.log("🔍 Origen:", req.get("origin"));
+
+      // Establecer cabeceras CORS explícitamente
+      res.header("Access-Control-Allow-Origin", "*");
+      res.header("Access-Control-Allow-Credentials", "true");
+      res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+      res.header(
+        "Access-Control-Allow-Headers",
+        "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+      );
+
+      const {
         documentType,
         topic,
         length,
+        indexStructure = "estandar",
+        additionalInfo = "",
+      } = req.body;
+
+      // Verificar API key de Claude
+      if (!process.env.CLAUDE_API_KEY) {
+        console.error("❌ CLAUDE_API_KEY no configurada");
+        return res.status(500).json({
+          error: "Error de configuración del servidor",
+          details: "API key no configurada",
+        });
+      }
+
+      // Generar prompt específico para la estructura
+      const prompt = getPromptForStructure(
         indexStructure,
+        documentType,
+        topic,
+        length,
+        additionalInfo
+      );
+
+      console.log("Prompt generado:", prompt);
+
+      // Consulta a la API de Claude
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-API-Key": process.env.CLAUDE_API_KEY,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model: "claude-3-haiku-20240307",
+          max_tokens: 4096,
+          messages: [
+            {
+              role: "user",
+              content: prompt,
+            },
+          ],
+        }),
       });
 
+      // Manejo de respuesta de Claude
+      if (!response.ok) {
+        console.error("Error de Claude:", response.status);
+        // Usar fallback con la estructura correcta
+        const fallbackIndex = generateFallbackIndex({
+          documentType,
+          topic,
+          length,
+          indexStructure,
+        });
+
+        return res.status(200).json({
+          index: fallbackIndex,
+          source: "fallback",
+        });
+      }
+
+      // Procesar respuesta de Claude
+      const data = await response.json();
+      return res.status(200).json({
+        index: data.content[0].text,
+        source: "claude",
+      });
+    } catch (error) {
+      console.error("🚨 Error completo en generación de índice:", error);
+
+      // En caso de cualquier error, usar el índice de respaldo
+      const fallbackIndex = generateFallbackIndex(req.body);
       return res.status(200).json({
         index: fallbackIndex,
         source: "fallback",
       });
     }
-
-    // Procesar respuesta de Claude
-    const data = await response.json();
-    return res.status(200).json({
-      index: data.content[0].text,
-      source: "claude",
-    });
-  } catch (error) {
-    console.error("🚨 Error completo en generación de índice:", error);
-
-    // En caso de cualquier error, usar el índice de respaldo
-    const fallbackIndex = generateFallbackIndex(req.body);
-    return res.status(200).json({
-      index: fallbackIndex,
-      source: "fallback",
-    });
   }
-});
+);
 
 // Ruta para verificar la salud del API
 app.get("/api/health", (req, res) => {
@@ -537,6 +786,56 @@ app.get("/api/health", (req, res) => {
     message: "API está funcionando correctamente",
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || "development",
+  });
+});
+
+// Ruta para append-to-sheet (en caso de que la implementes más adelante)
+app.post(
+  "/api/append-to-sheet",
+  // Middleware condicional para CAPTCHA - omitir si está deshabilitado
+  (req, res, next) => {
+    if (process.env.DISABLE_CAPTCHA === "true") {
+      return next();
+    }
+    verifyCaptcha(req, res, next);
+  },
+  // Middleware para términos - omitir si está deshabilitado
+  (req, res, next) => {
+    if (process.env.DISABLE_PRIVACY_CHECK === "true") {
+      return next();
+    }
+    verifyPrivacyAcceptance(req, res, next);
+  },
+  async (req, res) => {
+    // Implementación futura
+    res
+      .status(501)
+      .json({ message: "Esta funcionalidad aún no está implementada" });
+  }
+);
+
+// Manejador de error 404
+app.use((req, res, next) => {
+  res.status(404).json({
+    status: "error",
+    message: "Ruta no encontrada",
+  });
+});
+
+// Manejador de errores global
+app.use((err, req, res, next) => {
+  console.error("Error global:", err);
+
+  // No exponer detalles del error en producción
+  const statusCode = err.statusCode || 500;
+  const message =
+    process.env.NODE_ENV === "production" && statusCode === 500
+      ? "Error interno del servidor"
+      : err.message;
+
+  res.status(statusCode).json({
+    status: "error",
+    message,
   });
 });
 

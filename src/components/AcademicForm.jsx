@@ -28,7 +28,12 @@ import {
   User,
   AlertTriangle,
   ListTree,
+  Shield,
 } from "lucide-react";
+
+// Importamos los nuevos componentes de seguridad
+import ReCaptcha from "./ReCaptcha";
+import PrivacyTerms from "./PrivacyTerms";
 
 const DOCUMENT_TYPES = [
   { value: "ensayo", label: "Ensayo", icon: <FileText className="w-4 h-4" /> },
@@ -241,6 +246,9 @@ export default function AcademicForm() {
     coverData: {
       incluirCaratula: false,
     },
+    // Nuevos campos de seguridad
+    recaptchaToken: "",
+    privacyAccepted: false,
   };
 
   // Estados
@@ -251,11 +259,38 @@ export default function AcademicForm() {
   const [suggestions, setSuggestions] = useState([]);
   const [maxStep, setMaxStep] = useState(maxVisitedStep);
 
+  // Estados para seguridad
+  const [recaptchaToken, setRecaptchaToken] = useState("");
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
+  const [recaptchaError, setRecaptchaError] = useState(false);
+  const [securitySectionExpanded, setSecuritySectionExpanded] = useState(false);
+
   // Función para actualizar los datos de la carátula
   const handleCoverDataChange = (coverData) => {
     setFormData((prev) => ({
       ...prev,
       coverData,
+    }));
+  };
+
+  // Función para manejar la verificación de reCAPTCHA
+  const handleRecaptchaVerify = (token) => {
+    setRecaptchaToken(token);
+    setRecaptchaError(false);
+    // Actualizar formData con el token
+    setFormData((prev) => ({
+      ...prev,
+      recaptchaToken: token,
+    }));
+  };
+
+  // Manejar cambio en la aceptación de políticas
+  const handlePrivacyChange = (accepted) => {
+    setPrivacyAccepted(accepted);
+    // Actualizar formData
+    setFormData((prev) => ({
+      ...prev,
+      privacyAccepted: accepted,
     }));
   };
 
@@ -265,7 +300,10 @@ export default function AcademicForm() {
     { title: "Configuración", fields: ["length", "essayTone"] },
     { title: "Contenido", fields: ["topic", "course", "career"] },
     { title: "Estructura de Índice", fields: ["indexStructure"] },
-    { title: "Detalles Finales", fields: ["name", "phoneNumber"] },
+    {
+      title: "Detalles Finales",
+      fields: ["name", "phoneNumber", "privacyAccepted"],
+    },
   ];
 
   // Efecto para actualizar sugerencias de temas
@@ -287,6 +325,14 @@ export default function AcademicForm() {
       }));
     }
   }, [formData.documentType]);
+
+  // Efecto para iniciar reCAPTCHA cuando llegamos al último paso
+  useEffect(() => {
+    if (currentStep === steps.length - 1) {
+      // Intentar verificar reCAPTCHA automáticamente
+      // La verificación ocurrirá cuando el componente ReCaptcha se monte
+    }
+  }, [currentStep]);
 
   const calculateProgress = () => {
     // Calcular el total de pasos considerando si se debe omitir el paso de estructura para ensayos
@@ -345,7 +391,18 @@ export default function AcademicForm() {
       if (field === "name" && formData[field] && formData[field].length < 2) {
         newErrors[field] = "El nombre debe tener al menos 2 caracteres";
       }
+
+      // Validación para la aceptación de políticas de privacidad
+      if (field === "privacyAccepted" && !privacyAccepted) {
+        newErrors[field] = "Debes aceptar la política de privacidad";
+      }
     });
+
+    // Si estamos en el último paso, verificar si tenemos un token de reCAPTCHA
+    if (currentStep === steps.length - 1 && !recaptchaToken) {
+      setRecaptchaError(true);
+      newErrors.recaptcha = "Error en la verificación de seguridad";
+    }
 
     setErrors(newErrors);
     console.log("Errores de validación:", newErrors);
@@ -403,39 +460,42 @@ export default function AcademicForm() {
     setCurrentStep(prevStep);
   };
 
-const handleSubmit = async (e) => {
-  e?.preventDefault();
-  if (validateStep()) {
-    if (currentStep < steps.length - 1) {
-      handleNextStep();
-    } else {
-      setIsSubmitting(true);
-      try {
-        // Asegurar que la estructura de datos es compatible con el backend
-        const dataToSend = {
-          ...formData,
-          // Asegurar que la longitud está en el formato que espera content_generator.py
-          length: formData.length, // Ya debe estar en formato "10-15", "15-20", etc.
-          // Asegurar que el tipo de documento es uno de los esperados
-          documentType: formData.documentType.toLowerCase(), // Asegurar minúsculas
-        };
+  const handleSubmit = async (e) => {
+    e?.preventDefault();
+    if (validateStep()) {
+      if (currentStep < steps.length - 1) {
+        handleNextStep();
+      } else {
+        setIsSubmitting(true);
+        try {
+          // Asegurar que la estructura de datos es compatible con el backend
+          const dataToSend = {
+            ...formData,
+            // Asegurar que la longitud está en el formato que espera content_generator.py
+            length: formData.length, // Ya debe estar en formato "10-15", "15-20", etc.
+            // Asegurar que el tipo de documento es uno de los esperados
+            documentType: formData.documentType.toLowerCase(), // Asegurar minúsculas
+            // Incluir datos de seguridad
+            recaptchaToken: recaptchaToken,
+            privacyAccepted: privacyAccepted,
+          };
 
-        console.log("Datos a enviar:", dataToSend);
-        navigate("/preview", {
-          state: {
-            formData: dataToSend,
-            currentStep: steps.length - 1,
-            maxVisitedStep: steps.length - 1,
-          },
-        });
-      } catch (error) {
-        handleError(error, "Error al procesar el formulario");
-      } finally {
-        setIsSubmitting(false);
+          console.log("Datos a enviar:", dataToSend);
+          navigate("/preview", {
+            state: {
+              formData: dataToSend,
+              currentStep: steps.length - 1,
+              maxVisitedStep: steps.length - 1,
+            },
+          });
+        } catch (error) {
+          handleError(error, "Error al procesar el formulario");
+        } finally {
+          setIsSubmitting(false);
+        }
       }
     }
-  }
-};
+  };
 
   const SummaryPanel = () => (
     <Card className="bg-muted/50 border-primary/20 sticky top-8 h-fit">
@@ -549,6 +609,25 @@ const handleSubmit = async (e) => {
               </p>
             </div>
           )}
+
+          {/* Mostrar estado de verificación de seguridad */}
+          <div className="pt-3 border-t mt-3">
+            <div className="flex items-center justify-between">
+              <span className="font-medium flex items-center gap-1">
+                <Shield className="h-3.5 w-3.5 text-primary" />
+                Seguridad:
+              </span>
+              <span
+                className={`text-xs px-2 py-0.5 rounded-full ${
+                  privacyAccepted && recaptchaToken
+                    ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                    : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
+                }`}
+              >
+                {privacyAccepted && recaptchaToken ? "Verificado" : "Pendiente"}
+              </span>
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -1002,7 +1081,7 @@ const handleSubmit = async (e) => {
                 </div>
               )}
 
-              {/* Step 5: Final Details (ahora es el paso 5, antes era el 4) */}
+              {/* Step 5: Final Details */}
               {currentStep === 4 && (
                 <div className="space-y-4 sm:space-y-6 animate-fade-in">
                   <div className="space-y-4">
@@ -1093,6 +1172,111 @@ const handleSubmit = async (e) => {
                         Campo opcional: puedes proporcionar detalles adicionales
                         si lo deseas
                       </p>
+                    </div>
+
+                    {/* Sección de seguridad - Aceptación de Política de Privacidad */}
+                    <div className="pt-4 mt-2 border-t border-border">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-medium flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-primary" />
+                          Seguridad y Privacidad
+                        </h3>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            setSecuritySectionExpanded(!securitySectionExpanded)
+                          }
+                          className="text-xs"
+                        >
+                          {securitySectionExpanded ? "Colapsar" : "Expandir"}{" "}
+                          información
+                        </Button>
+                      </div>
+
+                      {securitySectionExpanded && (
+                        <div className="mb-4 bg-muted/20 p-4 rounded-lg border border-muted animate-fade-in">
+                          <h4 className="font-medium mb-2">
+                            ¿Por qué solicitamos esta información?
+                          </h4>
+                          <p className="text-sm text-muted-foreground mb-3">
+                            Implementamos verificaciones para mantener la
+                            seguridad de nuestro servicio y de tus datos:
+                          </p>
+                          <ul className="space-y-2 text-sm text-muted-foreground">
+                            <li className="flex items-start gap-2">
+                              <Shield className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                              <span>
+                                La verificación reCAPTCHA ayuda a prevenir
+                                abusos automatizados
+                              </span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <Shield className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                              <span>
+                                Solicitamos tu aceptación explícita para enviar
+                                comunicaciones a tu WhatsApp
+                              </span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <Shield className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                              <span>
+                                Tus datos personales se usan exclusivamente para
+                                la entrega de este servicio
+                              </span>
+                            </li>
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Componente de aceptación de política de privacidad */}
+                      <PrivacyTerms
+                        value={privacyAccepted}
+                        onChange={handlePrivacyChange}
+                      />
+
+                      {errors.privacyAccepted && (
+                        <p className="text-red-500 text-sm mt-1">
+                          {errors.privacyAccepted}
+                        </p>
+                      )}
+
+                      {/* Componente ReCaptcha invisible */}
+                      <div className="mt-4">
+                        <ReCaptcha
+                          onVerify={handleRecaptchaVerify}
+                          action="academic_form_submit"
+                        />
+
+                        {recaptchaError && (
+                          <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
+                            <div className="flex items-start gap-2">
+                              <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                              <div>
+                                <p className="text-sm text-red-700">
+                                  Error en la verificación de seguridad. Por
+                                  favor, recarga la página e inténtalo de nuevo.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {recaptchaToken && (
+                          <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-md">
+                            <div className="flex items-start gap-2">
+                              <Shield className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                              <div>
+                                <p className="text-sm text-green-700">
+                                  Verificación de seguridad completada
+                                  correctamente
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     {/* Sección de carátula */}
