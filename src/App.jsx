@@ -1,4 +1,4 @@
-// src/App.jsx (con correcciones para header y tema)
+// src/App.jsx (con widget de WhatsApp)
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import { DocumentProvider } from "./contexts/DocumentContext";
 import { ThemeProvider } from "./components/theme-provider";
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { FileText } from "lucide-react";
 import IndexPreview from "./components/IndexPreview";
 import Confirmation from "./components/Confirmation";
+import WhatsAppWidget from "./components/WhatsAppWidget"; // Cambiado
 
 function App() {
   return (
@@ -66,6 +67,10 @@ function App() {
                 <Route path="/confirmacion" element={<Confirmation />} />
               </Routes>
             </main>
+
+            {/* Widget de chat de WhatsApp - Visible en todas las páginas */}
+            <WhatsAppWidget />
+
             <Toaster />
           </div>
         </DocumentProvider>
