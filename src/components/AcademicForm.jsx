@@ -1411,16 +1411,16 @@ export default function AcademicForm() {
                         )}
                       </div>
 
-                      {/* Sección de carátula - Comentada para ocultarla */}
-                      {/* <div className="pt-6 border-t">
-                            <h3 className="text-lg font-medium mb-4">
-                              Opciones de Presentación
-                            </h3>
-                            <CoverGenerator
-                              setCoverData={handleCoverDataChange}
-                              coverData={formData.coverData || {}}
-                            />
-                          </div> */}
+                      {/* Sección de carátula - Añadir aquí */}
+                      <div className="pt-6 border-t">
+                        <h3 className="text-lg font-medium mb-4">
+                          Opciones de Presentación
+                        </h3>
+                        <CoverGenerator
+                          setCoverData={handleCoverDataChange}
+                          coverData={formData.coverData || {}}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
