@@ -54,6 +54,62 @@ export default async function handler(req, res) {
       nextId = parseInt(lastId) + 1;
     }
 
+    // CAMBIO IMPORTANTE: Guardar TODOS los datos de carátula en el JSON
+    let detallesJSON = "{}";
+    try {
+      // Si existe coverData como objeto, procesarlo
+      if (req.body.coverData && typeof req.body.coverData === "object") {
+        // Preparar un objeto completo con todos los datos de carátula
+        const caratulaCompleta = {
+          incluirCaratula: true,
+          tipoInstitucion: req.body.coverData.tipoInstitucion || "",
+          templateStyle: req.body.coverData.templateStyle || "style1",
+
+          // Datos específicos por tipo de institución
+          // 1. COLEGIO
+          nombreColegio: req.body.coverData.nombreColegio || "",
+          tituloTrabajoColegio: req.body.coverData.tituloTrabajoColegio || "",
+          cursoColegio: req.body.coverData.cursoColegio || "",
+          docenteColegio: req.body.coverData.docenteColegio || "",
+          gradoColegio: req.body.coverData.gradoColegio || "",
+          seccionColegio: req.body.coverData.seccionColegio || "",
+          estudiantesColegio: req.body.coverData.estudiantesColegio || [],
+
+          // 2. UNIVERSIDAD
+          nombreUniversidad: req.body.coverData.nombreUniversidad || "",
+          facultad: req.body.coverData.facultad || "",
+          carreraUniversidad: req.body.coverData.carreraUniversidad || "",
+          tituloTrabajoUniversidad:
+            req.body.coverData.tituloTrabajoUniversidad || "",
+          docenteUniversidad: req.body.coverData.docenteUniversidad || "",
+          estudiantesUniversidad:
+            req.body.coverData.estudiantesUniversidad || [],
+
+          // 3. INSTITUTO
+          nombreInstituto: req.body.coverData.nombreInstituto || "",
+          programaInstituto: req.body.coverData.programaInstituto || "",
+          tituloTrabajoInstituto:
+            req.body.coverData.tituloTrabajoInstituto || "",
+          docenteInstituto: req.body.coverData.docenteInstituto || "",
+          estudiantesInstituto: req.body.coverData.estudiantesInstituto || [],
+        };
+
+        // Convertir a JSON string
+        detallesJSON = JSON.stringify(caratulaCompleta);
+
+        // Limitar longitud para Google Sheets
+        if (detallesJSON.length > 50000) {
+          detallesJSON = detallesJSON.substring(0, 50000) + "... [truncado]";
+        }
+      } else if (typeof req.body["Detalles JSON"] === "string") {
+        // Si ya viene como string, usarlo directamente
+        detallesJSON = req.body["Detalles JSON"];
+      }
+    } catch (e) {
+      console.error("Error procesando JSON:", e);
+      detallesJSON = `{"error": "Error al procesar JSON: ${e.message}"}`;
+    }
+
     // Extraer datos de carátula - buscar en múltiples formatos de nombres
     const caratula = req.body.Caratula || req.body.caratula || "No";
     const tipoInstitucion =
@@ -62,45 +118,67 @@ export default async function handler(req, res) {
       req.body["Tipo Institución"] ||
       "";
     const plantilla = req.body.Plantilla || req.body.plantilla || "";
-    const institucion =
-      req.body.Institucion ||
-      req.body.institucion ||
-      req.body["Institución"] ||
-      "";
-    const tituloTrabajo =
-      req.body["Titulo Trabajo"] ||
-      req.body.tituloTrabajo ||
-      req.body["Título Trabajo"] ||
-      "";
-    const estudiantes = req.body.Estudiantes || req.body.estudiantes || "";
-    const facultad = req.body.Facultad || req.body.facultad || "";
+
+    // Determinar la institución según el tipo
+    let institucion = "";
+    if (tipoInstitucion === "colegio") {
+      institucion = req.body.coverData?.nombreColegio || "";
+    } else if (tipoInstitucion === "universidad") {
+      institucion = req.body.coverData?.nombreUniversidad || "";
+    } else if (tipoInstitucion === "instituto") {
+      institucion = req.body.coverData?.nombreInstituto || "";
+    }
+
+    // Determinar el título del trabajo según el tipo
+    let tituloTrabajo = "";
+    if (tipoInstitucion === "colegio") {
+      tituloTrabajo = req.body.coverData?.tituloTrabajoColegio || "";
+    } else if (tipoInstitucion === "universidad") {
+      tituloTrabajo = req.body.coverData?.tituloTrabajoUniversidad || "";
+    } else if (tipoInstitucion === "instituto") {
+      tituloTrabajo = req.body.coverData?.tituloTrabajoInstituto || "";
+    }
+
+    // Determinar la facultad (solo para universidad)
+    const facultad =
+      tipoInstitucion === "universidad"
+        ? req.body.coverData?.facultad || ""
+        : "";
+
+    // Extraer nombres de estudiantes como una cadena separada por comas
+    let estudiantes = "";
+    try {
+      if (
+        tipoInstitucion === "colegio" &&
+        req.body.coverData?.estudiantesColegio?.length > 0
+      ) {
+        estudiantes = req.body.coverData.estudiantesColegio
+          .map((est) => est.nombre)
+          .filter(Boolean)
+          .join(", ");
+      } else if (
+        tipoInstitucion === "universidad" &&
+        req.body.coverData?.estudiantesUniversidad?.length > 0
+      ) {
+        estudiantes = req.body.coverData.estudiantesUniversidad
+          .map((est) => est.nombre)
+          .filter(Boolean)
+          .join(", ");
+      } else if (
+        tipoInstitucion === "instituto" &&
+        req.body.coverData?.estudiantesInstituto?.length > 0
+      ) {
+        estudiantes = req.body.coverData.estudiantesInstituto
+          .map((est) => est.nombre)
+          .filter(Boolean)
+          .join(", ");
+      }
+    } catch (e) {
+      console.error("Error procesando estudiantes:", e);
+    }
 
     // Obtener estructura del índice
     const indexStructure = req.body.indexStructure || "estandar";
-
-    // Procesar datos JSON
-    let detallesJSON = "{}";
-    try {
-      // Obtener el JSON desde la solicitud
-      const jsonData =
-        req.body["Detalles JSON"] || req.body.detallesJSON || "{}";
-
-      // Asegurarse de que es una cadena de texto
-      if (typeof jsonData === "string") {
-        detallesJSON = jsonData;
-      } else {
-        // Si es un objeto, convertirlo a cadena JSON
-        detallesJSON = JSON.stringify(jsonData);
-      }
-
-      // Limitar la longitud para evitar problemas con Google Sheets
-      if (detallesJSON.length > 50000) {
-        detallesJSON = detallesJSON.substring(0, 50000) + "... [truncado]";
-      }
-    } catch (e) {
-      console.error("Error procesando JSON:", e);
-      detallesJSON = `{"error": "Error al procesar JSON: ${e.message}"}`;
-    }
 
     // Preparar los datos para insertar - Orden actualizado con la nueva columna
     const values = [
@@ -114,22 +192,22 @@ export default async function handler(req, res) {
         req.body.course, // G - Curso
         req.body.career, // H - Carrera
         req.body.essayTone, // I - Tono
-        indexStructure, // J - Estructura Índice (NUEVA COLUMNA)
-        req.body.additionalInfo, // K - Instrucciones (antes J)
-        req.body.index, // L - Índice (antes K)
-        req.body.name, // M - Contacto (antes L)
-        `${req.body.countryCode}${req.body.phoneNumber}`, // N - WhatsApp (antes M)
-        "Pendiente", // O - Status (antes N)
-        "Pendiente", // P - Estado Notificación (antes O)
-        nextId.toString(), // Q - Código de Pedido (antes P)
-        caratula, // R - Carátula (antes Q)
-        tipoInstitucion, // S - Tipo Institución (antes R)
-        plantilla, // T - Plantilla (antes S)
-        institucion, // U - Institución (antes T)
-        tituloTrabajo, // V - Título Trabajo (antes U)
-        estudiantes, // W - Estudiantes (antes V)
-        facultad, // X - Facultad (antes W)
-        detallesJSON, // Y - Detalles JSON (antes X)
+        indexStructure, // J - Estructura Índice
+        req.body.additionalInfo, // K - Instrucciones
+        req.body.index, // L - Índice
+        req.body.name, // M - Contacto
+        `${req.body.countryCode}${req.body.phoneNumber}`, // N - WhatsApp
+        "Pendiente", // O - Status
+        "Pendiente", // P - Estado Notificación
+        nextId.toString(), // Q - Código de Pedido
+        caratula, // R - Carátula
+        tipoInstitucion, // S - Tipo Institución
+        plantilla, // T - Plantilla
+        institucion, // U - Institución
+        tituloTrabajo, // V - Título Trabajo
+        estudiantes, // W - Estudiantes
+        facultad, // X - Facultad
+        detallesJSON, // Y - Detalles JSON
       ],
     ];
 
@@ -346,3 +424,4 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: error.message });
   }
 }
+  

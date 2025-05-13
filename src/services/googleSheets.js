@@ -11,101 +11,66 @@ export async function appendToSheet(data) {
     // Crear una copia profunda de los datos para no mutar el original
     const dataToSend = JSON.parse(JSON.stringify(data));
 
-    // Procesar los datos de carátula para el envío
+    // CAMBIO IMPORTANTE: Conservar todos los datos de la carátula en su forma original
+    // en lugar de filtrarlos o extraerlos parcialmente
+
     if (dataToSend.coverData) {
-      // Extraer información básica de carátula a campos de primer nivel
-      // Mapear directamente a los nombres de columnas en la hoja de cálculo
+      // Asegurarse de que coverData tenga la estructura correcta según el tipo de institución
+      const tipoInstitucion = dataToSend.coverData.tipoInstitucion || "";
+
+      // Mapear campos básicos a nivel superior para compatibilidad
       dataToSend.Caratula = dataToSend.coverData.incluirCaratula ? "Sí" : "No";
-      dataToSend["Tipo Institucion"] =
-        dataToSend.coverData.tipoInstitucion || "";
+      dataToSend["Tipo Institucion"] = tipoInstitucion;
       dataToSend.Plantilla = dataToSend.coverData.templateStyle || "";
 
-      // Según el tipo de institución, extraer campos específicos
-      if (dataToSend.coverData.tipoInstitucion === "colegio") {
+      // Mapear institución según tipo
+      if (tipoInstitucion === "colegio") {
         dataToSend.Institucion = dataToSend.coverData.nombreColegio || "";
         dataToSend["Titulo Trabajo"] =
           dataToSend.coverData.tituloTrabajoColegio || "";
-
-        // Extraer nombres de estudiantes como una cadena separada por comas
-        if (
-          dataToSend.coverData.estudiantesColegio &&
-          dataToSend.coverData.estudiantesColegio.length > 0
-        ) {
-          dataToSend.Estudiantes = dataToSend.coverData.estudiantesColegio
-            .map((est) => est.nombre)
-            .filter(Boolean)
-            .join(", ");
-        }
-      } else if (dataToSend.coverData.tipoInstitucion === "universidad") {
+      } else if (tipoInstitucion === "universidad") {
         dataToSend.Institucion = dataToSend.coverData.nombreUniversidad || "";
         dataToSend["Titulo Trabajo"] =
           dataToSend.coverData.tituloTrabajoUniversidad || "";
         dataToSend.Facultad = dataToSend.coverData.facultad || "";
-
-        if (
-          dataToSend.coverData.estudiantesUniversidad &&
-          dataToSend.coverData.estudiantesUniversidad.length > 0
-        ) {
-          dataToSend.Estudiantes = dataToSend.coverData.estudiantesUniversidad
-            .map((est) => est.nombre)
-            .filter(Boolean)
-            .join(", ");
-        }
-      } else if (dataToSend.coverData.tipoInstitucion === "instituto") {
+      } else if (tipoInstitucion === "instituto") {
         dataToSend.Institucion = dataToSend.coverData.nombreInstituto || "";
         dataToSend["Titulo Trabajo"] =
           dataToSend.coverData.tituloTrabajoInstituto || "";
-
-        if (
-          dataToSend.coverData.estudiantesInstituto &&
-          dataToSend.coverData.estudiantesInstituto.length > 0
-        ) {
-          dataToSend.Estudiantes = dataToSend.coverData.estudiantesInstituto
-            .map((est) => est.nombre)
-            .filter(Boolean)
-            .join(", ");
-        }
       }
 
-      // Generar un JSON limpio y bien estructurado para la columna Detalles JSON
-      try {
-        // Crear un objeto simplificado con solo la información esencial
-        const detallesJSON = {
-          incluirCaratula: dataToSend.coverData.incluirCaratula,
-          tipoInstitucion: dataToSend.coverData.tipoInstitucion,
-          templateStyle: dataToSend.coverData.templateStyle,
-        };
-
-        // Añadir los campos específicos según el tipo de institución
-        if (dataToSend.coverData.tipoInstitucion === "universidad") {
-          detallesJSON.nombreUniversidad =
-            dataToSend.coverData.nombreUniversidad || "";
-          detallesJSON.facultad = dataToSend.coverData.facultad || "";
-          detallesJSON.tituloTrabajo =
-            dataToSend.coverData.tituloTrabajoUniversidad || "";
-          detallesJSON.estudiantes = dataToSend.Estudiantes || "";
-        } else if (dataToSend.coverData.tipoInstitucion === "colegio") {
-          detallesJSON.nombreColegio = dataToSend.coverData.nombreColegio || "";
-          detallesJSON.tituloTrabajo =
-            dataToSend.coverData.tituloTrabajoColegio || "";
-          detallesJSON.estudiantes = dataToSend.Estudiantes || "";
-        } else if (dataToSend.coverData.tipoInstitucion === "instituto") {
-          detallesJSON.nombreInstituto =
-            dataToSend.coverData.nombreInstituto || "";
-          detallesJSON.tituloTrabajo =
-            dataToSend.coverData.tituloTrabajoInstituto || "";
-          detallesJSON.estudiantes = dataToSend.Estudiantes || "";
-        }
-
-        // Convertir a una cadena JSON simplificada (sin formato para reducir espacio)
-        dataToSend["Detalles JSON"] = JSON.stringify(detallesJSON);
-      } catch (e) {
-        console.error("Error generando JSON de detalles:", e);
-        dataToSend["Detalles JSON"] = "Error al generar detalles";
+      // Nombres de estudiantes
+      if (
+        tipoInstitucion === "colegio" &&
+        dataToSend.coverData.estudiantesColegio &&
+        dataToSend.coverData.estudiantesColegio.length > 0
+      ) {
+        dataToSend.Estudiantes = dataToSend.coverData.estudiantesColegio
+          .map((est) => est.nombre)
+          .filter(Boolean)
+          .join(", ");
+      } else if (
+        tipoInstitucion === "universidad" &&
+        dataToSend.coverData.estudiantesUniversidad &&
+        dataToSend.coverData.estudiantesUniversidad.length > 0
+      ) {
+        dataToSend.Estudiantes = dataToSend.coverData.estudiantesUniversidad
+          .map((est) => est.nombre)
+          .filter(Boolean)
+          .join(", ");
+      } else if (
+        tipoInstitucion === "instituto" &&
+        dataToSend.coverData.estudiantesInstituto &&
+        dataToSend.coverData.estudiantesInstituto.length > 0
+      ) {
+        dataToSend.Estudiantes = dataToSend.coverData.estudiantesInstituto
+          .map((est) => est.nombre)
+          .filter(Boolean)
+          .join(", ");
       }
 
-      // Eliminar el objeto complejo original para evitar duplicación de datos
-      delete dataToSend.coverData;
+      // IMPORTANTE: El objeto coverData original se mantendrá intacto
+      // y se convertirá a JSON en el servidor
     }
 
     console.log("Datos procesados para enviar:", dataToSend);
