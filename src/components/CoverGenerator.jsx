@@ -1,4 +1,4 @@
-// src/components/CoverGenerator.jsx
+// src/components/CoverGenerator.jsx - Actualizado
 import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -12,9 +12,8 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio";
 import { FileUpload } from "./FileUpload";
-import { Info, Plus, Minus, BookOpen, Bookmark } from "lucide-react";
+import { Info, Plus, Minus, BookOpen, Shield } from "lucide-react";
 
 export function CoverGenerator({ setCoverData, coverData = {} }) {
   const [includesCover, setIncludesCover] = useState(
@@ -23,10 +22,8 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
   const [institutionType, setInstitutionType] = useState(
     coverData.tipoInstitucion || ""
   );
-  const [selectedTemplate, setSelectedTemplate] = useState(
-    coverData.templateStyle || "style1"
-  );
-  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+  // Establecer una plantilla predeterminada fija (style1)
+  const selectedTemplate = "style1";
 
   // Arrays para estudiantes según tipo de institución
   const [schoolStudents, setSchoolStudents] = useState(
@@ -89,7 +86,7 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
     setCoverData({
       incluirCaratula: includesCover,
       tipoInstitucion: institutionType,
-      templateStyle: selectedTemplate,
+      templateStyle: selectedTemplate, // Siempre usará la plantilla predeterminada
       nombreColegio: coverData.nombreColegio || "",
       tituloTrabajoColegio: coverData.tituloTrabajoColegio || "",
       cursoColegio: coverData.cursoColegio || "",
@@ -115,7 +112,6 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
   }, [
     includesCover,
     institutionType,
-    selectedTemplate,
     schoolStudents,
     universityStudents,
     instituteStudents,
@@ -137,22 +133,6 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
     coverData.tituloTrabajoInstituto,
     coverData.docenteInstituto,
     coverData.logoInstituto,
-  ]);
-
-  // Verificar campos y mostrar selector de plantillas si es necesario
-  useEffect(() => {
-    if (includesCover && validateRequiredFields()) {
-      setShowTemplateSelector(true);
-    } else {
-      setShowTemplateSelector(false);
-    }
-  }, [
-    includesCover,
-    institutionType,
-    coverData,
-    schoolStudents,
-    universityStudents,
-    instituteStudents,
   ]);
 
   // Funciones para agregar/eliminar estudiantes
@@ -668,73 +648,15 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
             </Card>
           )}
 
-          {showTemplateSelector && (
-            <div className="space-y-4 animate-fade-in border rounded-lg p-6 bg-muted/20">
-              <div className="flex items-center gap-2 mb-2">
-                <BookOpen className="h-5 w-5 text-primary" />
-                <h3 className="text-xl font-semibold">
-                  Selecciona un diseño de carátula
-                </h3>
-              </div>
-              <p className="text-muted-foreground">
-                Escoge el estilo que mejor se adapte a tu trabajo
-              </p>
-
-              <RadioGroup
-                value={selectedTemplate}
-                onValueChange={setSelectedTemplate}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4"
-              >
-                {[1, 2, 3, 4, 5, 6].map((num) => (
-                  <div
-                    key={num}
-                    className={`relative border rounded-lg p-2 transition-all ${
-                      selectedTemplate === `style${num}`
-                        ? "border-primary bg-primary/5 ring-1 ring-primary"
-                        : "hover:border-primary/50"
-                    }`}
-                  >
-                    <div className="aspect-[3/4] bg-muted/30 rounded-md flex items-center justify-center mb-2 overflow-hidden">
-                      <img
-                        src={`/assets/caratula_${num}.jpg`}
-                        alt={`Diseño ${num}`}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = "/api/placeholder/300/400";
-                        }}
-                      />
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem
-                        value={`style${num}`}
-                        id={`style${num}`}
-                      />
-                      <Label
-                        htmlFor={`style${num}`}
-                        className="font-medium cursor-pointer"
-                      >
-                        {num === 1 && "Estilo Clásico"}
-                        {num === 2 && "Estilo Moderno"}
-                        {num === 3 && "Estilo Minimalista"}
-                        {num === 4 && "Estilo Académico"}
-                        {num === 5 && "Estilo Profesional"}
-                        {num === 6 && "Estilo Creativo"}
-                      </Label>
-                    </div>
-                  </div>
-                ))}
-              </RadioGroup>
-
-              <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 mt-4">
-                <div className="flex gap-2">
-                  <Info className="h-5 w-5 text-blue-500 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm text-blue-700">
-                      La carátula se generará automáticamente con tus datos y se
-                      incluirá en el documento final.
-                    </p>
-                  </div>
+          {validateRequiredFields() && (
+            <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-900 rounded-lg p-4 mt-4">
+              <div className="flex gap-2">
+                <Info className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                <div>
+                  <p className="text-sm text-blue-700 dark:text-blue-300">
+                    La carátula se generará automáticamente con tus datos usando
+                    el estilo clásico.
+                  </p>
                 </div>
               </div>
             </div>

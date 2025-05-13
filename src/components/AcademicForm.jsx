@@ -46,9 +46,9 @@ const DOCUMENT_TYPES = [
   },
   {
     value: "ensayo",
-    label: "Ensayo (Próximamente)",
+    label: "Ensayo", // Quitado el "(Próximamente)"
     icon: <FileText className="w-4 h-4" />,
-    available: false, // Marcado como no disponible
+    available: true, // Cambiado a true para habilitarlo
   },
 ];
 
@@ -1413,14 +1413,14 @@ export default function AcademicForm() {
 
                       {/* Sección de carátula - Comentada para ocultarla */}
                       {/* <div className="pt-6 border-t">
-                        <h3 className="text-lg font-medium mb-4">
-                          Opciones de Presentación
-                        </h3>
-                        <CoverGenerator
-                          setCoverData={handleCoverDataChange}
-                          coverData={formData.coverData || {}}
-                        />
-                      </div> */}
+                            <h3 className="text-lg font-medium mb-4">
+                              Opciones de Presentación
+                            </h3>
+                            <CoverGenerator
+                              setCoverData={handleCoverDataChange}
+                              coverData={formData.coverData || {}}
+                            />
+                          </div> */}
                     </div>
                   </div>
                 </div>
