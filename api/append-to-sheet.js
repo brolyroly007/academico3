@@ -40,7 +40,7 @@ export default async function handler(req, res) {
     });
 
     const sheets = google.sheets({ version: "v4", auth });
-    const RANGE = "Hoja 1!A:Y"; // Rango ampliado para incluir todas las columnas (Y)
+    const RANGE = "Hoja 1!A:AD"; // Rango ampliado para incluir todas las columnas (AD)
 
     // Obtener el último ID para generar uno nuevo
     const response = await sheets.spreadsheets.values.get({
@@ -54,48 +54,12 @@ export default async function handler(req, res) {
       nextId = parseInt(lastId) + 1;
     }
 
-    // CAMBIO IMPORTANTE: Guardar TODOS los datos de carátula en el JSON
+    // Procesar datos JSON
     let detallesJSON = "{}";
     try {
-      // Si existe coverData como objeto, procesarlo
+      // Si existe coverData como objeto, usar directamente
       if (req.body.coverData && typeof req.body.coverData === "object") {
-        // Preparar un objeto completo con todos los datos de carátula
-        const caratulaCompleta = {
-          incluirCaratula: true,
-          tipoInstitucion: req.body.coverData.tipoInstitucion || "",
-          templateStyle: req.body.coverData.templateStyle || "style1",
-
-          // Datos específicos por tipo de institución
-          // 1. COLEGIO
-          nombreColegio: req.body.coverData.nombreColegio || "",
-          tituloTrabajoColegio: req.body.coverData.tituloTrabajoColegio || "",
-          cursoColegio: req.body.coverData.cursoColegio || "",
-          docenteColegio: req.body.coverData.docenteColegio || "",
-          gradoColegio: req.body.coverData.gradoColegio || "",
-          seccionColegio: req.body.coverData.seccionColegio || "",
-          estudiantesColegio: req.body.coverData.estudiantesColegio || [],
-
-          // 2. UNIVERSIDAD
-          nombreUniversidad: req.body.coverData.nombreUniversidad || "",
-          facultad: req.body.coverData.facultad || "",
-          carreraUniversidad: req.body.coverData.carreraUniversidad || "",
-          tituloTrabajoUniversidad:
-            req.body.coverData.tituloTrabajoUniversidad || "",
-          docenteUniversidad: req.body.coverData.docenteUniversidad || "",
-          estudiantesUniversidad:
-            req.body.coverData.estudiantesUniversidad || [],
-
-          // 3. INSTITUTO
-          nombreInstituto: req.body.coverData.nombreInstituto || "",
-          programaInstituto: req.body.coverData.programaInstituto || "",
-          tituloTrabajoInstituto:
-            req.body.coverData.tituloTrabajoInstituto || "",
-          docenteInstituto: req.body.coverData.docenteInstituto || "",
-          estudiantesInstituto: req.body.coverData.estudiantesInstituto || [],
-        };
-
-        // Convertir a JSON string
-        detallesJSON = JSON.stringify(caratulaCompleta);
+        detallesJSON = JSON.stringify(req.body.coverData);
 
         // Limitar longitud para Google Sheets
         if (detallesJSON.length > 50000) {
@@ -111,13 +75,21 @@ export default async function handler(req, res) {
     }
 
     // Extraer datos de carátula - buscar en múltiples formatos de nombres
-    const caratula = req.body.Caratula || req.body.caratula || "No";
+    const caratula =
+      req.body.Caratula ||
+      req.body.caratula ||
+      (req.body.coverData?.incluirCaratula ? "Sí" : "No");
     const tipoInstitucion =
       req.body["Tipo Institucion"] ||
       req.body.tipoInstitucion ||
       req.body["Tipo Institución"] ||
+      req.body.coverData?.tipoInstitucion ||
       "";
-    const plantilla = req.body.Plantilla || req.body.plantilla || "";
+    const plantilla =
+      req.body.Plantilla ||
+      req.body.plantilla ||
+      req.body.coverData?.templateStyle ||
+      "";
 
     // Determinar la institución según el tipo
     let institucion = "";
@@ -145,8 +117,19 @@ export default async function handler(req, res) {
         ? req.body.coverData?.facultad || ""
         : "";
 
+    // Extraer docente según tipo de institución
+    let docente = "";
+    if (tipoInstitucion === "colegio") {
+      docente = req.body.coverData?.docenteColegio || "";
+    } else if (tipoInstitucion === "universidad") {
+      docente = req.body.coverData?.docenteUniversidad || "";
+    } else if (tipoInstitucion === "instituto") {
+      docente = req.body.coverData?.docenteInstituto || "";
+    }
+
     // Extraer nombres de estudiantes como una cadena separada por comas
     let estudiantes = "";
+    let codigosEstudiantes = "";
     try {
       if (
         tipoInstitucion === "colegio" &&
@@ -154,6 +137,12 @@ export default async function handler(req, res) {
       ) {
         estudiantes = req.body.coverData.estudiantesColegio
           .map((est) => est.nombre)
+          .filter(Boolean)
+          .join(", ");
+
+        // Extraer códigos de estudiantes (números de orden para colegio)
+        codigosEstudiantes = req.body.coverData.estudiantesColegio
+          .map((est) => est.orden)
           .filter(Boolean)
           .join(", ");
       } else if (
@@ -164,6 +153,12 @@ export default async function handler(req, res) {
           .map((est) => est.nombre)
           .filter(Boolean)
           .join(", ");
+
+        // Extraer códigos de estudiantes
+        codigosEstudiantes = req.body.coverData.estudiantesUniversidad
+          .map((est) => est.codigo)
+          .filter(Boolean)
+          .join(", ");
       } else if (
         tipoInstitucion === "instituto" &&
         req.body.coverData?.estudiantesInstituto?.length > 0
@@ -172,15 +167,37 @@ export default async function handler(req, res) {
           .map((est) => est.nombre)
           .filter(Boolean)
           .join(", ");
+
+        // Extraer códigos de estudiantes
+        codigosEstudiantes = req.body.coverData.estudiantesInstituto
+          .map((est) => est.codigo)
+          .filter(Boolean)
+          .join(", ");
       }
     } catch (e) {
       console.error("Error procesando estudiantes:", e);
     }
 
+    // Extraer grado y sección (solo para colegio)
+    let grado = "";
+    let seccion = "";
+    if (tipoInstitucion === "colegio") {
+      grado = req.body.coverData?.gradoColegio || "";
+      seccion = req.body.coverData?.seccionColegio || "";
+    }
+
+    // Extraer programa (solo para instituto)
+    let programa = "";
+    if (tipoInstitucion === "instituto") {
+      programa = req.body.coverData?.programaInstituto || "";
+    } else if (tipoInstitucion === "universidad") {
+      programa = req.body.coverData?.carreraUniversidad || "";
+    }
+
     // Obtener estructura del índice
     const indexStructure = req.body.indexStructure || "estandar";
 
-    // Preparar los datos para insertar - Orden actualizado con la nueva columna
+    // Preparar los datos para insertar - Orden actualizado con nuevas columnas
     const values = [
       [
         nextId, // A - ID
@@ -207,11 +224,16 @@ export default async function handler(req, res) {
         tituloTrabajo, // V - Título Trabajo
         estudiantes, // W - Estudiantes
         facultad, // X - Facultad
-        detallesJSON, // Y - Detalles JSON
+        docente, // Y - Docente (NUEVO)
+        codigosEstudiantes, // Z - Códigos Estudiantes (NUEVO)
+        grado, // AA - Grado (NUEVO)
+        seccion, // AB - Sección (NUEVO)
+        programa, // AC - Programa (NUEVO)
+        detallesJSON, // AD - Detalles JSON
       ],
     ];
 
-    console.log("Enviando datos a la hoja:", values[0].slice(0, 10)); // Log parcial incluyendo la nueva columna
+    console.log("Enviando datos a la hoja:", values[0].slice(0, 10)); // Log parcial
 
     // Añadir los datos a la hoja
     const result = await sheets.spreadsheets.values.append({
@@ -332,7 +354,7 @@ export default async function handler(req, res) {
               fields: "userEnteredFormat.backgroundColor",
             },
           },
-          // Formato para texto largo en Detalles JSON (ahora en columna Y - índice 24)
+          // Formato para Docente (columna Y - índice 24)
           {
             updateCells: {
               range: {
@@ -341,6 +363,31 @@ export default async function handler(req, res) {
                 endRowIndex: rowIndex + 1,
                 startColumnIndex: 24,
                 endColumnIndex: 25,
+              },
+              rows: [
+                {
+                  values: [
+                    {
+                      userEnteredFormat: {
+                        wrapStrategy: "WRAP",
+                        verticalAlignment: "TOP",
+                      },
+                    },
+                  ],
+                },
+              ],
+              fields: "userEnteredFormat(wrapStrategy,verticalAlignment)",
+            },
+          },
+          // Formato para texto largo en Detalles JSON (ahora en columna AD - índice 29)
+          {
+            updateCells: {
+              range: {
+                sheetId: 0,
+                startRowIndex: rowIndex,
+                endRowIndex: rowIndex + 1,
+                startColumnIndex: 29,
+                endColumnIndex: 30,
               },
               rows: [
                 {
@@ -424,4 +471,3 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: error.message });
   }
 }
-  
