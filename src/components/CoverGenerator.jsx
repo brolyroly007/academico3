@@ -1,4 +1,4 @@
-// src/components/CoverGenerator.jsx - Actualizado
+// src/components/CoverGenerator.jsx - Actualizado completamente
 import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -12,8 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { FileUpload } from "./FileUpload";
-import { Info, Plus, Minus, BookOpen, Shield } from "lucide-react";
+import { Info, Plus, Minus, BookOpen } from "lucide-react";
 
 export function CoverGenerator({ setCoverData, coverData = {} }) {
   const [includesCover, setIncludesCover] = useState(
@@ -41,6 +40,11 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
       ? coverData.estudiantesInstituto
       : [{ nombre: "", codigo: "" }]
   );
+
+  // Función para convertir texto a mayúsculas
+  const toUpperCase = (text) => {
+    return text.toUpperCase();
+  };
 
   // Función para verificar si los campos obligatorios están completos
   const validateRequiredFields = () => {
@@ -94,20 +98,17 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
       estudiantesColegio: schoolStudents,
       gradoColegio: coverData.gradoColegio || "",
       seccionColegio: coverData.seccionColegio || "",
-      logoColegio: coverData.logoColegio || null,
       nombreUniversidad: coverData.nombreUniversidad || "",
       facultad: coverData.facultad || "",
       carreraUniversidad: coverData.carreraUniversidad || "",
       tituloTrabajoUniversidad: coverData.tituloTrabajoUniversidad || "",
       docenteUniversidad: coverData.docenteUniversidad || "",
       estudiantesUniversidad: universityStudents,
-      logoUniversidad: coverData.logoUniversidad || null,
       nombreInstituto: coverData.nombreInstituto || "",
       programaInstituto: coverData.programaInstituto || "",
       tituloTrabajoInstituto: coverData.tituloTrabajoInstituto || "",
       docenteInstituto: coverData.docenteInstituto || "",
       estudiantesInstituto: instituteStudents,
-      logoInstituto: coverData.logoInstituto || null,
     });
   }, [
     includesCover,
@@ -121,18 +122,15 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
     coverData.docenteColegio,
     coverData.gradoColegio,
     coverData.seccionColegio,
-    coverData.logoColegio,
     coverData.nombreUniversidad,
     coverData.facultad,
     coverData.carreraUniversidad,
     coverData.tituloTrabajoUniversidad,
     coverData.docenteUniversidad,
-    coverData.logoUniversidad,
     coverData.nombreInstituto,
     coverData.programaInstituto,
     coverData.tituloTrabajoInstituto,
     coverData.docenteInstituto,
-    coverData.logoInstituto,
   ]);
 
   // Funciones para agregar/eliminar estudiantes
@@ -175,49 +173,21 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
   // Funciones para actualizar datos de estudiantes
   const updateSchoolStudent = (index, field, value) => {
     const newStudents = [...schoolStudents];
-    newStudents[index] = { ...newStudents[index], [field]: value };
+    newStudents[index] = { ...newStudents[index], [field]: toUpperCase(value) };
     setSchoolStudents(newStudents);
   };
 
   const updateUniversityStudent = (index, field, value) => {
     const newStudents = [...universityStudents];
-    newStudents[index] = { ...newStudents[index], [field]: value };
+    newStudents[index] = { ...newStudents[index], [field]: toUpperCase(value) };
     setUniversityStudents(newStudents);
   };
 
   const updateInstituteStudent = (index, field, value) => {
     const newStudents = [...instituteStudents];
-    newStudents[index] = { ...newStudents[index], [field]: value };
+    newStudents[index] = { ...newStudents[index], [field]: toUpperCase(value) };
     setInstituteStudents(newStudents);
   };
-
-  // Función para manejar los archivos de logo
-  const handleLogoUpload = (file, institution) => {
-    setCoverData((prev) => ({
-      ...prev,
-      [`logo${institution}`]: file,
-    }));
-  };
-
-  // Componente para manejar la carga de archivos de logo
-  const LogoUploader = ({ institution }) => (
-    <div className="space-y-2">
-      <Label>Logotipo (opcional)</Label>
-      <FileUpload
-        onFileChange={(file) => handleLogoUpload(file, institution)}
-        accept="image/*"
-      />
-      {coverData[`logo${institution}`] && (
-        <div className="mt-2">
-          <img
-            src={URL.createObjectURL(coverData[`logo${institution}`])}
-            alt="Logo preview"
-            className="max-h-20 rounded border p-1"
-          />
-        </div>
-      )}
-    </div>
-  );
 
   return (
     <div className="space-y-6">
@@ -263,9 +233,10 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                       onChange={(e) =>
                         setCoverData({
                           ...coverData,
-                          nombreColegio: e.target.value,
+                          nombreColegio: toUpperCase(e.target.value),
                         })
                       }
+                      className="uppercase"
                     />
                   </div>
                   <div className="space-y-2">
@@ -276,9 +247,10 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                       onChange={(e) =>
                         setCoverData({
                           ...coverData,
-                          tituloTrabajoColegio: e.target.value,
+                          tituloTrabajoColegio: toUpperCase(e.target.value),
                         })
                       }
+                      className="uppercase"
                     />
                   </div>
                 </div>
@@ -292,9 +264,10 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                       onChange={(e) =>
                         setCoverData({
                           ...coverData,
-                          cursoColegio: e.target.value,
+                          cursoColegio: toUpperCase(e.target.value),
                         })
                       }
+                      className="uppercase"
                     />
                   </div>
                   <div className="space-y-2">
@@ -305,9 +278,10 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                       onChange={(e) =>
                         setCoverData({
                           ...coverData,
-                          docenteColegio: e.target.value,
+                          docenteColegio: toUpperCase(e.target.value),
                         })
                       }
+                      className="uppercase"
                     />
                   </div>
                 </div>
@@ -334,7 +308,7 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                           onChange={(e) =>
                             updateSchoolStudent(index, "nombre", e.target.value)
                           }
-                          className="flex-1"
+                          className="flex-1 uppercase"
                         />
                         <Input
                           placeholder="N° de orden"
@@ -342,7 +316,7 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                           onChange={(e) =>
                             updateSchoolStudent(index, "orden", e.target.value)
                           }
-                          className="w-28"
+                          className="w-28 uppercase"
                         />
                         {index > 0 && (
                           <Button
@@ -369,9 +343,10 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                       onChange={(e) =>
                         setCoverData({
                           ...coverData,
-                          gradoColegio: e.target.value,
+                          gradoColegio: toUpperCase(e.target.value),
                         })
                       }
+                      className="uppercase"
                     />
                   </div>
                   <div className="space-y-2">
@@ -382,14 +357,13 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                       onChange={(e) =>
                         setCoverData({
                           ...coverData,
-                          seccionColegio: e.target.value,
+                          seccionColegio: toUpperCase(e.target.value),
                         })
                       }
+                      className="uppercase"
                     />
                   </div>
                 </div>
-
-                <LogoUploader institution="Colegio" />
               </CardContent>
             </Card>
           )}
@@ -406,9 +380,10 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                       onChange={(e) =>
                         setCoverData({
                           ...coverData,
-                          nombreUniversidad: e.target.value,
+                          nombreUniversidad: toUpperCase(e.target.value),
                         })
                       }
+                      className="uppercase"
                     />
                   </div>
                   <div className="space-y-2">
@@ -417,8 +392,12 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                       placeholder="Nombre de la facultad"
                       value={coverData.facultad || ""}
                       onChange={(e) =>
-                        setCoverData({ ...coverData, facultad: e.target.value })
+                        setCoverData({
+                          ...coverData,
+                          facultad: toUpperCase(e.target.value),
+                        })
                       }
+                      className="uppercase"
                     />
                   </div>
                 </div>
@@ -432,9 +411,10 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                       onChange={(e) =>
                         setCoverData({
                           ...coverData,
-                          carreraUniversidad: e.target.value,
+                          carreraUniversidad: toUpperCase(e.target.value),
                         })
                       }
+                      className="uppercase"
                     />
                   </div>
                   <div className="space-y-2">
@@ -445,9 +425,10 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                       onChange={(e) =>
                         setCoverData({
                           ...coverData,
-                          tituloTrabajoUniversidad: e.target.value,
+                          tituloTrabajoUniversidad: toUpperCase(e.target.value),
                         })
                       }
+                      className="uppercase"
                     />
                   </div>
                 </div>
@@ -460,9 +441,10 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                     onChange={(e) =>
                       setCoverData({
                         ...coverData,
-                        docenteUniversidad: e.target.value,
+                        docenteUniversidad: toUpperCase(e.target.value),
                       })
                     }
+                    className="uppercase"
                   />
                 </div>
 
@@ -492,7 +474,7 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                               e.target.value
                             )
                           }
-                          className="flex-1"
+                          className="flex-1 uppercase"
                         />
                         <Input
                           placeholder="Código de estudiante"
@@ -504,7 +486,7 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                               e.target.value
                             )
                           }
-                          className="w-40"
+                          className="w-40 uppercase"
                         />
                         {index > 0 && (
                           <Button
@@ -521,8 +503,6 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                     ))}
                   </div>
                 </div>
-
-                <LogoUploader institution="Universidad" />
               </CardContent>
             </Card>
           )}
@@ -539,9 +519,10 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                       onChange={(e) =>
                         setCoverData({
                           ...coverData,
-                          nombreInstituto: e.target.value,
+                          nombreInstituto: toUpperCase(e.target.value),
                         })
                       }
+                      className="uppercase"
                     />
                   </div>
                   <div className="space-y-2">
@@ -552,9 +533,10 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                       onChange={(e) =>
                         setCoverData({
                           ...coverData,
-                          programaInstituto: e.target.value,
+                          programaInstituto: toUpperCase(e.target.value),
                         })
                       }
+                      className="uppercase"
                     />
                   </div>
                 </div>
@@ -567,9 +549,10 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                     onChange={(e) =>
                       setCoverData({
                         ...coverData,
-                        tituloTrabajoInstituto: e.target.value,
+                        tituloTrabajoInstituto: toUpperCase(e.target.value),
                       })
                     }
+                    className="uppercase"
                   />
                 </div>
 
@@ -581,9 +564,10 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                     onChange={(e) =>
                       setCoverData({
                         ...coverData,
-                        docenteInstituto: e.target.value,
+                        docenteInstituto: toUpperCase(e.target.value),
                       })
                     }
+                    className="uppercase"
                   />
                 </div>
 
@@ -613,7 +597,7 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                               e.target.value
                             )
                           }
-                          className="flex-1"
+                          className="flex-1 uppercase"
                         />
                         <Input
                           placeholder="Código o matrícula"
@@ -625,7 +609,7 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                               e.target.value
                             )
                           }
-                          className="w-40"
+                          className="w-40 uppercase"
                         />
                         {index > 0 && (
                           <Button
@@ -642,8 +626,6 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                     ))}
                   </div>
                 </div>
-
-                <LogoUploader institution="Instituto" />
               </CardContent>
             </Card>
           )}
