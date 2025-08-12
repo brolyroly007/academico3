@@ -1,4 +1,4 @@
-// src/App.jsx (con widget de WhatsApp)
+// src/App.jsx (con widget de WhatsApp y RainbowBackground)
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import { DocumentProvider } from "./contexts/DocumentContext";
 import { ThemeProvider } from "./components/theme-provider";
@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { FileText } from "lucide-react";
 import IndexPreview from "./components/IndexPreview";
 import Confirmation from "./components/Confirmation";
-import WhatsAppWidget from "./components/WhatsAppWidget"; // Cambiado
+import WhatsAppWidget from "./components/WhatsAppWidget";
 
 function App() {
   return (
