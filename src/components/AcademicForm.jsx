@@ -1602,7 +1602,7 @@ export default function AcademicForm() {
                   <Info className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-sm text-amber-800 dark:text-amber-200">
-                      <strong>Tiempo de entrega:</strong> Documentos listos en 24-48 horas. Para entregas urgentes, contáctanos por WhatsApp.
+                      <strong>Tiempo de entrega:</strong> Documentos listos en 3-15 min, según cantidad de páginas solicitada. Para entregas urgentes, contáctanos por WhatsApp.
                     </p>
                   </div>
                 </div>

@@ -1,4 +1,4 @@
-// src/components/HomePage.jsx (Vista previa profesional con estructuras y tablas)
+// src/components/HomePage.jsx (Vista previa con estructuras y tablas)
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,14 +40,14 @@ export function HomePage() {
     {
       icon: <Zap className="h-6 w-6" />,
       title: "Entrega Inmediata",
-      description: "Documento completo en 24-48 horas vía WhatsApp",
+      description: "Documento completo en 3-15 min, según cantidad de páginas solicitada",
       color: isDark
         ? "bg-yellow-900/30 text-yellow-200"
         : "bg-blue-100 text-blue-600",
     },
     {
       icon: <LayoutTemplate className="h-6 w-6" />,
-      title: "3 Estructuras Profesionales",
+      title: "3 Estructuras Disponibles",
       description: "Elige entre formato estándar, por capítulos o académico",
       color: isDark
         ? "bg-blue-900/30 text-blue-200"
@@ -181,7 +181,7 @@ export function HomePage() {
     },
   };
 
-  // Ejemplos profesionales sobre calentamiento global
+  // Ejemplos sobre calentamiento global
   const documentPreviews = {
     monografia: {
       title: "MONOGRAFÍA",
@@ -420,7 +420,7 @@ El tiempo para debates académicos ha terminado. Cada día de inacción es una e
               <div className="animate-on-scroll animate-on-scroll-initial blur-in delay-0">
                 <div className="inline-flex items-center bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-6 py-2.5 rounded-full text-sm font-medium mb-6 shadow-lg hover:shadow-xl transition-shadow">
                   <CheckCircle className="h-4 w-4 mr-2" />
-                  Documentos académicos profesionales con estructura
+                  Documentos académicos con estructura
                   personalizable
                 </div>
               </div>
@@ -431,7 +431,7 @@ El tiempo para debates académicos ha terminado. Cada día de inacción es una e
                     Redacción Académica
                   </span>
                   <br />
-                  Profesional y Estructurada
+                  Completa y Estructurada
                 </h1>
               </div>
 
@@ -504,12 +504,12 @@ El tiempo para debates académicos ha terminado. Cada día de inacción es una e
             </div>
           </section>
 
-          {/* Vista Previa Profesional */}
+          {/* Vista Previa de Documentos */}
           <section id="preview-section" className="w-full px-4 sm:px-6 mb-24">
             <div className="max-w-7xl mx-auto">
               <div className="animate-on-scroll scale-in text-center mb-12">
                 <h2 className="text-4xl font-bold text-foreground mb-4 [text-wrap:balance]">
-                  Ejemplos de Documentos Profesionales
+                  Ejemplos de Documentos Académicos
                 </h2>
                 <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
                   Documentos completos con índice estructurado, contenido
