@@ -1,23 +1,60 @@
 // src/components/theme-toggle.jsx
 import { Moon, Sun } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useTheme } from "./theme-provider";
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const isDark = theme === "dark";
+
+  const handleToggle = () => {
+    setTheme(isDark ? "light" : "dark");
+  };
 
   return (
-    <Button
-      variant="outline"
-      size="icon"
-      onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-      className="relative h-9 w-9 bg-background border border-input hover:bg-accent hover:text-accent-foreground"
+    <div
+      className="w-[60px] h-[30px] flex items-center rounded-full cursor-pointer transition-all duration-500 ease-in-out shadow-sm hover:shadow-md"
+      onClick={handleToggle}
+      style={{
+        backgroundColor: isDark ? "white" : "#DFDEDE"
+      }}
       aria-label="Cambiar tema"
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleToggle();
+        }
+      }}
     >
-      <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-foreground" />
-      <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-foreground" />
-      <span className="sr-only">Cambiar tema</span>
-    </Button>
+      <div
+        className="w-[40%] h-[80%] rounded-full flex justify-center items-center relative overflow-hidden transition-all duration-500 ease-in-out"
+        style={{
+          transform: isDark ? "translateX(150%)" : "translateX(10%)",
+          backgroundColor: isDark ? "#2C2C2E" : "white"
+        }}
+      >
+        {/* Sun Icon */}
+        <Sun
+          className={`absolute text-yellow-500 transition-all duration-500 ease-in-out ${
+            isDark
+              ? "opacity-0 rotate-180 scale-0"
+              : "opacity-100 rotate-0 scale-100"
+          }`}
+          size={14}
+        />
+        
+        {/* Moon Icon */}
+        <Moon
+          className={`absolute text-slate-200 transition-all duration-500 ease-in-out ${
+            isDark
+              ? "opacity-100 rotate-0 scale-100"
+              : "opacity-0 -rotate-180 scale-0"
+          }`}
+          size={14}
+        />
+      </div>
+    </div>
   );
 }
 

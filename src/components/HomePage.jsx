@@ -25,7 +25,7 @@ import {
   PlusCircle,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTheme } from "./theme-provider";
 import RainbowBackground from "./RainbowBackground";
 
@@ -350,41 +350,51 @@ El tiempo para debates académicos ha terminado. Cada día de inacción es una e
     },
   };
 
-  // Configurar observador de intersección
+  // Configurar observador de intersección mejorado
   useEffect(() => {
     document.documentElement.classList.remove("no-js");
 
+    // Animaciones iniciales con delay escalonado
     setTimeout(() => {
       const initialElements = document.querySelectorAll(
         ".animate-on-scroll-initial"
       );
-      initialElements.forEach((el) => {
-        el.classList.add("animate-active");
+      initialElements.forEach((el, index) => {
+        setTimeout(() => {
+          el.classList.add("animate-active");
+        }, index * 100);
       });
-    }, 100);
+    }, 200);
 
     if ("IntersectionObserver" in window) {
       const animateItems = document.querySelectorAll(
         ".animate-on-scroll:not(.animate-on-scroll-initial)"
       );
 
+      // Observador más sensible para mejor rendimiento
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
-              entry.target.classList.add("animate-active");
+              // Añadir delay para animaciones más suaves
+              setTimeout(() => {
+                entry.target.classList.add("animate-active");
+              }, 50);
               observer.unobserve(entry.target);
             }
           });
         },
         {
-          threshold: 0.05,
-          rootMargin: "0px 0px -10% 0px",
+          threshold: 0.1,
+          rootMargin: "0px 0px -5% 0px",
         }
       );
 
-      animateItems.forEach((item) => {
-        observer.observe(item);
+      // Observar elementos con delay para evitar lag
+      animateItems.forEach((item, index) => {
+        setTimeout(() => {
+          observer.observe(item);
+        }, index * 10);
       });
 
       return () => {
@@ -444,24 +454,64 @@ El tiempo para debates académicos ha terminado. Cada día de inacción es una e
               </div>
 
               <div className="animate-on-scroll animate-on-scroll-initial rise-up delay-400">
-                <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
-                  <Link to="/configuracion">
-                    <Button className="h-14 px-12 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground text-lg rounded-xl shadow-2xl hover:shadow-3xl transition-all hover:-translate-y-0.5">
-                      Crear Mi Documento
-                      <span className="ml-2 opacity-90">→</span>
-                    </Button>
+                <div className="flex flex-col sm:flex-row justify-center gap-6 mt-8">
+                  <Link to="/configuracion" className="inline-block">
+                    <div className="relative w-72 h-16 transition-all duration-700 hover:duration-500 group cursor-pointer"
+                         style={{
+                           transformStyle: 'preserve-3d',
+                           transform: 'perspective(1200px) rotateY(0deg)'
+                         }}
+                         onMouseEnter={(e) => {
+                           e.currentTarget.style.transform = 'perspective(1200px) rotateY(-180deg) scale(1.05)'
+                         }}
+                         onMouseLeave={(e) => {
+                           e.currentTarget.style.transform = 'perspective(1200px) rotateY(0deg) scale(1)'
+                         }}>
+                      
+                      {/* Efecto de resplandor */}
+                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/20 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-lg scale-110" />
+                      
+                      {/* Cara frontal */}
+                      <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gradient-to-r from-primary via-primary/90 to-primary/80 text-primary-foreground text-lg rounded-xl shadow-2xl transition-all duration-500"
+                           style={{
+                             transform: 'rotateY(0deg) translateZ(30px)',
+                             backfaceVisibility: 'hidden',
+                             boxShadow: '0 20px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2)'
+                           }}>
+                        <span className="font-bold tracking-wide">Crear Mi Documento</span>
+                        <span className="ml-3 opacity-90 text-xl group-hover:translate-x-1 transition-transform duration-300">→</span>
+                      </div>
+                      
+                      {/* Cara trasera */}
+                      <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gradient-to-r from-secondary via-secondary/90 to-secondary/80 text-secondary-foreground text-lg rounded-xl shadow-2xl transition-all duration-500"
+                           style={{
+                             transform: 'rotateY(180deg) translateZ(30px)',
+                             backfaceVisibility: 'hidden',
+                             boxShadow: '0 20px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2)'
+                           }}>
+                        <span className="font-bold tracking-wide">¡Empezar Proyecto!</span>
+                        <span className="ml-3 text-xl animate-pulse">✨</span>
+                      </div>
+                    </div>
                   </Link>
-                  <Button
-                    className="h-14 px-8 text-lg rounded-xl bg-secondary text-secondary-foreground border-2 border-secondary hover:bg-secondary/90 hover:border-secondary/90 shadow-lg hover:shadow-xl transition-all"
-                    onClick={() =>
-                      document
-                        .getElementById("preview-section")
-                        .scrollIntoView({ behavior: "smooth" })
-                    }
-                  >
-                    <Eye className="h-5 w-5 mr-2" />
-                    Ver Ejemplos
-                  </Button>
+                  
+                  <div className="relative group">
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-secondary/20 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-lg scale-110" />
+                    <Button
+                      className="relative h-16 px-10 text-lg rounded-xl bg-gradient-to-r from-secondary to-secondary/90 text-secondary-foreground border-2 border-secondary/50 hover:border-secondary/80 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-105 hover:-translate-y-1 group"
+                      style={{
+                        boxShadow: '0 20px 40px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1)'
+                      }}
+                      onClick={() =>
+                        document
+                          .getElementById("preview-section")
+                          .scrollIntoView({ behavior: "smooth" })
+                      }
+                    >
+                      <Eye className="h-6 w-6 mr-3 group-hover:scale-110 transition-transform duration-300" />
+                      <span className="font-bold tracking-wide">Ver Ejemplos</span>
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -470,44 +520,49 @@ El tiempo para debates académicos ha terminado. Cada día de inacción es una e
           {/* Features Grid */}
           <section className="w-full px-4 sm:px-6 mb-24">
             <div className="max-w-7xl mx-auto">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="feature-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {features.map((feature, index) => (
-                  <Card
+                  <div
                     key={index}
-                    className={`relative overflow-hidden border border-border bg-card shadow-lg hover:shadow-xl transition-all duration-300 group isolate animate-on-scroll clip-reveal hover:-translate-y-1`}
+                    className="feature-card animate-on-scroll clip-reveal"
                     style={{
-                      minHeight: "220px",
-                      animationDelay: `${index * 100}ms`,
+                      animationDelay: `${index * 150}ms`,
                     }}
                   >
-                    <div className="absolute inset-0 border-t-2 border-primary/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                    <CardHeader className="items-start p-6 pb-4 space-y-0">
-                      <div
-                        className={`${feature.color} feature-icon-bg p-3 rounded-xl w-fit shadow-inner mb-4 transition-transform group-hover:scale-110`}
-                      >
-                        {feature.icon}
+                    <span className="icon">
+                      {feature.icon}
+                    </span>
+                    <h4>{feature.title}</h4>
+                    <p>{feature.description}</p>
+                    <div className="shine"></div>
+                    <div className="background">
+                      <div className="tiles">
+                        <div className="tile tile-1"></div>
+                        <div className="tile tile-2"></div>
+                        <div className="tile tile-3"></div>
+                        <div className="tile tile-4"></div>
+                        <div className="tile tile-5"></div>
+                        <div className="tile tile-6"></div>
+                        <div className="tile tile-7"></div>
+                        <div className="tile tile-8"></div>
+                        <div className="tile tile-9"></div>
+                        <div className="tile tile-10"></div>
                       </div>
-                      <CardTitle className="text-lg font-semibold text-card-foreground leading-tight mb-2">
-                        {feature.title}
-                      </CardTitle>
-                    </CardHeader>
-
-                    <CardContent className="text-muted-foreground pb-6 px-6 pt-0">
-                      <p className="text-sm leading-relaxed">
-                        {feature.description}
-                      </p>
-                    </CardContent>
-                  </Card>
+                      <div className="line line-1"></div>
+                      <div className="line line-2"></div>
+                      <div className="line line-3"></div>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
+            
           </section>
 
           {/* Vista Previa de Documentos */}
           <section id="preview-section" className="w-full px-4 sm:px-6 mb-24">
             <div className="max-w-7xl mx-auto">
-              <div className="animate-on-scroll scale-in text-center mb-12">
+              <div className="animate-on-scroll glow-fade text-center mb-12">
                 <h2 className="text-4xl font-bold text-foreground mb-4 [text-wrap:balance]">
                   Ejemplos de Documentos Académicos
                 </h2>
@@ -571,7 +626,7 @@ El tiempo para debates académicos ha terminado. Cada día de inacción es una e
               </div>
 
               {/* Contenido de la vista previa */}
-              <div className="animate-on-scroll scale-in">
+              <div className="animate-on-scroll elastic-in">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   {/* Panel de estructura/índice */}
                   <div className="lg:col-span-1">
@@ -1167,13 +1222,66 @@ El tiempo para debates académicos ha terminado. Cada día de inacción es una e
 
               {/* Botón de acción */}
               <div className="animate-on-scroll fade-up delay-200 text-center mt-24">
-                <Link to="/configuracion">
-                  <Button className="h-14 px-10 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground rounded-xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1">
-                    <FileText className="h-6 w-6 mr-3" />
-                    Crear Mi Documento Ahora
-                  </Button>
+                <Link to="/configuracion" className="inline-block">
+                  <div className="relative w-96 h-16 transition-all duration-800 hover:duration-600 group cursor-pointer"
+                       style={{
+                         transformStyle: 'preserve-3d',
+                         transform: 'perspective(1200px) rotateY(0deg)'
+                       }}
+                       onMouseEnter={(e) => {
+                         e.currentTarget.style.transform = 'perspective(1200px) rotateY(-180deg) scale(1.08) translateY(-4px)'
+                       }}
+                       onMouseLeave={(e) => {
+                         e.currentTarget.style.transform = 'perspective(1200px) rotateY(0deg) scale(1) translateY(0px)'
+                       }}>
+                    
+                    {/* Efecto de resplandor mejorado */}
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/30 via-primary/20 to-primary/30 opacity-0 group-hover:opacity-100 transition-opacity duration-600 blur-xl scale-125" />
+                    
+                    {/* Partículas flotantes */}
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-60 transition-opacity duration-700">
+                      {[...Array(8)].map((_, i) => (
+                        <div key={i} 
+                             className="absolute w-1.5 h-1.5 bg-primary/40 rounded-full animate-pulse"
+                             style={{
+                               top: `${Math.random() * 100}%`,
+                               left: `${Math.random() * 100}%`,
+                               animationDelay: `${i * 0.2}s`,
+                               animationDuration: '2s'
+                             }} />
+                      ))}
+                    </div>
+                    
+                    {/* Cara frontal */}
+                    <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gradient-to-r from-primary via-primary/95 to-primary/90 text-primary-foreground text-xl rounded-xl shadow-2xl transition-all duration-600 overflow-hidden"
+                         style={{
+                           transform: 'rotateY(0deg) translateZ(35px)',
+                           backfaceVisibility: 'hidden',
+                           boxShadow: '0 25px 50px rgba(0,0,0,0.4), inset 0 2px 0 rgba(255,255,255,0.2), 0 0 0 1px rgba(255,255,255,0.1)'
+                         }}>
+                      {/* Brillo animado */}
+                      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out" />
+                      
+                      <FileText className="h-7 w-7 mr-4 group-hover:rotate-6 group-hover:scale-110 transition-transform duration-500" />
+                      <span className="font-bold tracking-wide">Crear Mi Documento Ahora</span>
+                    </div>
+                    
+                    {/* Cara trasera */}
+                    <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-gradient-to-r from-primary/95 via-primary to-primary/95 text-primary-foreground text-xl rounded-xl shadow-2xl transition-all duration-600 overflow-hidden"
+                         style={{
+                           transform: 'rotateY(180deg) translateZ(35px)',
+                           backfaceVisibility: 'hidden',
+                           boxShadow: '0 25px 50px rgba(0,0,0,0.4), inset 0 2px 0 rgba(255,255,255,0.2), 0 0 0 1px rgba(255,255,255,0.1)'
+                         }}>
+                      {/* Brillo animado */}
+                      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out" />
+                      
+                      <span className="mr-4 text-2xl animate-bounce">🚀</span>
+                      <span className="font-bold tracking-wide">¡Empezar Mi Proyecto!</span>
+                    </div>
+                  </div>
                 </Link>
-                <p className="text-sm text-muted-foreground mt-4">
+                <p className="text-sm text-muted-foreground mt-6 opacity-80 group-hover:opacity-100 transition-opacity">
                   Personaliza tu documento con la estructura que prefieras
                 </p>
               </div>
@@ -1181,9 +1289,9 @@ El tiempo para debates académicos ha terminado. Cada día de inacción es una e
           </section>
 
           {/* Sección de Tutoriales */}
-          <section className="w-full px-4 sm:px-6 mb-24">
+          <section className="w-full px-4 sm:px-6 mb-12">
             <div className="max-w-7xl mx-auto">
-              <div className="animate-on-scroll scale-in text-center mb-12">
+              <div className="animate-on-scroll bounce-in text-center mb-12">
                 <h2 className="text-4xl font-bold text-foreground mb-4 [text-wrap:balance]">
                   Tutoriales de Uso
                 </h2>
@@ -1352,38 +1460,6 @@ El tiempo para debates académicos ha terminado. Cada día de inacción es una e
                 </div>
               </div>
 
-              {/* Nota informativa sobre los tutoriales */}
-              <div className="animate-on-scroll fade-up delay-200 mt-8">
-                <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5">
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-3">
-                      <Play className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                      <div>
-                        <h4 className="font-semibold text-foreground mb-2">
-                          Tutoriales Paso a Paso
-                        </h4>
-                        <p className="text-sm text-muted-foreground mb-3">
-                          Nuestros tutoriales te guían a través de cada proceso para que puedas aprovechar al máximo nuestros servicios académicos.
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
-                            • Videos HD
-                          </span>
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
-                            • Explicaciones claras
-                          </span>
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
-                            • Ejemplos prácticos
-                          </span>
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300">
-                            • Soporte 24/7
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
             </div>
           </section>
 

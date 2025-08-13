@@ -33,7 +33,7 @@ function App() {
                       RedactorIA
                     </span>
                   </Link>
-                  <nav className="hidden md:flex items-center space-x-10">
+                  <nav className="hidden md:flex items-center space-x-8">
                     <Link
                       to="/"
                       className="text-muted-foreground hover:text-primary transition-colors"
@@ -46,15 +46,43 @@ function App() {
                     >
                       Configurar
                     </Link>
-                    <ThemeToggle />
+                    <div className="flex items-center ml-4">
+                      <ThemeToggle />
+                    </div>
                   </nav>
                   <div className="flex items-center gap-4">
                     <Link to="/configuracion" className="hidden md:block">
-                      <Button className="h-11 px-6 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg rounded-xl">
-                        Empezar Ahora
-                      </Button>
+                      <div className="relative w-36 h-11 transition-all duration-700 hover:duration-500 group"
+                           style={{
+                             transformStyle: 'preserve-3d',
+                             transform: 'perspective(1000px) rotateY(0deg)'
+                           }}
+                           onMouseEnter={(e) => {
+                             e.currentTarget.style.transform = 'perspective(1000px) rotateY(-180deg)'
+                           }}
+                           onMouseLeave={(e) => {
+                             e.currentTarget.style.transform = 'perspective(1000px) rotateY(0deg)'
+                           }}>
+                        {/* Cara frontal */}
+                        <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-primary text-primary-foreground rounded-xl shadow-lg transition-all duration-300"
+                             style={{
+                               transform: 'rotateY(0deg) translateZ(20px)',
+                               backfaceVisibility: 'hidden'
+                             }}>
+                          <span className="font-medium text-sm">Empezar Ahora</span>
+                        </div>
+                        
+                        {/* Cara trasera */}
+                        <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-secondary text-secondary-foreground rounded-xl shadow-lg transition-all duration-300"
+                             style={{
+                               transform: 'rotateY(180deg) translateZ(20px)',
+                               backfaceVisibility: 'hidden'
+                             }}>
+                          <span className="font-medium text-sm">¡Vamos! 🎯</span>
+                        </div>
+                      </div>
                     </Link>
-                    <div className="md:hidden">
+                    <div className="md:hidden flex items-center">
                       <ThemeToggle />
                     </div>
                   </div>
@@ -165,11 +193,26 @@ function App() {
 
                 {/* Separador con gradiente */}
                 <div className="mt-12 pt-8 border-t border-border/50">
-                  <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <div className="flex flex-col sm:flex-row justify-between items-center gap-4 max-w-7xl mx-auto">
+                    {/* Copyright - Izquierda */}
+                    <div className="flex items-center text-sm text-muted-foreground">
                       <span>© 2024 RedactorIA.</span>
-                      <Heart className="h-4 w-4 text-red-500 fill-current animate-pulse" />
                     </div>
+                    
+                    {/* Design Credit - Centro */}
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-muted-foreground">Design and Developed by</span>
+                      <span className="font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 transition-colors duration-200 cursor-default select-none"
+                            style={{
+                              fontFamily: '"Inter", "-apple-system", "BlinkMacSystemFont", sans-serif',
+                              fontWeight: '500',
+                              letterSpacing: '0.025em'
+                            }}>
+                        Luxor
+                      </span>
+                    </div>
+
+                    {/* Enlaces legales - Derecha */}
                     <div className="flex items-center gap-6">
                       <Link to="/politica-privacidad" className="text-xs text-muted-foreground hover:text-primary transition-colors">
                         Política de Privacidad
