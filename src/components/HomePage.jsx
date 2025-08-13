@@ -19,6 +19,10 @@ import {
   BarChart3,
   AlertCircle,
   CheckCircle,
+  Play,
+  Edit,
+  FileDown,
+  PlusCircle,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
@@ -448,8 +452,7 @@ El tiempo para debates académicos ha terminado. Cada día de inacción es una e
                     </Button>
                   </Link>
                   <Button
-                    variant="outline"
-                    className="h-14 px-8 text-lg rounded-xl"
+                    className="h-14 px-8 text-lg rounded-xl bg-secondary text-secondary-foreground border-2 border-secondary hover:bg-secondary/90 hover:border-secondary/90 shadow-lg hover:shadow-xl transition-all"
                     onClick={() =>
                       document
                         .getElementById("preview-section")
@@ -1163,7 +1166,7 @@ El tiempo para debates académicos ha terminado. Cada día de inacción es una e
               )}
 
               {/* Botón de acción */}
-              <div className="animate-on-scroll fade-up delay-200 text-center mt-12">
+              <div className="animate-on-scroll fade-up delay-200 text-center mt-24">
                 <Link to="/configuracion">
                   <Button className="h-14 px-10 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground rounded-xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1">
                     <FileText className="h-6 w-6 mr-3" />
@@ -1177,35 +1180,213 @@ El tiempo para debates académicos ha terminado. Cada día de inacción es una e
             </div>
           </section>
 
-          {/* Final CTA */}
-          <section className="w-full px-4 sm:px-6 overflow-visible">
-            <div
-              ref={ctaSectionRef}
-              className="max-w-4xl mx-auto bg-gradient-to-br from-primary to-primary/80 rounded-2xl p-12 text-center shadow-2xl relative overflow-visible animate-on-scroll clip-reveal cta-container"
-              style={{
-                width: "100%",
-                opacity: 1,
-                clipPath: "inset(0 0 0 0)",
-              }}
-            >
-              <div className="absolute inset-0 opacity-5 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.1)_50%,transparent_75%)] bg-[length:3rem_3rem]" />
-              <h2 className="text-4xl font-bold text-primary-foreground mb-6 relative [text-wrap:balance]">
-                Optimiza tu Producción Académica
-              </h2>
-              <p className="text-lg text-primary-foreground/80 mb-8 max-w-xl mx-auto relative">
-                Tecnología avanzada para resultados precisos
-              </p>
-              <Link to="/configuracion">
-                <Button className="h-14 px-16 bg-background text-primary text-lg rounded-xl shadow-2xl hover:bg-background/90 hover:shadow-3xl transition-all relative">
-                  Generar Documento
-                </Button>
-              </Link>
-              <p className="text-sm text-primary-foreground/60 mt-6 relative">
-                Soporte técnico especializado • Garantía de cumplimiento
-                normativo
-              </p>
+          {/* Sección de Tutoriales */}
+          <section className="w-full px-4 sm:px-6 mb-24">
+            <div className="max-w-7xl mx-auto">
+              <div className="animate-on-scroll scale-in text-center mb-12">
+                <h2 className="text-4xl font-bold text-foreground mb-4 [text-wrap:balance]">
+                  Tutoriales de Uso
+                </h2>
+                <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+                  Aprende paso a paso cómo solicitar, modificar, descargar y editar tus trabajos académicos
+                </p>
+              </div>
+
+              <div className="animate-on-scroll fade-up">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {/* Tutorial: Cómo Solicitar */}
+                  <Card className="relative overflow-hidden border border-border bg-card shadow-lg hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
+                    <div className="absolute inset-0 border-t-2 border-green-500/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    
+                    <CardHeader className="p-6 pb-4">
+                      <div className="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 p-3 rounded-xl w-fit shadow-inner mb-4 transition-transform group-hover:scale-110">
+                        <PlusCircle className="h-6 w-6" />
+                      </div>
+                      <CardTitle className="text-lg font-semibold text-card-foreground leading-tight mb-2">
+                        Cómo Solicitar
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Proceso completo para crear tu solicitud de trabajo académico
+                      </p>
+                    </CardHeader>
+
+                    <CardContent className="p-6 pt-0">
+                      <div className="relative bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden mb-4 group/video cursor-pointer">
+                        <div className="aspect-video flex items-center justify-center">
+                          <div className="text-center">
+                            <div className="bg-primary/20 rounded-full p-4 mb-2 mx-auto w-fit group-hover/video:bg-primary/30 transition-colors">
+                              <Play className="h-8 w-8 text-primary" />
+                            </div>
+                            <p className="text-xs text-muted-foreground">Ver tutorial completo</p>
+                          </div>
+                        </div>
+                        <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
+                          3:45
+                        </div>
+                      </div>
+                      <ul className="text-sm space-y-1 text-muted-foreground">
+                        <li>• Configuración inicial</li>
+                        <li>• Selección de estructura</li>
+                        <li>• Envío de información</li>
+                        <li>• Confirmación de pedido</li>
+                      </ul>
+                    </CardContent>
+                  </Card>
+
+                  {/* Tutorial: Cómo Modificar */}
+                  <Card className="relative overflow-hidden border border-border bg-card shadow-lg hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
+                    <div className="absolute inset-0 border-t-2 border-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    
+                    <CardHeader className="p-6 pb-4">
+                      <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-3 rounded-xl w-fit shadow-inner mb-4 transition-transform group-hover:scale-110">
+                        <Edit className="h-6 w-6" />
+                      </div>
+                      <CardTitle className="text-lg font-semibold text-card-foreground leading-tight mb-2">
+                        Cómo Modificar
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Ajusta y personaliza tu trabajo antes de la entrega final
+                      </p>
+                    </CardHeader>
+
+                    <CardContent className="p-6 pt-0">
+                      <div className="relative bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden mb-4 group/video cursor-pointer">
+                        <div className="aspect-video flex items-center justify-center">
+                          <div className="text-center">
+                            <div className="bg-primary/20 rounded-full p-4 mb-2 mx-auto w-fit group-hover/video:bg-primary/30 transition-colors">
+                              <Play className="h-8 w-8 text-primary" />
+                            </div>
+                            <p className="text-xs text-muted-foreground">Ver tutorial completo</p>
+                          </div>
+                        </div>
+                        <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
+                          2:30
+                        </div>
+                      </div>
+                      <ul className="text-sm space-y-1 text-muted-foreground">
+                        <li>• Revisión del contenido</li>
+                        <li>• Solicitud de cambios</li>
+                        <li>• Proceso de revisión</li>
+                        <li>• Aprobación final</li>
+                      </ul>
+                    </CardContent>
+                  </Card>
+
+                  {/* Tutorial: Cómo Descargar */}
+                  <Card className="relative overflow-hidden border border-border bg-card shadow-lg hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
+                    <div className="absolute inset-0 border-t-2 border-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    
+                    <CardHeader className="p-6 pb-4">
+                      <div className="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 p-3 rounded-xl w-fit shadow-inner mb-4 transition-transform group-hover:scale-110">
+                        <FileDown className="h-6 w-6" />
+                      </div>
+                      <CardTitle className="text-lg font-semibold text-card-foreground leading-tight mb-2">
+                        Cómo Descargar
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Descarga tu trabajo en múltiples formatos disponibles
+                      </p>
+                    </CardHeader>
+
+                    <CardContent className="p-6 pt-0">
+                      <div className="relative bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden mb-4 group/video cursor-pointer">
+                        <div className="aspect-video flex items-center justify-center">
+                          <div className="text-center">
+                            <div className="bg-primary/20 rounded-full p-4 mb-2 mx-auto w-fit group-hover/video:bg-primary/30 transition-colors">
+                              <Play className="h-8 w-8 text-primary" />
+                            </div>
+                            <p className="text-xs text-muted-foreground">Ver tutorial completo</p>
+                          </div>
+                        </div>
+                        <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
+                          1:45
+                        </div>
+                      </div>
+                      <ul className="text-sm space-y-1 text-muted-foreground">
+                        <li>• Acceso al documento</li>
+                        <li>• Formatos disponibles</li>
+                        <li>• Descarga segura</li>
+                        <li>• Verificación de archivos</li>
+                      </ul>
+                    </CardContent>
+                  </Card>
+
+                  {/* Tutorial: Cómo Editar */}
+                  <Card className="relative overflow-hidden border border-border bg-card shadow-lg hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
+                    <div className="absolute inset-0 border-t-2 border-orange-500/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    
+                    <CardHeader className="p-6 pb-4">
+                      <div className="bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 p-3 rounded-xl w-fit shadow-inner mb-4 transition-transform group-hover:scale-110">
+                        <FileText className="h-6 w-6" />
+                      </div>
+                      <CardTitle className="text-lg font-semibold text-card-foreground leading-tight mb-2">
+                        Cómo Editar
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Guía para editar y personalizar tu trabajo entregado
+                      </p>
+                    </CardHeader>
+
+                    <CardContent className="p-6 pt-0">
+                      <div className="relative bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden mb-4 group/video cursor-pointer">
+                        <div className="aspect-video flex items-center justify-center">
+                          <div className="text-center">
+                            <div className="bg-primary/20 rounded-full p-4 mb-2 mx-auto w-fit group-hover/video:bg-primary/30 transition-colors">
+                              <Play className="h-8 w-8 text-primary" />
+                            </div>
+                            <p className="text-xs text-muted-foreground">Ver tutorial completo</p>
+                          </div>
+                        </div>
+                        <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
+                          4:20
+                        </div>
+                      </div>
+                      <ul className="text-sm space-y-1 text-muted-foreground">
+                        <li>• Herramientas de edición</li>
+                        <li>• Formato y estilo</li>
+                        <li>• Revisión de contenido</li>
+                        <li>• Guardado final</li>
+                      </ul>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              {/* Nota informativa sobre los tutoriales */}
+              <div className="animate-on-scroll fade-up delay-200 mt-8">
+                <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-3">
+                      <Play className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="font-semibold text-foreground mb-2">
+                          Tutoriales Paso a Paso
+                        </h4>
+                        <p className="text-sm text-muted-foreground mb-3">
+                          Nuestros tutoriales te guían a través de cada proceso para que puedas aprovechar al máximo nuestros servicios académicos.
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+                            • Videos HD
+                          </span>
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+                            • Explicaciones claras
+                          </span>
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
+                            • Ejemplos prácticos
+                          </span>
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300">
+                            • Soporte 24/7
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </section>
+
         </main>
       </div>
     </RainbowBackground>

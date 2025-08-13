@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- Fondo con gradiente -->
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Fondo redondeado -->
+  <rect x="4" y="4" width="40" height="40" rx="8" ry="8" fill="url(#grad1)" />
+  
+  <!-- Icono de documento -->
+  <path d="M16 12h12v2H16v-2z" fill="white" fill-opacity="0.9"/>
+  <path d="M16 16h16v2H16v-2z" fill="white" fill-opacity="0.8"/>
+  <path d="M16 20h14v2H16v-2z" fill="white" fill-opacity="0.7"/>
+  <path d="M16 24h12v2H16v-2z" fill="white" fill-opacity="0.6"/>
+  
+  <!-- Línea de "IA" -->
+  <circle cx="32" cy="32" r="3" fill="white" fill-opacity="0.9"/>
+  <text x="32" y="36" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="#1d4ed8">IA</text>
+</svg>
