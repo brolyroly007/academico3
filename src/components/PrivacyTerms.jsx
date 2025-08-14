@@ -66,8 +66,10 @@ const PrivacyTerms = ({ value = false, onChange }) => {
           <Label htmlFor="privacy-terms" className="text-sm cursor-pointer">
             Acepto la{" "}
             <button
+              type="button"
               onClick={openTermsModal}
               className="text-primary hover:underline focus:outline-none"
+              aria-label="Abrir Política de Privacidad"
             >
               Política de Privacidad
             </button>{" "}

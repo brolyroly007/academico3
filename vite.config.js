@@ -12,15 +12,32 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          ui: ['lucide-react', '@radix-ui/react-checkbox', '@radix-ui/react-label', '@radix-ui/react-radio-group', '@radix-ui/react-select', '@radix-ui/react-slot', '@radix-ui/react-toast'],
-          utils: ['clsx', 'class-variance-authority', 'tailwind-merge', 'date-fns']
+        manualChunks: (id) => {
+          // Vendor chunk - Core React libraries
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+              return 'vendor';
+            }
+            // UI libraries chunk
+            if (id.includes('lucide-react') || id.includes('@radix-ui/')) {
+              return 'ui';
+            }
+            // Utility libraries chunk
+            if (id.includes('clsx') || id.includes('class-variance-authority') || 
+                id.includes('tailwind-merge') || id.includes('date-fns')) {
+              return 'utils';
+            }
+            // Other node_modules go to vendor
+            return 'vendor';
+          }
         }
       }
     },
     target: 'esnext',
-    minify: 'esbuild'
+    minify: 'esbuild',
+    cssMinify: true,
+    reportCompressedSize: false, // Faster builds
+    chunkSizeWarningLimit: 1000
   },
   // No necesitas configuración de proxy ya que usarás la URL de Render directamente
 });

@@ -107,8 +107,8 @@ function App() {
               </Suspense>
             </main>
 
-            {/* Footer con efecto blur */}
-            <footer className="relative border-t border-border bg-background/80 backdrop-blur-lg">
+            {/* Footer con efecto blur - Optimizado para CLS */}
+            <footer className="relative border-t border-border bg-background/80 backdrop-blur-lg" style={{ minHeight: '400px' }}>
               {/* Gradiente sutil en la parte superior */}
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
               

@@ -532,7 +532,7 @@ El tiempo para debates académicos ha terminado. Cada día de inacción es una e
                     <span className="icon">
                       {feature.icon}
                     </span>
-                    <h4>{feature.title}</h4>
+                    <h3 className="text-lg font-semibold">{feature.title}</h3>
                     <p>{feature.description}</p>
                     <div className="shine"></div>
                     <div className="background">
@@ -641,7 +641,7 @@ El tiempo para debates académicos ha terminado. Cada día de inacción es una e
                           </CardTitle>
                         </div>
                         {activePreview === "monografia" && (
-                          <p className="text-xs text-muted-foreground mt-1">
+                          <p className="text-sm text-muted-foreground mt-1">
                             {monographStructures[activeStructure].description}
                           </p>
                         )}
@@ -939,7 +939,7 @@ El tiempo para debates académicos ha terminado. Cada día de inacción es una e
                                     </tbody>
                                   </table>
                                 </div>
-                                <p className="text-center text-xs text-muted-foreground mt-2">
+                                <p className="text-center text-sm text-muted-foreground mt-2">
                                   Fuente: Elaboración propia basada en datos del
                                   IPCC (2023) y NASA (2024)
                                 </p>
