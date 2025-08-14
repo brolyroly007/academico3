@@ -1,0 +1,101 @@
+# Mobile Performance Optimizations
+# Enable Brotli and Gzip compression
+<IfModule mod_brotli.c>
+    AddOutputFilterByType BROTLI_COMPRESS text/html
+    AddOutputFilterByType BROTLI_COMPRESS text/plain
+    AddOutputFilterByType BROTLI_COMPRESS text/xml
+    AddOutputFilterByType BROTLI_COMPRESS text/css
+    AddOutputFilterByType BROTLI_COMPRESS text/javascript
+    AddOutputFilterByType BROTLI_COMPRESS application/javascript
+    AddOutputFilterByType BROTLI_COMPRESS application/json
+    AddOutputFilterByType BROTLI_COMPRESS application/xml
+    AddOutputFilterByType BROTLI_COMPRESS application/xhtml+xml
+    AddOutputFilterByType BROTLI_COMPRESS application/rss+xml
+    AddOutputFilterByType BROTLI_COMPRESS application/atom_xml
+    AddOutputFilterByType BROTLI_COMPRESS image/svg+xml
+</IfModule>
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE text/javascript
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/json
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/atom_xml
+    AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+# Aggressive caching for static assets
+<IfModule mod_expires.c>
+    ExpiresActive On
+    
+    # JavaScript and CSS
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType text/javascript "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    
+    # Images
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/avif "access plus 1 year"
+    
+    # Fonts
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/ttf "access plus 1 year"
+    
+    # HTML and JSON (short cache for dynamic content)
+    ExpiresByType text/html "access plus 1 hour"
+    ExpiresByType application/json "access plus 1 hour"
+</IfModule>
+
+# Cache control headers
+<IfModule mod_headers.c>
+    # Remove ETags for better caching
+    Header unset ETag
+    FileETag None
+    
+    # Cache static assets aggressively
+    <FilesMatch "\.(css|js|png|jpg|jpeg|gif|svg|webp|avif|woff2|woff|ttf)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+    
+    # Short cache for HTML
+    <FilesMatch "\.(html|htm)$">
+        Header set Cache-Control "public, max-age=3600"
+    </FilesMatch>
+    
+    # Security headers
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-Frame-Options DENY
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    
+    # Mobile-specific optimizations
+    Header set Connection "Keep-Alive"
+    Header set Keep-Alive "timeout=5, max=100"
+</IfModule>
+
+# Preload key resources for mobile
+<IfModule mod_headers.c>
+    # Preload critical CSS and JS
+    <Files "index.html">
+        Header add Link "</assets/index-bjfeIsTH.css>; rel=preload; as=style"
+        Header add Link "</src/main.jsx>; rel=modulepreload"
+    </Files>
+</IfModule>
+
+# Enable HTTP/2 Server Push for critical resources (if supported)
+<IfModule mod_http2.c>
+    H2PushResource /assets/index-bjfeIsTH.css critical
+    H2PushResource /src/main.jsx critical
+</IfModule>

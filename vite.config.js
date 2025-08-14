@@ -13,31 +13,50 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          // Vendor chunk - Core React libraries
+          // Core React - Split into smaller chunks for mobile
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
-              return 'vendor';
+            // React core - Essential for initial render
+            if (id.includes('react/') && !id.includes('react-dom') && !id.includes('react-router')) {
+              return 'react-core';
             }
-            // UI libraries chunk
-            if (id.includes('lucide-react') || id.includes('@radix-ui/')) {
-              return 'ui';
+            // React DOM - Heavy but needed
+            if (id.includes('react-dom')) {
+              return 'react-dom';
             }
-            // Utility libraries chunk
+            // React Router - Can be lazy loaded
+            if (id.includes('react-router')) {
+              return 'router';
+            }
+            // UI libraries - Split further
+            if (id.includes('@radix-ui/react-select') || id.includes('@radix-ui/react-toast')) {
+              return 'ui-heavy';
+            }
+            if (id.includes('lucide-react')) {
+              return 'icons';
+            }
+            if (id.includes('@radix-ui/')) {
+              return 'ui-light';
+            }
+            // Utilities
             if (id.includes('clsx') || id.includes('class-variance-authority') || 
-                id.includes('tailwind-merge') || id.includes('date-fns')) {
+                id.includes('tailwind-merge')) {
               return 'utils';
             }
-            // Other node_modules go to vendor
-            return 'vendor';
+            if (id.includes('date-fns')) {
+              return 'date-utils';
+            }
+            // Other smaller libraries
+            return 'vendor-misc';
           }
         }
       }
     },
-    target: 'esnext',
+    target: 'es2020', // Better mobile compatibility
     minify: 'esbuild',
     cssMinify: true,
-    reportCompressedSize: false, // Faster builds
-    chunkSizeWarningLimit: 1000
+    reportCompressedSize: false,
+    chunkSizeWarningLimit: 500, // Smaller chunks for mobile
+    sourcemap: false // Disable sourcemaps for production mobile
   },
   // No necesitas configuración de proxy ya que usarás la URL de Render directamente
 });

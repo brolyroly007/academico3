@@ -9,7 +9,70 @@
     <link rel="preconnect" href="https://www.google.com" crossorigin>
     <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin>
     
-    <!-- Preload critical CSS -->
+    <!-- Critical CSS inline for mobile -->
+    <style>
+      /* Critical CSS for above-the-fold content - Mobile First */
+      :root {
+        --primary: 217 91% 60%;
+        --primary-foreground: 222.2 84% 4.9%;
+        --background: 0 0% 100%;
+        --foreground: 222.2 84% 4.9%;
+        --border: 214.3 31.8% 91.4%;
+        --muted: 210 40% 96%;
+        --muted-foreground: 215.4 16.3% 46.9%;
+      }
+      [data-theme="dark"] {
+        --primary: 217 91% 60%;
+        --primary-foreground: 222.2 84% 4.9%;
+        --background: 222.2 84% 4.9%;
+        --foreground: 210 40% 98%;
+        --border: 217.2 32.6% 17.5%;
+        --muted: 217.2 32.6% 17.5%;
+        --muted-foreground: 215 20.2% 65.1%;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
+      .min-h-screen { min-height: 100vh; }
+      .flex { display: flex; }
+      .flex-col { flex-direction: column; }
+      .flex-1 { flex: 1; }
+      .w-full { width: 100%; }
+      .h-20 { height: 5rem; }
+      .bg-background { background-color: hsl(var(--background)); }
+      .text-foreground { color: hsl(var(--foreground)); }
+      .border-b { border-bottom-width: 1px; }
+      .border-border { border-color: hsl(var(--border)); }
+      .sticky { position: sticky; }
+      .top-0 { top: 0; }
+      .z-50 { z-index: 50; }
+      .shadow-sm { box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); }
+      .backdrop-blur-md { backdrop-filter: blur(12px); }
+      .max-w-7xl { max-width: 80rem; }
+      .mx-auto { margin-left: auto; margin-right: auto; }
+      .px-4 { padding-left: 1rem; padding-right: 1rem; }
+      .items-center { align-items: center; }
+      .justify-between { justify-content: space-between; }
+      .space-x-3 > * + * { margin-left: 0.75rem; }
+      .w-10 { width: 2.5rem; }
+      .h-10 { height: 2.5rem; }
+      .bg-primary { background-color: hsl(var(--primary)); }
+      .text-primary-foreground { color: hsl(var(--primary-foreground)); }
+      .rounded-xl { border-radius: 0.75rem; }
+      .h-6 { height: 1.5rem; }
+      .w-6 { width: 1.5rem; }
+      .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+      .font-bold { font-weight: 700; }
+      .text-primary { color: hsl(var(--primary)); }
+      .hidden { display: none; }
+      .md\:flex { display: none; }
+      @media (min-width: 768px) { .md\:flex { display: flex; } }
+      .text-muted-foreground { color: hsl(var(--muted-foreground)); }
+      .hover\:text-primary:hover { color: hsl(var(--primary)); }
+      .transition-colors { transition: color 150ms ease; }
+      .rainbow-background-container { min-height: 100vh; width: 100%; }
+    </style>
+    
+    <!-- Load non-critical CSS asynchronously -->
     <link rel="preload" href="/assets/index-bjfeIsTH.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="/assets/index-bjfeIsTH.css"></noscript>
     
@@ -41,9 +104,14 @@
     <meta name="twitter:description" content="Sistema inteligente para creación de documentos académicos con estructuración automatizada y personalización avanzada." />
     <meta name="twitter:image" content="/icon-512.png" />
     
-    <!-- Código de Google AdSense - Optimizado -->
+    <!-- Resource Priority Hints -->
+    <link rel="modulepreload" href="/src/main.jsx">
+    <link rel="prefetch" href="/assets/vendor-CiDNUrZ5.js">
+    <link rel="dns-prefetch" href="//academico3-production.up.railway.app">
+    
+    <!-- Código de Google AdSense - Optimizado con low priority -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2674565100954739"
-     crossorigin="anonymous" defer></script>
+     crossorigin="anonymous" defer importance="low"></script>
     <!-- Fin del código de Google AdSense -->
     
     <title>RedactorIA - Generador de Documentos Académicos</title>

@@ -15,8 +15,11 @@ export const AnimatedBackground = memo(function AnimatedBackground({ children, c
   const [colorIndices, setColorIndices] = useState([0, 1, 2, 3]);
   const [step, setStep] = useState(0);
   const animationRef = useRef(null);
-  const ANIMATION_SPEED = 0.005; // Reducido de 0.01 a 0.005 para suavizar
-  const INTERVAL = 50; // Aumentado de 20ms a 50ms para reducir frecuencia
+  
+  // Mobile-optimized animation settings
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const ANIMATION_SPEED = isMobile ? 0.002 : 0.005; // Much slower on mobile
+  const INTERVAL = isMobile ? 100 : 50; // Less frequent on mobile
 
   const gradientStyle = useMemo(() => {
     const color_1_start = bkgColors[colorIndices[0]];

@@ -9,10 +9,26 @@ import { FileText, Mail, Phone, MapPin } from "lucide-react";
 import WhatsAppWidget from "./components/WhatsAppWidget";
 import { LoadingSpinner } from "./components/LoadingSpinner";
 
-// Lazy loading de componentes pesados
-const AcademicForm = lazy(() => import("./components/AcademicForm"));
-const HomePage = lazy(() => import("./components/HomePage"));
-const IndexPreview = lazy(() => import("./components/IndexPreview"));
+// Lazy loading optimizado para móvil - conditional imports
+const HomePage = lazy(() => {
+  const isMobile = window.innerWidth < 768;
+  return isMobile 
+    ? import("./components/MobileOptimizedHomePage")
+    : import("./components/HomePage");
+});
+const AcademicForm = lazy(() => 
+  new Promise(resolve => {
+    // Delay heavy components on mobile for better initial load
+    const isMobile = window.innerWidth < 768;
+    const delay = isMobile ? 100 : 0;
+    setTimeout(() => resolve(import("./components/AcademicForm")), delay);
+  })
+);
+const IndexPreview = lazy(() => 
+  new Promise(resolve => {
+    setTimeout(() => resolve(import("./components/IndexPreview")), 50);
+  })
+);
 const Confirmation = lazy(() => import("./components/Confirmation"));
 const GarantiaCalidad = lazy(() => import("./components/GarantiaCalidad"));
 const PoliticaPrivacidad = lazy(() => import("./components/PoliticaPrivacidad"));
