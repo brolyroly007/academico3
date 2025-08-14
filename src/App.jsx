@@ -7,14 +7,19 @@ import { ThemeToggle } from "./components/theme-toggle";
 import { Toaster } from "@/components/ui/toaster";
 import { FileText, Mail, Phone, MapPin } from "lucide-react";
 import WhatsAppWidget from "./components/WhatsAppWidget";
-import { LoadingSpinner } from "./components/LoadingSpinner";
+import { LoadingSpinner, SimpleLoadingSpinner } from "./components/LoadingSpinner";
 
-// Lazy loading optimizado para móvil - conditional imports
+// Lazy loading optimizado para móvil - conditional imports with fallback
 const HomePage = lazy(() => {
-  const isMobile = window.innerWidth < 768;
-  return isMobile 
-    ? import("./components/MobileOptimizedHomePage")
-    : import("./components/HomePage");
+  try {
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    return isMobile 
+      ? import("./components/MobileOptimizedHomePage").catch(() => import("./components/HomePage"))
+      : import("./components/HomePage");
+  } catch (error) {
+    // Fallback to original HomePage if there's any issue
+    return import("./components/HomePage");
+  }
 });
 const AcademicForm = lazy(() => 
   new Promise(resolve => {
@@ -110,7 +115,7 @@ function App() {
             </header>
 
             <main className="flex-1 w-full bg-background text-foreground">
-              <Suspense fallback={<LoadingSpinner />}>
+              <Suspense fallback={<SimpleLoadingSpinner />}>
                 <Routes>
                   <Route path="/" element={<HomePage />} />
                   <Route path="/configuracion" element={<AcademicForm />} />
