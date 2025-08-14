@@ -1,19 +1,22 @@
 // src/App.jsx (con widget de WhatsApp y RainbowBackground)
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { Suspense, lazy, memo } from "react";
 import { DocumentProvider } from "./contexts/DocumentContext";
 import { ThemeProvider } from "./components/theme-provider";
 import { ThemeToggle } from "./components/theme-toggle";
-import AcademicForm from "./components/AcademicForm";
-import { HomePage } from "./components/HomePage";
 import { Toaster } from "@/components/ui/toaster";
-import { Button } from "@/components/ui/button";
-import { FileText, Heart, Shield, Mail, Phone, MapPin, Clock, Award, Users, Zap } from "lucide-react";
-import IndexPreview from "./components/IndexPreview";
-import Confirmation from "./components/Confirmation";
+import { FileText, Mail, Phone, MapPin } from "lucide-react";
 import WhatsAppWidget from "./components/WhatsAppWidget";
-import GarantiaCalidad from "./components/GarantiaCalidad";
-import PoliticaPrivacidad from "./components/PoliticaPrivacidad";
-import TerminosServicio from "./components/TerminosServicio";
+import { LoadingSpinner } from "./components/LoadingSpinner";
+
+// Lazy loading de componentes pesados
+const AcademicForm = lazy(() => import("./components/AcademicForm"));
+const HomePage = lazy(() => import("./components/HomePage"));
+const IndexPreview = lazy(() => import("./components/IndexPreview"));
+const Confirmation = lazy(() => import("./components/Confirmation"));
+const GarantiaCalidad = lazy(() => import("./components/GarantiaCalidad"));
+const PoliticaPrivacidad = lazy(() => import("./components/PoliticaPrivacidad"));
+const TerminosServicio = lazy(() => import("./components/TerminosServicio"));
 
 function App() {
   return (
@@ -91,15 +94,17 @@ function App() {
             </header>
 
             <main className="flex-1 w-full bg-background text-foreground">
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/configuracion" element={<AcademicForm />} />
-                <Route path="/preview" element={<IndexPreview />} />
-                <Route path="/confirmacion" element={<Confirmation />} />
-                <Route path="/garantia-calidad" element={<GarantiaCalidad />} />
-                <Route path="/politica-privacidad" element={<PoliticaPrivacidad />} />
-                <Route path="/terminos-servicio" element={<TerminosServicio />} />
-              </Routes>
+              <Suspense fallback={<LoadingSpinner />}>
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/configuracion" element={<AcademicForm />} />
+                  <Route path="/preview" element={<IndexPreview />} />
+                  <Route path="/confirmacion" element={<Confirmation />} />
+                  <Route path="/garantia-calidad" element={<GarantiaCalidad />} />
+                  <Route path="/politica-privacidad" element={<PoliticaPrivacidad />} />
+                  <Route path="/terminos-servicio" element={<TerminosServicio />} />
+                </Routes>
+              </Suspense>
             </main>
 
             {/* Footer con efecto blur */}

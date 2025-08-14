@@ -25,11 +25,11 @@ import {
   PlusCircle,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, memo } from "react";
 import { useTheme } from "./theme-provider";
 import RainbowBackground from "./RainbowBackground";
 
-export function HomePage() {
+export const HomePage = memo(function HomePage() {
   const ctaSectionRef = useRef(null);
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -1467,6 +1467,6 @@ El tiempo para debates académicos ha terminado. Cada día de inacción es una e
       </div>
     </RainbowBackground>
   );
-}
+});
 
 export default HomePage;

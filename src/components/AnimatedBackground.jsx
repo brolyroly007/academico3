@@ -1,5 +1,5 @@
 // src/components/AnimatedBackground.jsx
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo, useMemo } from "react";
 
 const bkgColors = [
   [26, 56, 82], // Azul oscuro
@@ -11,14 +11,14 @@ const bkgColors = [
   [37, 110, 143], // Azul medio
 ];
 
-export function AnimatedBackground({ children, className = "" }) {
+export const AnimatedBackground = memo(function AnimatedBackground({ children, className = "" }) {
   const [colorIndices, setColorIndices] = useState([0, 1, 2, 3]);
   const [step, setStep] = useState(0);
   const animationRef = useRef(null);
-  const ANIMATION_SPEED = 0.01;
-  const INTERVAL = 20; // ms
+  const ANIMATION_SPEED = 0.005; // Reducido de 0.01 a 0.005 para suavizar
+  const INTERVAL = 50; // Aumentado de 20ms a 50ms para reducir frecuencia
 
-  const calculateGradient = () => {
+  const gradientStyle = useMemo(() => {
     const color_1_start = bkgColors[colorIndices[0]];
     const color_1_end = bkgColors[colorIndices[1]];
     const color_2_start = bkgColors[colorIndices[2]];
@@ -36,8 +36,10 @@ export function AnimatedBackground({ children, className = "" }) {
     const b2 = Math.round(stepIndex * color_2_start[2] + step * color_2_end[2]);
     const color_2 = `rgb(${r2}, ${g2}, ${b2})`;
 
-    return `linear-gradient(155deg, ${color_1}, ${color_2})`;
-  };
+    return {
+      background: `linear-gradient(155deg, ${color_1}, ${color_2})`,
+    };
+  }, [colorIndices, step]);
 
   const updateAnimation = () => {
     setStep((prevStep) => {
@@ -81,16 +83,11 @@ export function AnimatedBackground({ children, className = "" }) {
     };
   }, []);
 
-  // Calcular el gradiente actual
-  const gradientStyle = {
-    background: calculateGradient(),
-  };
-
   return (
     <div className={`w-full min-h-screen ${className}`} style={gradientStyle}>
       {children}
     </div>
   );
-}
+});
 
 export default AnimatedBackground;
