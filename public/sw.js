@@ -6,8 +6,9 @@ const DYNAMIC_CACHE = 'dynamic-v1';
 // Critical resources to cache immediately
 const STATIC_ASSETS = [
   '/',
-  '/favicon.ico',
-  '/favicon.svg',
+  '/favicon3.ico',
+  '/favicon4.ico',
+  '/favicon5.ico',
   '/icon-192.png',
   '/icon-512.png',
   '/manifest.json'

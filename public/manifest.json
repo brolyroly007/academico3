@@ -17,9 +17,9 @@
       "purpose": "any"
     },
     {
-      "src": "/favicon.svg",
+      "src": "/favicon5.ico",
       "sizes": "any",
-      "type": "image/svg+xml",
+      "type": "image/x-icon",
       "purpose": "any"
     },
     {
