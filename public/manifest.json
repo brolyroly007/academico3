@@ -12,13 +12,21 @@
   "icons": [
     {
       "src": "/favicon5.ico",
-      "sizes": "16x16 32x32",
-      "type": "image/x-icon"
+      "sizes": "16x16 32x32 48x48",
+      "type": "image/x-icon",
+      "purpose": "any"
     },
     {
       "src": "/favicon.svg",
       "sizes": "any",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon5.ico",
+      "sizes": "180x180",
+      "type": "image/x-icon",
+      "purpose": "apple-touch-icon"
     },
     {
       "src": "/icon-192.png",
