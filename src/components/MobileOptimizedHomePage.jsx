@@ -25,15 +25,15 @@ import {
   PlusCircle
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import React, { memo, useState, useRef, useEffect } from "react";
+import React, { memo, useState, useRef } from "react";
 import { useTheme } from "./theme-provider";
-// Removed RainbowBackground for mobile optimization
 
 export const MobileOptimizedHomePage = memo(function MobileOptimizedHomePage() {
   const ctaSectionRef = useRef(null);
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const [activePreview, setActivePreview] = useState("monografia");
+  const [activeStructure, setActiveStructure] = useState("estandar");
 
   const features = [
     {
@@ -66,87 +66,82 @@ export const MobileOptimizedHomePage = memo(function MobileOptimizedHomePage() {
     ctaSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Document structures (simplified for mobile)
-  const documentStructures = {
-    monografia: {
-      estandar: [
-        { level: 1, text: "ÍNDICE", indent: 0, bold: true },
-        { level: 1, text: "1. INTRODUCCIÓN", indent: 0, bold: true },
-        { level: 2, text: "1.1 Contextualización", indent: 1 },
-        { level: 2, text: "1.2 Objetivos", indent: 1 },
-        { level: 1, text: "2. DESARROLLO", indent: 0, bold: true },
-        { level: 2, text: "2.1 Subtema principal", indent: 1 },
-        { level: 2, text: "2.2 Análisis detallado", indent: 1 },
-        { level: 1, text: "3. CONCLUSIONES", indent: 0, bold: true },
-        { level: 1, text: "4. REFERENCIAS", indent: 0, bold: true }
-      ],
-      capitulos: [
-        { level: 1, text: "ÍNDICE", indent: 0, bold: true },
-        { level: 1, text: "CAPÍTULO I: INTRODUCCIÓN", indent: 0, bold: true },
-        { level: 2, text: "1.1 Introducción al tema", indent: 1 },
-        { level: 2, text: "1.2 Contexto histórico", indent: 1 },
-        { level: 1, text: "CAPÍTULO II: DESARROLLO", indent: 0, bold: true },
-        { level: 2, text: "2.1 Desarrollo conceptual", indent: 1 },
-        { level: 2, text: "2.2 Análisis detallado", indent: 1 },
-        { level: 1, text: "CAPÍTULO III: CONCLUSIONES", indent: 0, bold: true },
-        { level: 1, text: "REFERENCIAS", indent: 0, bold: true }
-      ],
-      academica: [
+  const scrollToPreview = () => {
+    const element = document.getElementById('preview-section');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // Simplified document structures
+  const getDocumentStructure = () => {
+    const structures = {
+      monografia: {
+        estandar: [
+          { level: 1, text: "ÍNDICE", indent: 0, bold: true },
+          { level: 1, text: "1. INTRODUCCIÓN", indent: 0, bold: true },
+          { level: 2, text: "1.1 Contextualización", indent: 1 },
+          { level: 2, text: "1.2 Objetivos", indent: 1 },
+          { level: 1, text: "2. DESARROLLO", indent: 0, bold: true },
+          { level: 2, text: "2.1 Subtema principal", indent: 1 },
+          { level: 2, text: "2.2 Análisis detallado", indent: 1 },
+          { level: 1, text: "3. CONCLUSIONES", indent: 0, bold: true },
+          { level: 1, text: "4. REFERENCIAS", indent: 0, bold: true }
+        ],
+        capitulos: [
+          { level: 1, text: "ÍNDICE", indent: 0, bold: true },
+          { level: 1, text: "CAPÍTULO I: INTRODUCCIÓN", indent: 0, bold: true },
+          { level: 2, text: "1.1 Introducción al tema", indent: 1 },
+          { level: 2, text: "1.2 Contexto histórico", indent: 1 },
+          { level: 1, text: "CAPÍTULO II: DESARROLLO", indent: 0, bold: true },
+          { level: 1, text: "CAPÍTULO III: CONCLUSIONES", indent: 0, bold: true },
+          { level: 1, text: "REFERENCIAS", indent: 0, bold: true }
+        ],
+        academica: [
+          { level: 1, text: "ÍNDICE", indent: 0, bold: true },
+          { level: 1, text: "I. INTRODUCCIÓN", indent: 0, bold: true },
+          { level: 1, text: "II. OBJETIVOS", indent: 0, bold: true },
+          { level: 1, text: "III. MARCO TEÓRICO", indent: 0, bold: true },
+          { level: 1, text: "IV. METODOLOGÍA", indent: 0, bold: true },
+          { level: 1, text: "V. RESULTADOS", indent: 0, bold: true },
+          { level: 1, text: "VI. CONCLUSIONES", indent: 0, bold: true },
+          { level: 1, text: "VII. REFERENCIAS", indent: 0, bold: true }
+        ]
+      },
+      ensayo: [
         { level: 1, text: "ÍNDICE", indent: 0, bold: true },
         { level: 1, text: "I. INTRODUCCIÓN", indent: 0, bold: true },
-        { level: 2, text: "1.1 Planteamiento del problema", indent: 1 },
-        { level: 2, text: "1.2 Justificación", indent: 1 },
-        { level: 1, text: "II. OBJETIVOS", indent: 0, bold: true },
-        { level: 2, text: "2.1 Objetivo general", indent: 1 },
-        { level: 2, text: "2.2 Objetivos específicos", indent: 1 },
-        { level: 1, text: "III. MARCO TEÓRICO", indent: 0, bold: true },
-        { level: 2, text: "3.1 Antecedentes", indent: 1 },
-        { level: 2, text: "3.2 Bases teóricas", indent: 1 },
-        { level: 1, text: "IV. METODOLOGÍA", indent: 0, bold: true },
-        { level: 1, text: "V. RESULTADOS", indent: 0, bold: true },
-        { level: 1, text: "VI. CONCLUSIONES", indent: 0, bold: true },
-        { level: 1, text: "VII. REFERENCIAS", indent: 0, bold: true }
+        { level: 1, text: "II. DESARROLLO ARGUMENTATIVO", indent: 0, bold: true },
+        { level: 1, text: "III. CONCLUSIÓN", indent: 0, bold: true },
+        { level: 1, text: "IV. REFERENCIAS", indent: 0, bold: true }
       ]
-    },
-    ensayo: [
-      { level: 1, text: "ÍNDICE", indent: 0, bold: true },
-      { level: 1, text: "I. INTRODUCCIÓN", indent: 0, bold: true },
-      { level: 2, text: "1.1 La paradoja del conocimiento", indent: 1 },
-      { level: 2, text: "1.2 Contexto de inacción global", indent: 1 },
-      { level: 1, text: "II. DESARROLLO ARGUMENTATIVO", indent: 0, bold: true },
-      { level: 2, text: "2.1 El peso de la evidencia", indent: 1 },
-      { level: 2, text: "2.2 Barreras psicológicas", indent: 1 },
-      { level: 1, text: "III. CONCLUSIÓN", indent: 0, bold: true },
-      { level: 1, text: "IV. REFERENCIAS", indent: 0, bold: true }
-    ]
-  };
+    };
 
-  const getDocumentStructure = (type, structure = 'estandar') => {
-    if (type === 'monografia') {
-      return documentStructures.monografia[structure] || documentStructures.monografia.estandar;
+    if (activePreview === 'monografia') {
+      return structures.monografia[activeStructure] || structures.monografia.estandar;
     }
-    return documentStructures.ensayo;
+    return structures.ensayo;
   };
 
-  const getSampleContent = (type) => {
+  const getSampleContent = () => {
     const content = {
       monografia: {
         subtitle: "Impacto del Calentamiento Global en los Ecosistemas Terrestres: Análisis Integral 2020-2024",
-        introduction: "El calentamiento global representa uno de los desafíos más apremiantes del siglo XXI, con implicaciones profundas para los sistemas naturales y humanos a escala planetaria. Según el Panel Intergubernamental sobre Cambio Climático (IPCC, 2023), la temperatura media global ha aumentado aproximadamente 1.1°C desde la era preindustrial, siendo este incremento atribuible inequívocamente a las actividades humanas."
+        introduction: "El calentamiento global representa uno de los desafíos más apremiantes del siglo XXI, con implicaciones profundas para los sistemas naturales y humanos a escala planetaria."
       },
       ensayo: {
         subtitle: "La Paradoja del Conocimiento: Por Qué Sabemos Todo sobre el Cambio Climático pero Hacemos Tan Poco",
-        introduction: "Vivimos en la era de la información, donde el conocimiento científico sobre el cambio climático es más robusto, accesible y convincente que nunca. Paradójicamente, mientras la evidencia se acumula y los científicos lanzan advertencias cada vez más urgentes, la acción colectiva permanece tristemente inadecuada."
+        introduction: "Vivimos en la era de la información, donde el conocimiento científico sobre el cambio climático es más robusto, accesible y convincente que nunca."
       }
     };
-    return content[type] || content.monografia;
+    return content[activePreview] || content.monografia;
   };
 
   return (
     <div className="min-h-screen bg-background">
       <div className="relative min-h-screen">
         <main className="w-full">
-          {/* Hero Section - Simplified */}
+          {/* Hero Section */}
           <section className="pt-20 pb-12 px-4 sm:px-6 relative">
             <div className="max-w-4xl mx-auto text-center">
               <h1 className="text-3xl md:text-5xl font-bold mb-6 tracking-tight">
@@ -176,7 +171,7 @@ export const MobileOptimizedHomePage = memo(function MobileOptimizedHomePage() {
                   </Link>
                 </Button>
                 <Button
-                  onClick={() => document.getElementById('preview-section')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={scrollToPreview}
                   variant="outline"
                   size="lg"
                   className="border-border bg-background/50 backdrop-blur hover:bg-background/80 transition-all duration-200"
@@ -188,7 +183,7 @@ export const MobileOptimizedHomePage = memo(function MobileOptimizedHomePage() {
             </div>
           </section>
 
-          {/* Features - Optimized */}
+          {/* Features */}
           <section className="py-12 px-4 sm:px-6">
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-12">
@@ -220,7 +215,7 @@ export const MobileOptimizedHomePage = memo(function MobileOptimizedHomePage() {
             </div>
           </section>
 
-          {/* Process Steps - Mobile Optimized */}
+          {/* Process Steps */}
           <section className="py-12 px-4 sm:px-6">
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-12">
@@ -244,7 +239,7 @@ export const MobileOptimizedHomePage = memo(function MobileOptimizedHomePage() {
                     step: "02", 
                     icon: <ListTree className="h-6 w-6" />,
                     title: "Selecciona la estructura",
-                    description: "Escoge entre estructura estándar, extendida o académica formal"
+                    description: "Escoge entre estructura estándar, por capítulos o académica"
                   },
                   {
                     step: "03",
@@ -278,7 +273,7 @@ export const MobileOptimizedHomePage = memo(function MobileOptimizedHomePage() {
             </div>
           </section>
 
-          {/* Document Preview Section - Mobile Optimized */}
+          {/* Document Preview Section */}
           <section id="preview-section" className="py-12 px-4 sm:px-6">
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-8">
@@ -286,7 +281,7 @@ export const MobileOptimizedHomePage = memo(function MobileOptimizedHomePage() {
                   Ejemplos de Documentos Académicos
                 </h2>
                 <p className="text-lg text-muted-foreground">
-                  Documentos completos con índice estructurado, contenido desarrollado, tablas y gráficos
+                  Documentos completos con índice estructurado y contenido desarrollado
                 </p>
               </div>
 
@@ -360,7 +355,7 @@ export const MobileOptimizedHomePage = memo(function MobileOptimizedHomePage() {
                   </CardHeader>
                   <CardContent className="p-4">
                     <div className="space-y-2 max-h-60 overflow-y-auto">
-                      {getDocumentStructure(activePreview, activeStructure).map((item, index) => (
+                      {getDocumentStructure().map((item, index) => (
                         <div
                           key={index}
                           className={`text-sm p-2 rounded transition-colors hover:bg-muted/50 ${
@@ -380,17 +375,15 @@ export const MobileOptimizedHomePage = memo(function MobileOptimizedHomePage() {
                 {/* Sample Content */}
                 <Card className="border border-border shadow-lg">
                   <CardHeader className="bg-gradient-to-r from-secondary/10 to-primary/10">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Eye className="h-5 w-5 text-primary" />
-                        <div>
-                          <CardTitle className="text-lg">
-                            {activePreview === "monografia" ? "MONOGRAFÍA" : "ENSAYO ARGUMENTATIVO"}
-                          </CardTitle>
-                          <p className="text-sm text-muted-foreground">
-                            {getSampleContent(activePreview).subtitle}
-                          </p>
-                        </div>
+                    <div className="flex items-center gap-2">
+                      <Eye className="h-5 w-5 text-primary" />
+                      <div>
+                        <CardTitle className="text-lg">
+                          {activePreview === "monografia" ? "MONOGRAFÍA" : "ENSAYO ARGUMENTATIVO"}
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground">
+                          {getSampleContent().subtitle}
+                        </p>
                       </div>
                     </div>
                   </CardHeader>
@@ -399,55 +392,8 @@ export const MobileOptimizedHomePage = memo(function MobileOptimizedHomePage() {
                     <div>
                       <h4 className="font-bold text-foreground mb-2">1. INTRODUCCIÓN</h4>
                       <p className="text-sm text-justify leading-relaxed text-foreground/90">
-                        {getSampleContent(activePreview).introduction.substring(0, 300)}...
+                        {getSampleContent().introduction}...
                       </p>
-                    </div>
-
-                    {/* Table Sample */}
-                    <div className="bg-muted/30 p-4 rounded-lg">
-                      <p className="text-sm font-semibold mb-3 text-center">
-                        Tabla 1. Datos de Investigación
-                      </p>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-xs border-collapse border border-gray-300">
-                          <thead>
-                            <tr className="bg-gray-100 dark:bg-gray-800">
-                              <th className="border border-gray-300 px-2 py-1 text-left">Aspecto</th>
-                              <th className="border border-gray-300 px-2 py-1 text-left">Valor</th>
-                              <th className="border border-gray-300 px-2 py-1 text-left">Estado</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr>
-                              <td className="border border-gray-300 px-2 py-1">Temperatura</td>
-                              <td className="border border-gray-300 px-2 py-1">+1.2°C</td>
-                              <td className="border border-gray-300 px-2 py-1">Crítico</td>
-                            </tr>
-                            <tr className="bg-gray-50 dark:bg-gray-900/50">
-                              <td className="border border-gray-300 px-2 py-1">Biodiversidad</td>
-                              <td className="border border-gray-300 px-2 py-1">-15%</td>
-                              <td className="border border-gray-300 px-2 py-1">Vulnerable</td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-
-                    {/* Graph Placeholder */}
-                    <div className="bg-muted/30 p-4 rounded-lg text-center">
-                      <BarChart3 className="h-12 w-12 text-primary/60 mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground">
-                        Figura 1. Gráfico de Tendencias
-                      </p>
-                    </div>
-
-                    {/* References Sample */}
-                    <div>
-                      <h4 className="font-bold text-foreground mb-2">REFERENCIAS (APA 7)</h4>
-                      <div className="text-xs text-foreground/80 space-y-1">
-                        <p>IPCC. (2023). Climate Change 2023: Synthesis Report...</p>
-                        <p>NASA. (2024). Global Climate Change: Vital Signs...</p>
-                      </div>
                     </div>
 
                     {/* Document Features */}
@@ -487,73 +433,7 @@ export const MobileOptimizedHomePage = memo(function MobileOptimizedHomePage() {
             </div>
           </section>
 
-          {/* Tutorials Section - Mobile Optimized */}
-          <section className="py-12 px-4 sm:px-6 bg-muted/30">
-            <div className="max-w-4xl mx-auto">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold mb-4">
-                  Tutoriales de Uso
-                </h2>
-                <p className="text-lg text-muted-foreground">
-                  Aprende paso a paso cómo usar nuestra plataforma
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {[
-                  {
-                    icon: <PlusCircle className="h-6 w-6" />,
-                    title: "Cómo Solicitar",
-                    description: "Proceso completo para crear tu solicitud",
-                    steps: ["Configuración inicial", "Selección de estructura", "Envío de información"],
-                    color: "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
-                  },
-                  {
-                    icon: <Edit className="h-6 w-6" />,
-                    title: "Cómo Modificar",
-                    description: "Ajusta y personaliza tu trabajo",
-                    steps: ["Revisión del contenido", "Solicitud de cambios", "Aprobación final"],
-                    color: "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
-                  },
-                  {
-                    icon: <FileDown className="h-6 w-6" />,
-                    title: "Cómo Descargar",
-                    description: "Descarga en múltiples formatos",
-                    steps: ["Acceso al documento", "Formatos disponibles", "Descarga segura"],
-                    color: "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800"
-                  },
-                  {
-                    icon: <FileText className="h-6 w-6" />,
-                    title: "Cómo Editar",
-                    description: "Guía para editar tu trabajo entregado",
-                    steps: ["Herramientas de edición", "Formato y estilo", "Guardado final"],
-                    color: "bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800"
-                  }
-                ].map((tutorial, index) => (
-                  <Card key={index} className={`${tutorial.color} transition-all duration-200 hover:shadow-lg`}>
-                    <CardContent className="p-4">
-                      <div className="flex items-start gap-3">
-                        <div className="p-2 rounded-lg bg-background/50">
-                          {tutorial.icon}
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-semibold mb-1">{tutorial.title}</h3>
-                          <p className="text-sm text-muted-foreground mb-3">{tutorial.description}</p>
-                          <ul className="text-xs space-y-1 text-muted-foreground">
-                            {tutorial.steps.map((step, stepIndex) => (
-                              <li key={stepIndex}>• {step}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/* Document Types - Mobile Optimized */}
+          {/* Document Types */}
           <section className="py-12 px-4 sm:px-6">
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-8">
@@ -618,7 +498,7 @@ export const MobileOptimizedHomePage = memo(function MobileOptimizedHomePage() {
             </div>
           </section>
 
-          {/* Benefits Section - Mobile Optimized */}
+          {/* Benefits Section */}
           <section className="py-12 px-4 sm:px-6 bg-muted/30">
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-8">
@@ -664,7 +544,7 @@ export const MobileOptimizedHomePage = memo(function MobileOptimizedHomePage() {
             </div>
           </section>
 
-          {/* CTA Section - Mobile Optimized */}
+          {/* CTA Section */}
           <section ref={ctaSectionRef} className="py-16 px-4 sm:px-6">
             <div className="max-w-4xl mx-auto text-center">
               <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-8 border border-border">
