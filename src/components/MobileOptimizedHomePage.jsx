@@ -16,12 +16,18 @@ import {
   User,
   Building,
   CheckCircle,
-  Play
+  Play,
+  Table,
+  BarChart3,
+  AlertCircle,
+  Edit,
+  FileDown,
+  PlusCircle
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import React, { memo, useState, useRef, useEffect } from "react";
 import { useTheme } from "./theme-provider";
-import RainbowBackground from "./RainbowBackground";
+// Removed RainbowBackground for mobile optimization
 
 export const MobileOptimizedHomePage = memo(function MobileOptimizedHomePage() {
   const ctaSectionRef = useRef(null);
@@ -33,20 +39,26 @@ export const MobileOptimizedHomePage = memo(function MobileOptimizedHomePage() {
     {
       icon: <Zap className="h-6 w-6" />,
       title: "Entrega Inmediata",
-      description: "Documento completo en 3-15 min",
+      description: "Documento completo en 3-15 min, según cantidad de páginas",
       color: isDark ? "bg-yellow-900/30 text-yellow-200" : "bg-blue-100 text-blue-600",
     },
     {
       icon: <LayoutTemplate className="h-6 w-6" />,
       title: "3 Estructuras Disponibles", 
-      description: "Estándar, extendida y académica formal",
-      color: isDark ? "bg-green-900/30 text-green-200" : "bg-green-100 text-green-600",
+      description: "Elige entre formato estándar, por capítulos o académico",
+      color: isDark ? "bg-blue-900/30 text-blue-200" : "bg-yellow-100 text-yellow-600",
     },
     {
       icon: <ClipboardList className="h-6 w-6" />,
-      title: "Formato Profesional",
-      description: "Normas APA, bibliografía incluida",
-      color: isDark ? "bg-blue-900/30 text-blue-200" : "bg-purple-100 text-purple-600",
+      title: "Personalización Total",
+      description: "Ajusta el índice y contenido a tus necesidades exactas",
+      color: isDark ? "bg-yellow-900/30 text-yellow-200" : "bg-blue-100 text-blue-600",
+    },
+    {
+      icon: <BadgeCheck className="h-6 w-6" />,
+      title: "Normativas APA 7",
+      description: "Citas, referencias y formato según estándares académicos",
+      color: isDark ? "bg-blue-900/30 text-blue-200" : "bg-yellow-100 text-yellow-600",
     },
   ];
 
@@ -54,8 +66,84 @@ export const MobileOptimizedHomePage = memo(function MobileOptimizedHomePage() {
     ctaSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Document structures (simplified for mobile)
+  const documentStructures = {
+    monografia: {
+      estandar: [
+        { level: 1, text: "ÍNDICE", indent: 0, bold: true },
+        { level: 1, text: "1. INTRODUCCIÓN", indent: 0, bold: true },
+        { level: 2, text: "1.1 Contextualización", indent: 1 },
+        { level: 2, text: "1.2 Objetivos", indent: 1 },
+        { level: 1, text: "2. DESARROLLO", indent: 0, bold: true },
+        { level: 2, text: "2.1 Subtema principal", indent: 1 },
+        { level: 2, text: "2.2 Análisis detallado", indent: 1 },
+        { level: 1, text: "3. CONCLUSIONES", indent: 0, bold: true },
+        { level: 1, text: "4. REFERENCIAS", indent: 0, bold: true }
+      ],
+      capitulos: [
+        { level: 1, text: "ÍNDICE", indent: 0, bold: true },
+        { level: 1, text: "CAPÍTULO I: INTRODUCCIÓN", indent: 0, bold: true },
+        { level: 2, text: "1.1 Introducción al tema", indent: 1 },
+        { level: 2, text: "1.2 Contexto histórico", indent: 1 },
+        { level: 1, text: "CAPÍTULO II: DESARROLLO", indent: 0, bold: true },
+        { level: 2, text: "2.1 Desarrollo conceptual", indent: 1 },
+        { level: 2, text: "2.2 Análisis detallado", indent: 1 },
+        { level: 1, text: "CAPÍTULO III: CONCLUSIONES", indent: 0, bold: true },
+        { level: 1, text: "REFERENCIAS", indent: 0, bold: true }
+      ],
+      academica: [
+        { level: 1, text: "ÍNDICE", indent: 0, bold: true },
+        { level: 1, text: "I. INTRODUCCIÓN", indent: 0, bold: true },
+        { level: 2, text: "1.1 Planteamiento del problema", indent: 1 },
+        { level: 2, text: "1.2 Justificación", indent: 1 },
+        { level: 1, text: "II. OBJETIVOS", indent: 0, bold: true },
+        { level: 2, text: "2.1 Objetivo general", indent: 1 },
+        { level: 2, text: "2.2 Objetivos específicos", indent: 1 },
+        { level: 1, text: "III. MARCO TEÓRICO", indent: 0, bold: true },
+        { level: 2, text: "3.1 Antecedentes", indent: 1 },
+        { level: 2, text: "3.2 Bases teóricas", indent: 1 },
+        { level: 1, text: "IV. METODOLOGÍA", indent: 0, bold: true },
+        { level: 1, text: "V. RESULTADOS", indent: 0, bold: true },
+        { level: 1, text: "VI. CONCLUSIONES", indent: 0, bold: true },
+        { level: 1, text: "VII. REFERENCIAS", indent: 0, bold: true }
+      ]
+    },
+    ensayo: [
+      { level: 1, text: "ÍNDICE", indent: 0, bold: true },
+      { level: 1, text: "I. INTRODUCCIÓN", indent: 0, bold: true },
+      { level: 2, text: "1.1 La paradoja del conocimiento", indent: 1 },
+      { level: 2, text: "1.2 Contexto de inacción global", indent: 1 },
+      { level: 1, text: "II. DESARROLLO ARGUMENTATIVO", indent: 0, bold: true },
+      { level: 2, text: "2.1 El peso de la evidencia", indent: 1 },
+      { level: 2, text: "2.2 Barreras psicológicas", indent: 1 },
+      { level: 1, text: "III. CONCLUSIÓN", indent: 0, bold: true },
+      { level: 1, text: "IV. REFERENCIAS", indent: 0, bold: true }
+    ]
+  };
+
+  const getDocumentStructure = (type, structure = 'estandar') => {
+    if (type === 'monografia') {
+      return documentStructures.monografia[structure] || documentStructures.monografia.estandar;
+    }
+    return documentStructures.ensayo;
+  };
+
+  const getSampleContent = (type) => {
+    const content = {
+      monografia: {
+        subtitle: "Impacto del Calentamiento Global en los Ecosistemas Terrestres: Análisis Integral 2020-2024",
+        introduction: "El calentamiento global representa uno de los desafíos más apremiantes del siglo XXI, con implicaciones profundas para los sistemas naturales y humanos a escala planetaria. Según el Panel Intergubernamental sobre Cambio Climático (IPCC, 2023), la temperatura media global ha aumentado aproximadamente 1.1°C desde la era preindustrial, siendo este incremento atribuible inequívocamente a las actividades humanas."
+      },
+      ensayo: {
+        subtitle: "La Paradoja del Conocimiento: Por Qué Sabemos Todo sobre el Cambio Climático pero Hacemos Tan Poco",
+        introduction: "Vivimos en la era de la información, donde el conocimiento científico sobre el cambio climático es más robusto, accesible y convincente que nunca. Paradójicamente, mientras la evidencia se acumula y los científicos lanzan advertencias cada vez más urgentes, la acción colectiva permanece tristemente inadecuada."
+      }
+    };
+    return content[type] || content.monografia;
+  };
+
   return (
-    <RainbowBackground className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <div className="relative min-h-screen">
         <main className="w-full">
           {/* Hero Section - Simplified */}
@@ -72,15 +160,15 @@ export const MobileOptimizedHomePage = memo(function MobileOptimizedHomePage() {
               </h1>
               
               <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-                Crea documentos académicos profesionales en minutos. 
-                Monografías, ensayos e informes con estructura perfecta.
+                Creamos documentos académicos completos con índice personalizable, 
+                tablas, gráficos y referencias en formato APA 7
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button
                   asChild
                   size="lg"
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200"
                 >
                   <Link to="/configuracion">
                     <FileText className="mr-2 h-5 w-5" />
@@ -88,19 +176,19 @@ export const MobileOptimizedHomePage = memo(function MobileOptimizedHomePage() {
                   </Link>
                 </Button>
                 <Button
-                  onClick={scrollToCTA}
+                  onClick={() => document.getElementById('preview-section')?.scrollIntoView({ behavior: 'smooth' })}
                   variant="outline"
                   size="lg"
-                  className="border-border bg-background/50 backdrop-blur hover:bg-background/80 transition-all duration-300"
+                  className="border-border bg-background/50 backdrop-blur hover:bg-background/80 transition-all duration-200"
                 >
-                  <Play className="mr-2 h-5 w-5" />
-                  Ver Demo
+                  <Eye className="mr-2 h-5 w-5" />
+                  Ver Ejemplos
                 </Button>
               </div>
             </div>
           </section>
 
-          {/* Features - Simplified */}
+          {/* Features - Optimized */}
           <section className="py-12 px-4 sm:px-6">
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-12">
@@ -109,11 +197,11 @@ export const MobileOptimizedHomePage = memo(function MobileOptimizedHomePage() {
                 </h2>
               </div>
 
-              <div className="grid md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {features.map((feature, index) => (
                   <div
                     key={index}
-                    className={`p-6 rounded-xl border border-border shadow-lg hover:shadow-xl transition-all duration-300 ${feature.color}`}
+                    className={`p-6 rounded-xl border border-border shadow-lg hover:shadow-xl transition-all duration-200 ${feature.color}`}
                   >
                     <div className="flex items-center mb-4">
                       <div className="p-2 rounded-lg bg-white/20 backdrop-blur">
@@ -190,6 +278,281 @@ export const MobileOptimizedHomePage = memo(function MobileOptimizedHomePage() {
             </div>
           </section>
 
+          {/* Document Preview Section - Mobile Optimized */}
+          <section id="preview-section" className="py-12 px-4 sm:px-6">
+            <div className="max-w-4xl mx-auto">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold mb-4">
+                  Ejemplos de Documentos Académicos
+                </h2>
+                <p className="text-lg text-muted-foreground">
+                  Documentos completos con índice estructurado, contenido desarrollado, tablas y gráficos
+                </p>
+              </div>
+
+              {/* Document Type Selector */}
+              <div className="flex justify-center gap-4 mb-8 flex-wrap">
+                <button
+                  onClick={() => {
+                    setActivePreview("monografia");
+                    setActiveStructure("estandar");
+                  }}
+                  className={`flex items-center gap-2 px-4 py-3 rounded-lg font-medium transition-all ${
+                    activePreview === "monografia"
+                      ? "bg-primary text-primary-foreground shadow-md"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  }`}
+                >
+                  <BookOpen className="h-4 w-4" />
+                  Monografía
+                </button>
+                <button
+                  onClick={() => setActivePreview("ensayo")}
+                  className={`flex items-center gap-2 px-4 py-3 rounded-lg font-medium transition-all ${
+                    activePreview === "ensayo"
+                      ? "bg-primary text-primary-foreground shadow-md"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  }`}
+                >
+                  <FileText className="h-4 w-4" />
+                  Ensayo
+                </button>
+              </div>
+
+              {/* Structure Selector for Monographs */}
+              {activePreview === "monografia" && (
+                <div className="flex justify-center gap-2 flex-wrap mb-6">
+                  {[
+                    { key: "estandar", title: "Estándar", icon: <FileText className="h-4 w-4" /> },
+                    { key: "capitulos", title: "Capítulos", icon: <ListTree className="h-4 w-4" /> },
+                    { key: "academica", title: "Académica", icon: <BookOpen className="h-4 w-4" /> }
+                  ].map((structure) => (
+                    <button
+                      key={structure.key}
+                      onClick={() => setActiveStructure(structure.key)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                        activeStructure === structure.key
+                          ? "bg-secondary text-secondary-foreground shadow-sm"
+                          : "bg-muted/50 text-muted-foreground hover:bg-muted/70"
+                      }`}
+                    >
+                      {structure.icon}
+                      {structure.title}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Preview Content */}
+              <div className="grid gap-6">
+                {/* Document Structure */}
+                <Card className="border border-border shadow-lg">
+                  <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10">
+                    <div className="flex items-center gap-2">
+                      <ListTree className="h-5 w-5 text-primary" />
+                      <CardTitle className="text-lg">
+                        {activePreview === "monografia" 
+                          ? `Estructura ${activeStructure === "estandar" ? "Estándar" : activeStructure === "capitulos" ? "por Capítulos" : "Académica"}`
+                          : "Estructura del Ensayo"
+                        }
+                      </CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    <div className="space-y-2 max-h-60 overflow-y-auto">
+                      {getDocumentStructure(activePreview, activeStructure).map((item, index) => (
+                        <div
+                          key={index}
+                          className={`text-sm p-2 rounded transition-colors hover:bg-muted/50 ${
+                            item.bold ? "font-bold" : ""
+                          } ${
+                            item.level === 1 ? "text-primary" : "text-foreground"
+                          }`}
+                          style={{ paddingLeft: `${item.indent * 16 + 8}px` }}
+                        >
+                          {item.text}
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Sample Content */}
+                <Card className="border border-border shadow-lg">
+                  <CardHeader className="bg-gradient-to-r from-secondary/10 to-primary/10">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Eye className="h-5 w-5 text-primary" />
+                        <div>
+                          <CardTitle className="text-lg">
+                            {activePreview === "monografia" ? "MONOGRAFÍA" : "ENSAYO ARGUMENTATIVO"}
+                          </CardTitle>
+                          <p className="text-sm text-muted-foreground">
+                            {getSampleContent(activePreview).subtitle}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-4 space-y-4">
+                    {/* Introduction Sample */}
+                    <div>
+                      <h4 className="font-bold text-foreground mb-2">1. INTRODUCCIÓN</h4>
+                      <p className="text-sm text-justify leading-relaxed text-foreground/90">
+                        {getSampleContent(activePreview).introduction.substring(0, 300)}...
+                      </p>
+                    </div>
+
+                    {/* Table Sample */}
+                    <div className="bg-muted/30 p-4 rounded-lg">
+                      <p className="text-sm font-semibold mb-3 text-center">
+                        Tabla 1. Datos de Investigación
+                      </p>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-xs border-collapse border border-gray-300">
+                          <thead>
+                            <tr className="bg-gray-100 dark:bg-gray-800">
+                              <th className="border border-gray-300 px-2 py-1 text-left">Aspecto</th>
+                              <th className="border border-gray-300 px-2 py-1 text-left">Valor</th>
+                              <th className="border border-gray-300 px-2 py-1 text-left">Estado</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td className="border border-gray-300 px-2 py-1">Temperatura</td>
+                              <td className="border border-gray-300 px-2 py-1">+1.2°C</td>
+                              <td className="border border-gray-300 px-2 py-1">Crítico</td>
+                            </tr>
+                            <tr className="bg-gray-50 dark:bg-gray-900/50">
+                              <td className="border border-gray-300 px-2 py-1">Biodiversidad</td>
+                              <td className="border border-gray-300 px-2 py-1">-15%</td>
+                              <td className="border border-gray-300 px-2 py-1">Vulnerable</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    {/* Graph Placeholder */}
+                    <div className="bg-muted/30 p-4 rounded-lg text-center">
+                      <BarChart3 className="h-12 w-12 text-primary/60 mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground">
+                        Figura 1. Gráfico de Tendencias
+                      </p>
+                    </div>
+
+                    {/* References Sample */}
+                    <div>
+                      <h4 className="font-bold text-foreground mb-2">REFERENCIAS (APA 7)</h4>
+                      <div className="text-xs text-foreground/80 space-y-1">
+                        <p>IPCC. (2023). Climate Change 2023: Synthesis Report...</p>
+                        <p>NASA. (2024). Global Climate Change: Vital Signs...</p>
+                      </div>
+                    </div>
+
+                    {/* Document Features */}
+                    <div className="grid grid-cols-3 gap-2 mt-4">
+                      <div className="bg-primary/5 p-3 rounded-lg text-center">
+                        <div className="font-semibold text-primary text-sm">
+                          {activePreview === "monografia" ? "45-50" : "20-25"} pág.
+                        </div>
+                        <div className="text-xs text-muted-foreground">Completo</div>
+                      </div>
+                      <div className="bg-secondary/5 p-3 rounded-lg text-center">
+                        <Table className="h-4 w-4 text-secondary mx-auto mb-1" />
+                        <div className="text-xs text-muted-foreground">Tablas</div>
+                      </div>
+                      <div className="bg-primary/5 p-3 rounded-lg text-center">
+                        <div className="font-semibold text-primary text-sm">APA 7</div>
+                        <div className="text-xs text-muted-foreground">Formato</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Action Button */}
+              <div className="text-center mt-8">
+                <Button
+                  asChild
+                  size="lg"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  <Link to="/configuracion">
+                    <FileText className="mr-2 h-5 w-5" />
+                    Crear Mi Documento Ahora
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </section>
+
+          {/* Tutorials Section - Mobile Optimized */}
+          <section className="py-12 px-4 sm:px-6 bg-muted/30">
+            <div className="max-w-4xl mx-auto">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold mb-4">
+                  Tutoriales de Uso
+                </h2>
+                <p className="text-lg text-muted-foreground">
+                  Aprende paso a paso cómo usar nuestra plataforma
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[
+                  {
+                    icon: <PlusCircle className="h-6 w-6" />,
+                    title: "Cómo Solicitar",
+                    description: "Proceso completo para crear tu solicitud",
+                    steps: ["Configuración inicial", "Selección de estructura", "Envío de información"],
+                    color: "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
+                  },
+                  {
+                    icon: <Edit className="h-6 w-6" />,
+                    title: "Cómo Modificar",
+                    description: "Ajusta y personaliza tu trabajo",
+                    steps: ["Revisión del contenido", "Solicitud de cambios", "Aprobación final"],
+                    color: "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
+                  },
+                  {
+                    icon: <FileDown className="h-6 w-6" />,
+                    title: "Cómo Descargar",
+                    description: "Descarga en múltiples formatos",
+                    steps: ["Acceso al documento", "Formatos disponibles", "Descarga segura"],
+                    color: "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800"
+                  },
+                  {
+                    icon: <FileText className="h-6 w-6" />,
+                    title: "Cómo Editar",
+                    description: "Guía para editar tu trabajo entregado",
+                    steps: ["Herramientas de edición", "Formato y estilo", "Guardado final"],
+                    color: "bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800"
+                  }
+                ].map((tutorial, index) => (
+                  <Card key={index} className={`${tutorial.color} transition-all duration-200 hover:shadow-lg`}>
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-lg bg-background/50">
+                          {tutorial.icon}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold mb-1">{tutorial.title}</h3>
+                          <p className="text-sm text-muted-foreground mb-3">{tutorial.description}</p>
+                          <ul className="text-xs space-y-1 text-muted-foreground">
+                            {tutorial.steps.map((step, stepIndex) => (
+                              <li key={stepIndex}>• {step}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </section>
+
           {/* Document Types - Mobile Optimized */}
           <section className="py-12 px-4 sm:px-6">
             <div className="max-w-4xl mx-auto">
@@ -226,7 +589,7 @@ export const MobileOptimizedHomePage = memo(function MobileOptimizedHomePage() {
                     color: "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800"
                   }
                 ].map((docType, index) => (
-                  <Card key={index} className={`${docType.color} transition-all duration-300 hover:shadow-lg`}>
+                  <Card key={index} className={`${docType.color} transition-all duration-200 hover:shadow-lg`}>
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between">
                         <div className="flex items-start gap-3 flex-1">
@@ -301,10 +664,10 @@ export const MobileOptimizedHomePage = memo(function MobileOptimizedHomePage() {
             </div>
           </section>
 
-          {/* CTA Section - Enhanced */}
+          {/* CTA Section - Mobile Optimized */}
           <section ref={ctaSectionRef} className="py-16 px-4 sm:px-6">
             <div className="max-w-4xl mx-auto text-center">
-              <div className="bg-gradient-to-r from-primary/20 to-blue-600/20 rounded-2xl p-8 border border-border">
+              <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-8 border border-border">
                 <h2 className="text-2xl md:text-3xl font-bold mb-4">
                   ¿Listo para crear tu documento académico?
                 </h2>
@@ -315,7 +678,7 @@ export const MobileOptimizedHomePage = memo(function MobileOptimizedHomePage() {
                   <Button
                     asChild
                     size="lg"
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200"
                   >
                     <Link to="/configuracion">
                       <Send className="mr-2 h-5 w-5" />
@@ -326,6 +689,7 @@ export const MobileOptimizedHomePage = memo(function MobileOptimizedHomePage() {
                     asChild
                     variant="outline"
                     size="lg"
+                    className="transition-all duration-200"
                   >
                     <Link to="/preview">
                       <Eye className="mr-2 h-5 w-5" />
@@ -341,7 +705,7 @@ export const MobileOptimizedHomePage = memo(function MobileOptimizedHomePage() {
           </section>
         </main>
       </div>
-    </RainbowBackground>
+    </div>
   );
 });
 
