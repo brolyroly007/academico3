@@ -18,6 +18,7 @@ import {
 import { appendToSheet } from "../services/googleSheets";
 import { handleError, handleSuccess } from "../utils/errorHandler";
 import RainbowBackground from "./RainbowBackground";
+import IndexEditor from "./IndexEditor";
 
 // Definición de las estructuras disponibles
 const STRUCTURE_TYPES = {
@@ -48,6 +49,8 @@ function IndexPreview() {
   const [generatedIndex, setGeneratedIndex] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  const [editedContent, setEditedContent] = useState("");
 
   // Función para obtener información de la estructura
   const getStructureInfo = () => {
@@ -396,6 +399,17 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
     }
   }, []);
 
+  // Función para manejar el guardado del contenido editado
+  const handleSaveEditedContent = (content) => {
+    setEditedContent(content);
+    // Convertir HTML a texto plano para el textarea
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = content;
+    const textContent = tempDiv.textContent || tempDiv.innerText || '';
+    setGeneratedIndex(textContent);
+    setEditMode(false);
+  };
+
   const handleConfirm = async () => {
     setIsSubmitting(true);
     try {
@@ -484,8 +498,11 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
                 </Button>
               </div>
 
-              {/* Resumen del pedido que muestra toda la información recopilada */}
-              <div className="bg-gradient-to-r from-muted/20 to-muted/10 rounded-lg p-3 sm:p-6 border border-border/50 shadow-lg animate-on-scroll glow-fade">
+              {/* Layout de 2 columnas: Resumen del pedido + Editor de índice */}
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 flex-1">
+                {/* Columna izquierda: Resumen del pedido */}
+                <div className="space-y-6">
+                  <div className="bg-gradient-to-r from-muted/20 to-muted/10 rounded-lg p-3 sm:p-6 border border-border/50 shadow-lg animate-on-scroll glow-fade">
                 <h3 className="font-medium mb-2 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
                   <div className="bg-gradient-to-r from-primary/20 to-primary/10 p-1.5 rounded-lg">
                     <List className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
@@ -613,59 +630,101 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
                       </p>
                     </div>
                   </div>
-                </div>
-              </div>
-
-              {/* Área del índice - ocupa el espacio restante */}
-              <div className="bg-gradient-to-r from-muted/20 to-muted/10 rounded-lg p-3 sm:p-6 flex-1 flex flex-col min-h-[300px] border border-border/50 shadow-lg animate-on-scroll elastic-in">
-                <div className="flex items-center justify-between mb-3 sm:mb-4">
-                  <h3 className="text-sm sm:text-lg font-medium flex items-center gap-2">
-                    <div className="bg-gradient-to-r from-blue-500/20 to-blue-400/10 p-1.5 rounded-lg">
-                      <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
                     </div>
-                    <span className="hidden sm:inline bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
-                      Revisa y ajusta el índice según tus necesidades
-                    </span>
-                    <span className="inline sm:hidden bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">Revisa el índice</span>
-                  </h3>
-                  <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-0.5 sm:py-1 bg-gradient-to-r from-muted to-muted/80 rounded-full text-xs sm:text-sm shadow-md border border-border/30">
-                    <div className="bg-gradient-to-r from-primary/20 to-primary/10 p-0.5 rounded">
-                      {structureInfo.icon}
-                    </div>
-                    <span className="font-medium">{structureInfo.name}</span>
                   </div>
                 </div>
-                <div className="relative flex-1 flex flex-col">
-                  <Textarea
-                    value={generatedIndex}
-                    onChange={(e) => setGeneratedIndex(e.target.value)}
-                    className="flex-1 min-h-0 font-mono text-xs sm:text-sm resize-none"
-                    disabled={isLoading}
-                    placeholder={isLoading ? "Generando índice..." : ""}
-                  />
-                  {isLoading && (
-                    <div className="absolute inset-0 bg-white/80 dark:bg-background/80 flex items-center justify-center">
-                      <div className="flex items-center gap-2">
-                        <Loader className="w-5 h-5 animate-spin" />
-                        <span>
-                          Generando índice personalizado basado en{" "}
-                          {formData.length} páginas...
-                        </span>
+
+                {/* Columna derecha: Editor de índice */}
+                <div className="space-y-6 flex-1 flex flex-col">
+                  {!editMode ? (
+                    // Vista previa simple
+                    <div className="bg-gradient-to-r from-muted/20 to-muted/10 rounded-lg p-3 sm:p-6 flex-1 flex flex-col min-h-[500px] border border-border/50 shadow-lg animate-on-scroll elastic-in">
+                      <div className="flex items-center justify-between mb-3 sm:mb-4">
+                        <h3 className="text-sm sm:text-lg font-medium flex items-center gap-2">
+                          <div className="bg-gradient-to-r from-blue-500/20 to-blue-400/10 p-1.5 rounded-lg">
+                            <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
+                          </div>
+                          <span className="bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
+                            Índice Propuesto
+                          </span>
+                        </h3>
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-0.5 sm:py-1 bg-gradient-to-r from-muted to-muted/80 rounded-full text-xs sm:text-sm shadow-md border border-border/30">
+                            <div className="bg-gradient-to-r from-primary/20 to-primary/10 p-0.5 rounded">
+                              {structureInfo.icon}
+                            </div>
+                            <span className="font-medium">{structureInfo.name}</span>
+                          </div>
+                          <Button
+                            onClick={() => {
+                              setEditMode(true);
+                              setEditedContent(generatedIndex);
+                            }}
+                            variant="outline"
+                            size="sm"
+                            className="text-purple-600 hover:bg-purple-50 border-purple-200"
+                          >
+                            <AlertCircle className="w-4 h-4 mr-2" />
+                            Editar Avanzado
+                          </Button>
+                        </div>
                       </div>
+                      <div className="relative flex-1 flex flex-col">
+                        <Textarea
+                          value={generatedIndex}
+                          onChange={(e) => setGeneratedIndex(e.target.value)}
+                          className="flex-1 min-h-0 font-mono text-xs sm:text-sm resize-none"
+                          disabled={isLoading}
+                          placeholder={isLoading ? "Generando índice..." : ""}
+                        />
+                        {isLoading && (
+                          <div className="absolute inset-0 bg-white/80 dark:bg-background/80 flex items-center justify-center">
+                            <div className="flex items-center gap-2">
+                              <Loader className="w-5 h-5 animate-spin" />
+                              <span>
+                                Generando índice personalizado basado en{" "}
+                                {formData.length} páginas...
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground mt-2">
+                        Edición básica disponible aquí. Para opciones avanzadas como regenerar con IA, agregar cuadros y más, usa el "Editar Avanzado".
+                        {apiError && (
+                          <span className="block text-yellow-600 dark:text-yellow-400 mt-1">
+                            Nota: {apiError}. Puedes continuar con este índice o modificarlo.
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  ) : (
+                    // Editor avanzado TipTap
+                    <div className="flex-1 flex flex-col">
+                      <div className="mb-4 flex items-center justify-between">
+                        <h3 className="text-lg font-medium flex items-center gap-2">
+                          <AlertCircle className="w-5 h-5 text-blue-500" />
+                          Editor Avanzado de Índice
+                        </h3>
+                        <Button
+                          onClick={() => {
+                            setEditMode(false);
+                            setGeneratedIndex(editedContent);
+                          }}
+                          variant="outline"
+                          size="sm"
+                        >
+                          Volver a Vista Simple
+                        </Button>
+                      </div>
+                      <IndexEditor
+                        initialContent={editedContent}
+                        onSave={handleSaveEditedContent}
+                        formData={formData}
+                      />
                     </div>
                   )}
                 </div>
-                <p className="text-[10px] sm:text-xs text-muted-foreground mt-2">
-                  Puedes editar directamente el índice para ajustarlo a tus
-                  necesidades específicas. Los cambios que realices aquí se
-                  guardarán con tu pedido.
-                  {apiError && (
-                    <span className="block text-yellow-600 dark:text-yellow-400 mt-1">
-                      Nota: {apiError}. Puedes continuar con este índice o
-                      modificarlo manualmente.
-                    </span>
-                  )}
-                </p>
               </div>
 
               {/* Sección de acciones finales */}
