@@ -244,6 +244,7 @@ export default function AcademicForm() {
   // Recuperar el paso y datos guardados
   const savedStep = location.state?.currentStep ?? 0;
   const maxVisitedStep = location.state?.maxVisitedStep ?? savedStep;
+  const phoneChanged = location.state?.phoneChanged ?? false;
   const savedFormData = location.state?.formData ?? {
     documentType: "",
     topic: "",
@@ -282,6 +283,16 @@ export default function AcademicForm() {
   );
   const [recaptchaError, setRecaptchaError] = useState(false);
   const [securitySectionExpanded, setSecuritySectionExpanded] = useState(false);
+  const [showPhoneChangeMessage, setShowPhoneChangeMessage] = useState(phoneChanged);
+  
+  // Efecto para mostrar mensaje de cambio de número
+  useEffect(() => {
+    if (phoneChanged) {
+      setTimeout(() => {
+        setShowPhoneChangeMessage(false);
+      }, 5000); // Ocultar después de 5 segundos
+    }
+  }, [phoneChanged]);
 
   // Función para actualizar los datos de la carátula
   const handleCoverDataChange = (coverData) => {
@@ -293,14 +304,21 @@ export default function AcademicForm() {
 
   // Función para manejar la verificación de reCAPTCHA
   const handleRecaptchaVerify = (token) => {
-    setRecaptchaToken(token);
-    setRecaptchaError(false);
+    try {
+      setRecaptchaToken(token);
+      setRecaptchaError(false);
 
-    // Actualizar formData con el token real
-    setFormData((prev) => ({
-      ...prev,
-      recaptchaToken: token,
-    }));
+      // Actualizar formData con el token real
+      setFormData((prev) => ({
+        ...prev,
+        recaptchaToken: token,
+      }));
+      
+      console.log("reCAPTCHA token recibido correctamente");
+    } catch (error) {
+      console.error("Error al manejar token reCAPTCHA:", error);
+      setRecaptchaError(true);
+    }
   };
 
   // Manejar cambio en la aceptación de políticas
@@ -442,10 +460,15 @@ export default function AcademicForm() {
         newErrors.privacyAccepted = "Debes aceptar la política de privacidad";
       }
 
-      // Verificar si tenemos un token de reCAPTCHA
+      // Verificar si tenemos un token de reCAPTCHA con timeout
       if (!recaptchaToken) {
-        setRecaptchaError(true);
-        newErrors.recaptcha = "Error en la verificación de seguridad";
+        // Dar un poco más de tiempo para reCAPTCHA
+        setTimeout(() => {
+          if (!recaptchaToken) {
+            setRecaptchaError(true);
+            newErrors.recaptcha = "Error en la verificación de seguridad";
+          }
+        }, 2000);
       }
     }
 
@@ -728,6 +751,21 @@ export default function AcademicForm() {
                 }: ${steps[currentStep].title}`}
               />
             </div>
+            
+            {/* Mensaje de cambio de número */}
+            {showPhoneChangeMessage && (
+              <div className="mb-6 animate-on-scroll fade-up">
+                <div className="bg-gradient-to-r from-green-50/80 to-green-100/60 dark:from-green-950/30 dark:to-green-900/20 border border-green-200/50 dark:border-green-800/50 rounded-lg p-4">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    <p className="text-green-700 dark:text-green-300 font-medium">
+                      Número de teléfono actualizado correctamente. Puedes continuar o enviar el formulario.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
               {/* Step 1: Document Type */}
               {currentStep === 0 && (

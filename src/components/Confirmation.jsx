@@ -1,7 +1,16 @@
 // src/pages/Confirmation.jsx
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   CheckCircle2,
   Calendar,
@@ -9,13 +18,76 @@ import {
   Phone,
   BookOpen,
   Home,
+  Edit3,
+  Save,
+  X,
 } from "lucide-react";
 import RainbowBackground from "./RainbowBackground";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+
+// Códigos de país disponibles
+const COUNTRY_CODES = [
+  { value: "+51", label: "Perú (+51)" },
+  { value: "+56", label: "Chile (+56)" },
+  { value: "+57", label: "Colombia (+57)" },
+  { value: "+52", label: "México (+52)" },
+  { value: "+54", label: "Argentina (+54)" },
+  { value: "+593", label: "Ecuador (+593)" },
+  { value: "+58", label: "Venezuela (+58)" },
+  { value: "+34", label: "España (+34)" },
+];
 
 export default function Confirmation() {
   const { state } = useLocation();
-  const { formData } = state;
+  const navigate = useNavigate();
+  const { formData } = state || {};
+  
+  // Estados para editar número
+  const [isEditingPhone, setIsEditingPhone] = useState(false);
+  const [editedCountryCode, setEditedCountryCode] = useState(formData?.countryCode || "+51");
+  const [editedPhoneNumber, setEditedPhoneNumber] = useState(formData?.phoneNumber || "");
+  
+  // Funciones para manejar cambios
+  const handleSavePhone = () => {
+    // Validar número
+    if (!editedPhoneNumber.trim()) {
+      alert("Por favor ingresa un número válido");
+      return;
+    }
+    
+    // Actualizar los datos
+    const updatedFormData = {
+      ...formData,
+      countryCode: editedCountryCode,
+      phoneNumber: editedPhoneNumber
+    };
+    
+    // Redireccionar al formulario con los datos actualizados
+    navigate("/configuracion", {
+      state: {
+        formData: updatedFormData,
+        currentStep: 4, // Ir al paso de detalles finales
+        maxVisitedStep: 4,
+        phoneChanged: true // Flag para indicar que se cambió el número
+      }
+    });
+  };
+  
+  const handleReturnToForm = () => {
+    navigate("/configuracion", {
+      state: {
+        formData,
+        currentStep: 4, // Ir al paso de detalles finales
+        maxVisitedStep: 4
+      }
+    });
+  };
+  
+  // Verificar que tenemos los datos necesarios
+  if (!formData) {
+    navigate("/configuracion");
+    return null;
+  }
 
   // Configurar animaciones al cargar la página
   useEffect(() => {
@@ -159,19 +231,109 @@ export default function Confirmation() {
                   </p>
                 </div>
 
-                <div className="relative group">
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/20 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-lg scale-110" />
-                  <Button asChild className="relative w-full h-12 text-lg rounded-xl bg-gradient-to-r from-primary via-primary/95 to-primary/90 text-primary-foreground border-2 border-primary/50 hover:border-primary/80 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 hover:-translate-y-0.5 group"
-                    style={{
-                      boxShadow: '0 20px 40px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1)'
-                    }}>
-                    <Link to="/" className="flex items-center justify-center gap-2">
-                      <Home className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
-                      <span className="font-bold tracking-wide">Volver al Inicio</span>
-                      {/* Brillo animado */}
-                      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out rounded-xl" />
-                    </Link>
-                  </Button>
+                {/* Sección para cambiar número */}
+                <div className="bg-gradient-to-r from-amber-50/80 to-amber-100/60 dark:from-amber-950/30 dark:to-amber-900/20 border border-amber-200/50 dark:border-amber-800/50 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-medium text-amber-800 dark:text-amber-300">Número de contacto</h4>
+                    {!isEditingPhone ? (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsEditingPhone(true)}
+                        className="text-amber-700 dark:text-amber-400 hover:bg-amber-200/50 dark:hover:bg-amber-800/50"
+                      >
+                        <Edit3 className="w-4 h-4 mr-1" />
+                        Cambiar
+                      </Button>
+                    ) : (
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleSavePhone}
+                          className="text-green-700 dark:text-green-400 hover:bg-green-200/50 dark:hover:bg-green-800/50"
+                        >
+                          <Save className="w-4 h-4 mr-1" />
+                          Guardar
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setIsEditingPhone(false);
+                            setEditedCountryCode(formData.countryCode);
+                            setEditedPhoneNumber(formData.phoneNumber);
+                          }}
+                          className="text-red-700 dark:text-red-400 hover:bg-red-200/50 dark:hover:bg-red-800/50"
+                        >
+                          <X className="w-4 h-4 mr-1" />
+                          Cancelar
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {!isEditingPhone ? (
+                    <p className="text-sm text-amber-700 dark:text-amber-300">
+                      {formData.countryCode} {formData.phoneNumber}
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-xs text-amber-700 dark:text-amber-400">Código</Label>
+                        <Select value={editedCountryCode} onValueChange={setEditedCountryCode}>
+                          <SelectTrigger className="h-9">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {COUNTRY_CODES.map((country) => (
+                              <SelectItem key={country.value} value={country.value}>
+                                {country.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-amber-700 dark:text-amber-400">Número</Label>
+                        <Input
+                          value={editedPhoneNumber}
+                          onChange={(e) => setEditedPhoneNumber(e.target.value)}
+                          placeholder="Número de teléfono"
+                          className="h-9"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="relative group">
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-muted/20 to-muted/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-lg scale-110" />
+                    <Button
+                      variant="outline"
+                      onClick={handleReturnToForm}
+                      className="relative w-full h-12 text-base rounded-xl border-2 border-border/50 hover:border-border/80 transition-all duration-300 hover:scale-105 hover:-translate-y-0.5"
+                    >
+                      <Edit3 className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform duration-300" />
+                      <span className="font-medium">Modificar Datos</span>
+                    </Button>
+                  </div>
+                  
+                  <div className="relative group">
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/20 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-lg scale-110" />
+                    <Button asChild className="relative w-full h-12 text-base rounded-xl bg-gradient-to-r from-primary via-primary/95 to-primary/90 text-primary-foreground border-2 border-primary/50 hover:border-primary/80 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 hover:-translate-y-0.5 group"
+                      style={{
+                        boxShadow: '0 20px 40px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1)'
+                      }}>
+                      <Link to="/" className="flex items-center justify-center gap-2">
+                        <Home className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+                        <span className="font-bold tracking-wide">Volver al Inicio</span>
+                        {/* Brillo animado */}
+                        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out rounded-xl" />
+                      </Link>
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
