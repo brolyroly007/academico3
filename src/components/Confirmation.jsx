@@ -51,8 +51,14 @@ export default function Confirmation() {
   const [editedPhoneNumber, setEditedPhoneNumber] = useState(formData?.phoneNumber || "");
   const [isResubmitting, setIsResubmitting] = useState(false);
   
-  // Funciones para manejar cambios
+  // Funciones para manejar cambios - REPLICANDO EXACTAMENTE handleConfirm de IndexPreview
   const handleSavePhone = async () => {
+    console.log("[DEBUG] handleSavePhone - Iniciando resubmisión con:");
+    console.log("[DEBUG] editedCountryCode:", editedCountryCode);
+    console.log("[DEBUG] editedPhoneNumber:", editedPhoneNumber);
+    console.log("[DEBUG] formData original:", formData);
+    console.log("[DEBUG] index:", index);
+    
     // Validar número
     if (!editedPhoneNumber.trim()) {
       alert("Por favor ingresa un número válido");
@@ -69,34 +75,32 @@ export default function Confirmation() {
     setIsResubmitting(true);
     
     try {
-      // Verificar que tenemos los datos necesarios
-      if (!formData || !formData.documentType) {
-        throw new Error("Datos del formulario no encontrados");
-      }
-      
-      // Crear los datos actualizados con el nuevo número
-      const updatedFormData = {
+      // EXACTAMENTE como en IndexPreview: Asegurarnos de que el objeto formData está completo
+      const completeFormData = {
         ...formData,
+        // Actualizar el número
         countryCode: editedCountryCode,
         phoneNumber: editedPhoneNumber.trim(),
-        // Incluir el índice si existe
+        // EXACTAMENTE como en IndexPreview: incluir el índice
         index: index || formData.index || "",
-        // Agregar timestamp de actualización
+        // EXACTAMENTE como en IndexPreview: timestamp
+        timestamp: new Date().toISOString(),
+        // Campos adicionales para marcar como reenvío
         phoneUpdatedAt: new Date().toISOString(),
-        // Marcar como reenvío
         isResubmission: true,
-        originalTimestamp: formData.timestamp || new Date().toISOString(),
-        newTimestamp: new Date().toISOString(),
-        // Asegurar que el timestamp principal esté presente
-        timestamp: new Date().toISOString()
+        originalTimestamp: formData.timestamp || formData.newTimestamp || new Date().toISOString(),
       };
       
-      console.log("[DEBUG] Datos originales:", formData);
-      console.log("[DEBUG] Reenviando solicitud con nuevo número:", updatedFormData);
+      // EXACTAMENTE como en IndexPreview: Registrar los datos que estamos enviando
+      console.log("[DEBUG] Enviando datos completos a Google Sheets:", completeFormData);
       
-      // Reenviar a Google Sheets
-      const result = await appendToSheet(updatedFormData);
-      console.log("[DEBUG] Resultado del reenvío:", result);
+      // EXACTAMENTE como en IndexPreview: llamar a appendToSheet
+      console.log("[DEBUG] Llamando a appendToSheet...");
+      await appendToSheet(completeFormData);
+      console.log("[DEBUG] appendToSheet completado exitosamente");
+      
+      // EXACTAMENTE como en IndexPreview: mostrar mensaje de éxito
+      handleSuccess("¡Tu solicitud ha sido reenviada correctamente!");
       
       // Actualizar el estado local
       Object.assign(formData, {
@@ -106,9 +110,6 @@ export default function Confirmation() {
       
       // Salir del modo edición
       setIsEditingPhone(false);
-      
-      // Mostrar mensaje de éxito
-      handleSuccess("¡Solicitud reenviada correctamente con el nuevo número!");
       
     } catch (error) {
       console.error("[ERROR] Error completo al reenviar solicitud:", error);
@@ -126,19 +127,21 @@ export default function Confirmation() {
     }
   };
   
+  // EXACTAMENTE como handleBack en IndexPreview
   const handleReturnToForm = () => {
-    console.log("[DEBUG] Navegando de vuelta al formulario con datos:", {
+    console.log("[DEBUG] handleReturnToForm - FormData recibido:", formData);
+    console.log("[DEBUG] handleReturnToForm - Navegando a step 4 con state:", {
       formData,
-      currentStep: 3,
-      maxVisitedStep: 4
+      currentStep: 4,
+      maxVisitedStep: 4,
     });
     
     navigate("/configuracion", {
       state: {
         formData,
-        currentStep: 3, // Ir al paso de detalles finales (0-indexed, so 3 = step 4)
-        maxVisitedStep: 4
-      }
+        currentStep: 4, // EXACTAMENTE como en IndexPreview - Detalles finales es step 4
+        maxVisitedStep: 4, // EXACTAMENTE como en IndexPreview - Importante para permitir la navegación
+      },
     });
   };
   

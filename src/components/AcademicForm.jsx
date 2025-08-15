@@ -245,6 +245,11 @@ export default function AcademicForm() {
   const savedStep = location.state?.currentStep ?? 0;
   const maxVisitedStep = location.state?.maxVisitedStep ?? savedStep;
   const phoneChanged = location.state?.phoneChanged ?? false;
+  
+  // DEBUG: Verificar qué estado estamos recibiendo
+  console.log("[DEBUG] AcademicForm - location.state recibido:", location.state);
+  console.log("[DEBUG] AcademicForm - savedStep:", savedStep);
+  console.log("[DEBUG] AcademicForm - maxVisitedStep:", maxVisitedStep);
   const savedFormData = location.state?.formData ?? {
     documentType: "",
     topic: "",
@@ -270,6 +275,11 @@ export default function AcademicForm() {
   const [formData, setFormData] = useState(savedFormData);
   const [errors, setErrors] = useState({});
   const [currentStep, setCurrentStep] = useState(savedStep);
+  
+  // DEBUG: Monitorear cambios en currentStep
+  useEffect(() => {
+    console.log("[DEBUG] AcademicForm - currentStep cambió a:", currentStep);
+  }, [currentStep]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [maxStep, setMaxStep] = useState(maxVisitedStep);
