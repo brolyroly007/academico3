@@ -18,7 +18,7 @@ import {
 import { appendToSheet } from "../services/googleSheets";
 import { handleError, handleSuccess } from "../utils/errorHandler";
 import RainbowBackground from "./RainbowBackground";
-import IndexEditor from "./IndexEditor";
+import SimpleIndexEditor from "./SimpleIndexEditor";
 
 // Definición de las estructuras disponibles
 const STRUCTURE_TYPES = {
@@ -717,7 +717,7 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
                           Volver a Vista Simple
                         </Button>
                       </div>
-                      <IndexEditor
+                      <SimpleIndexEditor
                         initialContent={editedContent}
                         onSave={handleSaveEditedContent}
                         formData={formData}
