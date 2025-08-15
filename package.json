@@ -42,7 +42,6 @@
     "quill": "^2.0.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-quill": "^2.0.0",
     "react-router-dom": "^6.0.0",
     "simplex-noise": "^4.0.3",
     "stats.js": "^0.17.0",

@@ -18,7 +18,7 @@ import {
 import { appendToSheet } from "../services/googleSheets";
 import { handleError, handleSuccess } from "../utils/errorHandler";
 import RainbowBackground from "./RainbowBackground";
-import QuillIndexEditor from "./QuillIndexEditor";
+import FullQuillIndexEditor from "./FullQuillIndexEditor";
 
 // Definición de las estructuras disponibles
 const STRUCTURE_TYPES = {
@@ -49,7 +49,6 @@ function IndexPreview() {
   const [generatedIndex, setGeneratedIndex] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState(null);
-  const [editMode, setEditMode] = useState(false);
   const [editedContent, setEditedContent] = useState("");
 
   // Función para obtener información de la estructura
@@ -399,16 +398,6 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
     }
   }, []);
 
-  // Función para manejar el guardado del contenido editado
-  const handleSaveEditedContent = (content) => {
-    setEditedContent(content);
-    // Convertir HTML a texto plano para el textarea
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = content;
-    const textContent = tempDiv.textContent || tempDiv.innerText || '';
-    setGeneratedIndex(textContent);
-    setEditMode(false);
-  };
 
   const handleConfirm = async () => {
     setIsSubmitting(true);
@@ -498,233 +487,72 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
                 </Button>
               </div>
 
-              {/* Layout de 2 columnas: Resumen del pedido + Editor de índice */}
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 flex-1">
-                {/* Columna izquierda: Resumen del pedido */}
-                <div className="space-y-6">
-                  <div className="bg-gradient-to-r from-muted/20 to-muted/10 rounded-lg p-3 sm:p-6 border border-border/50 shadow-lg animate-on-scroll glow-fade">
-                <h3 className="font-medium mb-2 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
+              {/* Resumen del pedido en forma compacta */}
+              <div className="bg-gradient-to-r from-muted/20 to-muted/10 rounded-lg p-3 sm:p-4 border border-border/50 shadow-lg animate-on-scroll glow-fade">
+                <h3 className="font-medium mb-2 sm:mb-3 flex items-center gap-2 text-sm sm:text-base">
                   <div className="bg-gradient-to-r from-primary/20 to-primary/10 p-1.5 rounded-lg">
                     <List className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                   </div>
                   <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent font-semibold">Resumen del pedido</span>
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6 animate-on-scroll clip-reveal">
-                  {/* Información básica del documento */}
-                  <div className="space-y-2 sm:space-y-4">
-                    <div>
-                      <span className="text-xs sm:text-sm font-medium">
-                        Tipo de Documento:
-                      </span>
-                      <p className="text-muted-foreground text-sm">
-                        {formData.documentType}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="text-xs sm:text-sm font-medium">
-                        Tema:
-                      </span>
-                      <p className="text-muted-foreground text-sm">
-                        {formData.topic}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="text-xs sm:text-sm font-medium">
-                        Formato de Citas:
-                      </span>
-                      <p className="text-muted-foreground text-sm">
-                        {formData.citationFormat}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="text-xs sm:text-sm font-medium">
-                        Longitud:
-                      </span>
-                      <p className="text-muted-foreground text-sm">
-                        {formData.length} páginas
-                        <span className="text-xs text-muted-foreground/70 ml-1">
-                          (nivel de detalle{" "}
-                          {getDetailLevelDescription(formData.length)})
-                        </span>
-                      </p>
-                    </div>
-                    <div>
-                      <span className="text-xs sm:text-sm font-medium">
-                        Tono de Redacción:
-                      </span>
-                      <p className="text-muted-foreground text-sm">
-                        {formData.essayTone}
-                      </p>
-                    </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4 text-xs sm:text-sm">
+                  <div>
+                    <span className="font-medium">Tipo:</span>
+                    <p className="text-muted-foreground">{formData.documentType}</p>
                   </div>
-                  {/* Información académica y estructura */}
-                  <div className="space-y-2 sm:space-y-4">
-                    <div>
-                      <span className="text-xs sm:text-sm font-medium">
-                        Curso:
-                      </span>
-                      <p className="text-muted-foreground text-sm">
-                        {formData.course}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="text-xs sm:text-sm font-medium">
-                        Área de Estudio:
-                      </span>
-                      <p className="text-muted-foreground text-sm">
-                        {formData.career}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="text-xs sm:text-sm font-medium">
-                        Estructura:
-                      </span>
-                      <div className="flex items-center gap-2 mt-1">
-                        {structureInfo.icon}
-                        <div>
-                          <p className="text-muted-foreground text-sm">
-                            {structureInfo.name}
-                          </p>
-                          <p className="text-[10px] sm:text-xs text-muted-foreground/80">
-                            {structureInfo.description}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    {/* Información de carátula si está incluida */}
-                    {formData.coverData &&
-                      formData.coverData.incluirCaratula && (
-                        <div>
-                          <span className="text-xs sm:text-sm font-medium">
-                            Carátula:
-                          </span>
-                          <p className="text-muted-foreground text-sm">
-                            {formData.coverData.tipoInstitucion === "colegio"
-                              ? "Colegio"
-                              : formData.coverData.tipoInstitucion ===
-                                "universidad"
-                              ? "Universidad"
-                              : "Instituto"}
-                          </p>
-                        </div>
-                      )}
+                  <div>
+                    <span className="font-medium">Tema:</span>
+                    <p className="text-muted-foreground truncate" title={formData.topic}>{formData.topic}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium">Citas:</span>
+                    <p className="text-muted-foreground">{formData.citationFormat}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium">Páginas:</span>
+                    <p className="text-muted-foreground">{formData.length}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium">Curso:</span>
+                    <p className="text-muted-foreground truncate" title={formData.course}>{formData.course}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium">Área:</span>
+                    <p className="text-muted-foreground truncate" title={formData.career}>{formData.career}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium">Contacto:</span>
+                    <p className="text-muted-foreground">{formData.countryCode} {formData.phoneNumber}</p>
                   </div>
                 </div>
-                {/* Información de contacto */}
-                <div className="border-t mt-3 pt-3 sm:mt-4 sm:pt-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4">
-                    <div>
-                      <span className="text-xs sm:text-sm font-medium">
-                        Nombre:
-                      </span>
-                      <p className="text-muted-foreground text-sm">
-                        {formData.name}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="text-xs sm:text-sm font-medium">
-                        WhatsApp:
-                      </span>
-                      <p className="text-muted-foreground text-sm">
-                        {formData.countryCode} {formData.phoneNumber}
-                      </p>
-                    </div>
-                  </div>
-                    </div>
-                  </div>
-                </div>
+              </div>
 
-                {/* Columna derecha: Editor de índice */}
-                <div className="space-y-6 flex-1 flex flex-col">
-                  {!editMode ? (
-                    // Vista previa simple
-                    <div className="bg-gradient-to-r from-muted/20 to-muted/10 rounded-lg p-3 sm:p-6 flex-1 flex flex-col min-h-[500px] border border-border/50 shadow-lg animate-on-scroll elastic-in">
-                      <div className="flex items-center justify-between mb-3 sm:mb-4">
-                        <h3 className="text-sm sm:text-lg font-medium flex items-center gap-2">
-                          <div className="bg-gradient-to-r from-blue-500/20 to-blue-400/10 p-1.5 rounded-lg">
-                            <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
-                          </div>
-                          <span className="bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
-                            Índice Propuesto
-                          </span>
-                        </h3>
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-0.5 sm:py-1 bg-gradient-to-r from-muted to-muted/80 rounded-full text-xs sm:text-sm shadow-md border border-border/30">
-                            <div className="bg-gradient-to-r from-primary/20 to-primary/10 p-0.5 rounded">
-                              {structureInfo.icon}
-                            </div>
-                            <span className="font-medium">{structureInfo.name}</span>
-                          </div>
-                          <Button
-                            onClick={() => {
-                              setEditMode(true);
-                              setEditedContent(generatedIndex);
-                            }}
-                            variant="outline"
-                            size="sm"
-                            className="text-purple-600 hover:bg-purple-50 border-purple-200"
-                          >
-                            <AlertCircle className="w-4 h-4 mr-2" />
-                            Editar Avanzado
-                          </Button>
-                        </div>
-                      </div>
-                      <div className="relative flex-1 flex flex-col">
-                        <Textarea
-                          value={generatedIndex}
-                          onChange={(e) => setGeneratedIndex(e.target.value)}
-                          className="flex-1 min-h-0 font-mono text-xs sm:text-sm resize-none"
-                          disabled={isLoading}
-                          placeholder={isLoading ? "Generando índice..." : ""}
-                        />
-                        {isLoading && (
-                          <div className="absolute inset-0 bg-white/80 dark:bg-background/80 flex items-center justify-center">
-                            <div className="flex items-center gap-2">
-                              <Loader className="w-5 h-5 animate-spin" />
-                              <span>
-                                Generando índice personalizado basado en{" "}
-                                {formData.length} páginas...
-                              </span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                      <p className="text-[10px] sm:text-xs text-muted-foreground mt-2">
-                        Edición básica disponible aquí. Para opciones avanzadas como regenerar con IA, agregar cuadros y más, usa el "Editar Avanzado".
-                        {apiError && (
-                          <span className="block text-yellow-600 dark:text-yellow-400 mt-1">
-                            Nota: {apiError}. Puedes continuar con este índice o modificarlo.
-                          </span>
-                        )}
-                      </p>
+              {/* Editor principal ocupando todo el ancho */}
+              <div className="w-full">
+                {isLoading ? (
+                  <div className="bg-gradient-to-r from-muted/20 to-muted/10 rounded-lg p-6 flex items-center justify-center min-h-[600px] border border-border/50 shadow-lg">
+                    <div className="flex items-center gap-2">
+                      <Loader className="w-5 h-5 animate-spin" />
+                      <span>Generando índice personalizado basado en {formData.length} páginas...</span>
                     </div>
-                  ) : (
-                    // Editor avanzado TipTap
-                    <div className="flex-1 flex flex-col">
-                      <div className="mb-4 flex items-center justify-between">
-                        <h3 className="text-lg font-medium flex items-center gap-2">
-                          <AlertCircle className="w-5 h-5 text-blue-500" />
-                          Editor Avanzado de Índice
-                        </h3>
-                        <Button
-                          onClick={() => {
-                            setEditMode(false);
-                            setGeneratedIndex(editedContent);
-                          }}
-                          variant="outline"
-                          size="sm"
-                        >
-                          Volver a Vista Simple
-                        </Button>
-                      </div>
-                      <QuillIndexEditor
-                        initialContent={editedContent}
-                        onSave={handleSaveEditedContent}
-                        formData={formData}
-                      />
-                    </div>
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <FullQuillIndexEditor
+                    initialContent={generatedIndex}
+                    onSave={(content) => {
+                      setGeneratedIndex(content);
+                      setEditedContent(content);
+                    }}
+                    formData={formData}
+                  />
+                )}
+                {apiError && (
+                  <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="text-sm text-yellow-700">
+                      Nota: {apiError}. Puedes continuar con este índice o modificarlo usando el editor.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Sección de acciones finales */}
