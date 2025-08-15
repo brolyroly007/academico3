@@ -377,3 +377,109 @@
   border: 1px solid #22c55e;
   background-color: #f0fdf4 !important;
 }
+
+/* Estilos para secciones hoverables */
+.section-hoverable {
+  transition: all 0.2s ease-in-out;
+  padding: 8px 12px;
+  margin: 8px -12px;
+  border-radius: 8px;
+}
+
+.section-hoverable:hover {
+  background-color: rgba(139, 92, 246, 0.05);
+  border: 1px dashed rgba(139, 92, 246, 0.3);
+  transform: translateX(4px);
+}
+
+/* Botón hover para secciones */
+.section-hover-button {
+  animation: fadeInScale 0.2s ease-out;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Efectos de hover mejorados */
+.quill-container .ql-editor h1:hover,
+.quill-container .ql-editor h2:hover,
+.quill-container .ql-editor h3:hover,
+.quill-container .ql-editor h4:hover,
+.quill-container .ql-editor h5:hover,
+.quill-container .ql-editor h6:hover {
+  background-color: rgba(139, 92, 246, 0.05);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 4px -12px;
+  border: 1px dashed rgba(139, 92, 246, 0.3);
+  transform: translateX(4px);
+  transition: all 0.2s ease-in-out;
+}
+
+/* Indicador visual para secciones editables */
+.quill-container .ql-editor h1::before,
+.quill-container .ql-editor h2::before,
+.quill-container .ql-editor h3::before,
+.quill-container .ql-editor h4::before,
+.quill-container .ql-editor h5::before,
+.quill-container .ql-editor h6::before {
+  content: "✏️";
+  opacity: 0;
+  margin-right: 8px;
+  transition: opacity 0.2s ease;
+  font-size: 0.8em;
+}
+
+.quill-container .ql-editor h1:hover::before,
+.quill-container .ql-editor h2:hover::before,
+.quill-container .ql-editor h3:hover::before,
+.quill-container .ql-editor h4:hover::before,
+.quill-container .ql-editor h5:hover::before,
+.quill-container .ql-editor h6:hover::before {
+  opacity: 1;
+}
+
+/* Estilos para el contenedor principal expandido */
+.full-width-editor {
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  padding: 0 2rem;
+}
+
+/* Responsive para pantallas pequeñas */
+@media (max-width: 768px) {
+  .full-width-editor {
+    padding: 0 1rem;
+  }
+  
+  .section-hover-button {
+    transform: scale(0.9);
+  }
+  
+  .quill-container .ql-editor h1:hover,
+  .quill-container .ql-editor h2:hover,
+  .quill-container .ql-editor h3:hover,
+  .quill-container .ql-editor h4:hover,
+  .quill-container .ql-editor h5:hover,
+  .quill-container .ql-editor h6:hover {
+    transform: translateX(2px);
+  }
+}
+
+/* Animaciones suaves para elementos interactivos */
+.interactive-section {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.interactive-section:hover {
+  box-shadow: 0 10px 25px rgba(139, 92, 246, 0.15);
+  transform: translateY(-2px);
+}

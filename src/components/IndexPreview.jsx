@@ -18,7 +18,7 @@ import {
 import { appendToSheet } from "../services/googleSheets";
 import { handleError, handleSuccess } from "../utils/errorHandler";
 import RainbowBackground from "./RainbowBackground";
-import FullQuillIndexEditor from "./FullQuillIndexEditor";
+import AdvancedQuillEditor from "./AdvancedQuillEditor";
 
 // Definición de las estructuras disponibles
 const STRUCTURE_TYPES = {
@@ -461,7 +461,7 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
   return (
     <RainbowBackground>
       <div className="min-h-[100dvh] w-full px-2 sm:px-4 py-2 sm:py-8 flex flex-col">
-        <div className="max-w-4xl mx-auto w-full flex-1 flex flex-col">
+        <div className="max-w-none mx-auto w-full flex-1 flex flex-col">
           <Card className="border-0 shadow-xl flex-1 flex flex-col bg-card/80 backdrop-blur-md">
             <CardContent className="p-3 sm:p-8 flex flex-col flex-1">
             {/* Contenedor principal que usa space-y-6 para espaciado consistente entre secciones */}
@@ -537,7 +537,7 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
                     </div>
                   </div>
                 ) : (
-                  <FullQuillIndexEditor
+                  <AdvancedQuillEditor
                     initialContent={generatedIndex}
                     onSave={(content) => {
                       setGeneratedIndex(content);
