@@ -21,8 +21,11 @@ import {
   Edit3,
   Save,
   X,
+  Loader,
 } from "lucide-react";
 import RainbowBackground from "./RainbowBackground";
+import { appendToSheet } from "../services/googleSheets";
+import { handleError, handleSuccess } from "../utils/errorHandler";
 import { useEffect, useState } from "react";
 
 // Códigos de país disponibles
@@ -46,6 +49,7 @@ export default function Confirmation() {
   const [isEditingPhone, setIsEditingPhone] = useState(false);
   const [editedCountryCode, setEditedCountryCode] = useState(formData?.countryCode || "+51");
   const [editedPhoneNumber, setEditedPhoneNumber] = useState(formData?.phoneNumber || "");
+  const [isResubmitting, setIsResubmitting] = useState(false);
   
   // Funciones para manejar cambios
   const handleSavePhone = async () => {
@@ -55,30 +59,51 @@ export default function Confirmation() {
       return;
     }
     
+    // Validar formato del número
+    const phoneRegex = /^[0-9]{8,15}$/;
+    if (!phoneRegex.test(editedPhoneNumber.trim())) {
+      alert("Por favor ingresa un número de teléfono válido (8-15 dígitos)");
+      return;
+    }
+    
+    setIsResubmitting(true);
+    
     try {
-      // Actualizar los datos localmente
+      // Crear los datos actualizados con el nuevo número
       const updatedFormData = {
         ...formData,
         countryCode: editedCountryCode,
-        phoneNumber: editedPhoneNumber
+        phoneNumber: editedPhoneNumber.trim(),
+        // Agregar timestamp de actualización
+        phoneUpdatedAt: new Date().toISOString(),
+        // Marcar como reenvío
+        isResubmission: true,
+        originalTimestamp: formData.timestamp,
+        newTimestamp: new Date().toISOString()
       };
       
-      // Aquí deberías llamar a la API para reenviar la solicitud
-      // Por ahora simulamos el reenvío
       console.log("Reenviando solicitud con nuevo número:", updatedFormData);
       
+      // Reenviar a Google Sheets
+      await appendToSheet(updatedFormData);
+      
       // Actualizar el estado local
-      Object.assign(formData, updatedFormData);
+      Object.assign(formData, {
+        countryCode: editedCountryCode,
+        phoneNumber: editedPhoneNumber.trim()
+      });
       
       // Salir del modo edición
       setIsEditingPhone(false);
       
       // Mostrar mensaje de éxito
-      alert("¡Solicitud reenviada correctamente con el nuevo número!");
+      handleSuccess("¡Solicitud reenviada correctamente con el nuevo número!");
       
     } catch (error) {
       console.error("Error al reenviar solicitud:", error);
-      alert("Error al reenviar la solicitud. Inténtalo de nuevo.");
+      handleError(error, "Error al reenviar la solicitud");
+    } finally {
+      setIsResubmitting(false);
     }
   };
   
@@ -217,7 +242,7 @@ export default function Confirmation() {
                       ) : (
                         <div className="flex items-center gap-3">
                           <span className="text-lg">WhatsApp:</span>
-                          <Select value={editedCountryCode} onValueChange={setEditedCountryCode}>
+                          <Select value={editedCountryCode} onValueChange={setEditedCountryCode} disabled={isResubmitting}>
                             <SelectTrigger className="w-32 h-9">
                               <SelectValue />
                             </SelectTrigger>
@@ -233,6 +258,7 @@ export default function Confirmation() {
                             value={editedPhoneNumber}
                             onChange={(e) => setEditedPhoneNumber(e.target.value)}
                             placeholder="Número de teléfono"
+                            disabled={isResubmitting}
                             className="w-40 h-9"
                           />
                         </div>
@@ -256,10 +282,20 @@ export default function Confirmation() {
                             variant="outline"
                             size="sm"
                             onClick={handleSavePhone}
-                            className="text-green-700 dark:text-green-400 hover:bg-green-200/50 dark:hover:bg-green-800/50"
+                            disabled={isResubmitting}
+                            className="text-green-700 dark:text-green-400 hover:bg-green-200/50 dark:hover:bg-green-800/50 disabled:opacity-50"
                           >
-                            <Save className="w-4 h-4 mr-1" />
-                            Reenviar
+                            {isResubmitting ? (
+                              <>
+                                <Loader className="w-4 h-4 mr-1 animate-spin" />
+                                Enviando...
+                              </>
+                            ) : (
+                              <>
+                                <Save className="w-4 h-4 mr-1" />
+                                Reenviar
+                              </>
+                            )}
                           </Button>
                           <Button
                             variant="outline"
@@ -269,7 +305,8 @@ export default function Confirmation() {
                               setEditedCountryCode(formData.countryCode);
                               setEditedPhoneNumber(formData.phoneNumber);
                             }}
-                            className="text-red-700 dark:text-red-400 hover:bg-red-200/50 dark:hover:bg-red-800/50"
+                            disabled={isResubmitting}
+                            className="text-red-700 dark:text-red-400 hover:bg-red-200/50 dark:hover:bg-red-800/50 disabled:opacity-50"
                           >
                             <X className="w-4 h-4 mr-1" />
                             Cancelar
