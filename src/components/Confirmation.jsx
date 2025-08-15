@@ -43,7 +43,7 @@ const COUNTRY_CODES = [
 export default function Confirmation() {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { formData } = state || {};
+  const { formData, index } = state || {};
   
   // Estados para editar número
   const [isEditingPhone, setIsEditingPhone] = useState(false);
@@ -69,23 +69,34 @@ export default function Confirmation() {
     setIsResubmitting(true);
     
     try {
+      // Verificar que tenemos los datos necesarios
+      if (!formData || !formData.documentType) {
+        throw new Error("Datos del formulario no encontrados");
+      }
+      
       // Crear los datos actualizados con el nuevo número
       const updatedFormData = {
         ...formData,
         countryCode: editedCountryCode,
         phoneNumber: editedPhoneNumber.trim(),
+        // Incluir el índice si existe
+        index: index || formData.index || "",
         // Agregar timestamp de actualización
         phoneUpdatedAt: new Date().toISOString(),
         // Marcar como reenvío
         isResubmission: true,
-        originalTimestamp: formData.timestamp,
-        newTimestamp: new Date().toISOString()
+        originalTimestamp: formData.timestamp || new Date().toISOString(),
+        newTimestamp: new Date().toISOString(),
+        // Asegurar que el timestamp principal esté presente
+        timestamp: new Date().toISOString()
       };
       
-      console.log("Reenviando solicitud con nuevo número:", updatedFormData);
+      console.log("[DEBUG] Datos originales:", formData);
+      console.log("[DEBUG] Reenviando solicitud con nuevo número:", updatedFormData);
       
       // Reenviar a Google Sheets
-      await appendToSheet(updatedFormData);
+      const result = await appendToSheet(updatedFormData);
+      console.log("[DEBUG] Resultado del reenvío:", result);
       
       // Actualizar el estado local
       Object.assign(formData, {
@@ -100,18 +111,32 @@ export default function Confirmation() {
       handleSuccess("¡Solicitud reenviada correctamente con el nuevo número!");
       
     } catch (error) {
-      console.error("Error al reenviar solicitud:", error);
-      handleError(error, "Error al reenviar la solicitud");
+      console.error("[ERROR] Error completo al reenviar solicitud:", error);
+      console.error("[ERROR] Stack trace:", error.stack);
+      
+      // Mensaje de error más específico
+      let errorMessage = "Error al reenviar la solicitud";
+      if (error.message) {
+        errorMessage += ": " + error.message;
+      }
+      
+      handleError(error, errorMessage);
     } finally {
       setIsResubmitting(false);
     }
   };
   
   const handleReturnToForm = () => {
+    console.log("[DEBUG] Navegando de vuelta al formulario con datos:", {
+      formData,
+      currentStep: 3,
+      maxVisitedStep: 4
+    });
+    
     navigate("/configuracion", {
       state: {
         formData,
-        currentStep: 4, // Ir al paso de detalles finales
+        currentStep: 3, // Ir al paso de detalles finales (0-indexed, so 3 = step 4)
         maxVisitedStep: 4
       }
     });
