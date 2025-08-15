@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { appendToSheet } from "../services/googleSheets";
 import { handleError, handleSuccess } from "../utils/errorHandler";
+import RainbowBackground from "./RainbowBackground";
 
 // Definición de las estructuras disponibles
 const STRUCTURE_TYPES = {
@@ -341,6 +342,60 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
     generateIndex();
   }, [formData, generateLocalIndex]);
 
+  // Configurar animaciones al cargar la página
+  useEffect(() => {
+    document.documentElement.classList.remove("no-js");
+
+    // Animaciones iniciales con delay escalonado
+    setTimeout(() => {
+      const initialElements = document.querySelectorAll(
+        ".animate-on-scroll-initial"
+      );
+      initialElements.forEach((el, index) => {
+        setTimeout(() => {
+          el.classList.add("animate-active");
+        }, index * 100);
+      });
+    }, 200);
+
+    if ("IntersectionObserver" in window) {
+      const animateItems = document.querySelectorAll(
+        ".animate-on-scroll:not(.animate-on-scroll-initial)"
+      );
+
+      // Observador para animaciones
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setTimeout(() => {
+                entry.target.classList.add("animate-active");
+              }, 50);
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        {
+          threshold: 0.1,
+          rootMargin: "0px 0px -5% 0px",
+        }
+      );
+
+      // Observar elementos con delay
+      animateItems.forEach((item, index) => {
+        setTimeout(() => {
+          observer.observe(item);
+        }, index * 10);
+      });
+
+      return () => {
+        animateItems.forEach((item) => {
+          observer.unobserve(item);
+        });
+      };
+    }
+  }, []);
+
   const handleConfirm = async () => {
     setIsSubmitting(true);
     try {
@@ -401,24 +456,27 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
   };
 
   return (
-    <div className="min-h-[100dvh] w-full px-2 sm:px-4 py-2 sm:py-8 flex flex-col">
-      <div className="max-w-4xl mx-auto w-full flex-1 flex flex-col">
-        <Card className="border-0 shadow-xl flex-1 flex flex-col">
-          <CardContent className="p-3 sm:p-8 flex flex-col flex-1">
+    <RainbowBackground>
+      <div className="min-h-[100dvh] w-full px-2 sm:px-4 py-2 sm:py-8 flex flex-col">
+        <div className="max-w-4xl mx-auto w-full flex-1 flex flex-col">
+          <Card className="border-0 shadow-xl flex-1 flex flex-col bg-card/80 backdrop-blur-md">
+            <CardContent className="p-3 sm:p-8 flex flex-col flex-1">
             {/* Contenedor principal que usa space-y-6 para espaciado consistente entre secciones */}
             <div className="space-y-4 sm:space-y-6 flex-1 flex flex-col">
               {/* Encabezado con título y botón de retorno */}
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between animate-on-scroll fade-up">
                 <div className="flex items-center gap-3">
-                  <List className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-                  <h2 className="text-xl sm:text-2xl font-bold text-primary">
+                  <div className="bg-gradient-to-r from-primary/20 to-primary/10 p-2 rounded-xl">
+                    <List className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                  </div>
+                  <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
                     Índice Propuesto
                   </h2>
                 </div>
                 <Button
                   variant="ghost"
                   onClick={handleBack}
-                  className="flex items-center gap-2 text-sm sm:text-base"
+                  className="flex items-center gap-2 text-sm sm:text-base hover:bg-primary/10 transition-all duration-300 rounded-xl"
                 >
                   <ChevronLeft className="w-4 h-4" />
                   <span className="hidden sm:inline">Volver al formulario</span>
@@ -427,12 +485,14 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
               </div>
 
               {/* Resumen del pedido que muestra toda la información recopilada */}
-              <div className="bg-muted/20 rounded-lg p-3 sm:p-6">
+              <div className="bg-gradient-to-r from-muted/20 to-muted/10 rounded-lg p-3 sm:p-6 border border-border/50 shadow-lg animate-on-scroll glow-fade">
                 <h3 className="font-medium mb-2 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
-                  <List className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-                  Resumen del pedido
+                  <div className="bg-gradient-to-r from-primary/20 to-primary/10 p-1.5 rounded-lg">
+                    <List className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                  </div>
+                  <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent font-semibold">Resumen del pedido</span>
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6 animate-on-scroll clip-reveal">
                   {/* Información básica del documento */}
                   <div className="space-y-2 sm:space-y-4">
                     <div>
@@ -557,18 +617,22 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
               </div>
 
               {/* Área del índice - ocupa el espacio restante */}
-              <div className="bg-muted/20 rounded-lg p-3 sm:p-6 flex-1 flex flex-col min-h-[300px]">
+              <div className="bg-gradient-to-r from-muted/20 to-muted/10 rounded-lg p-3 sm:p-6 flex-1 flex flex-col min-h-[300px] border border-border/50 shadow-lg animate-on-scroll elastic-in">
                 <div className="flex items-center justify-between mb-3 sm:mb-4">
                   <h3 className="text-sm sm:text-lg font-medium flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
-                    <span className="hidden sm:inline">
+                    <div className="bg-gradient-to-r from-blue-500/20 to-blue-400/10 p-1.5 rounded-lg">
+                      <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
+                    </div>
+                    <span className="hidden sm:inline bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
                       Revisa y ajusta el índice según tus necesidades
                     </span>
-                    <span className="inline sm:hidden">Revisa el índice</span>
+                    <span className="inline sm:hidden bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">Revisa el índice</span>
                   </h3>
-                  <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-0.5 sm:py-1 bg-muted rounded-full text-xs sm:text-sm">
-                    {structureInfo.icon}
-                    <span>{structureInfo.name}</span>
+                  <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-0.5 sm:py-1 bg-gradient-to-r from-muted to-muted/80 rounded-full text-xs sm:text-sm shadow-md border border-border/30">
+                    <div className="bg-gradient-to-r from-primary/20 to-primary/10 p-0.5 rounded">
+                      {structureInfo.icon}
+                    </div>
+                    <span className="font-medium">{structureInfo.name}</span>
                   </div>
                 </div>
                 <div className="relative flex-1 flex flex-col">
@@ -605,9 +669,9 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
               </div>
 
               {/* Sección de acciones finales */}
-              <div className="border-t pt-3 sm:pt-6">
+              <div className="border-t border-border/50 pt-3 sm:pt-6 animate-on-scroll fade-up">
                 <div className="flex flex-col gap-3 sm:gap-4">
-                  <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900 rounded-lg p-3 sm:p-4">
+                  <div className="bg-gradient-to-r from-blue-50/80 to-blue-100/60 dark:from-blue-950/30 dark:to-blue-900/20 border border-blue-200/50 dark:border-blue-800/50 rounded-lg p-3 sm:p-4 shadow-lg animate-on-scroll bounce-in">
                     <div className="flex items-start gap-2 sm:gap-3">
                       <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                       <div>
@@ -637,39 +701,51 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
                   </div>
 
                   <div className="flex justify-end gap-2 sm:gap-4">
-                    <Button
-                      variant="outline"
-                      onClick={handleBack}
-                      className="gap-1 sm:gap-2 text-xs sm:text-sm h-9 sm:h-10"
-                      disabled={isLoading || isSubmitting}
-                    >
-                      <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4" />
-                      <span className="hidden sm:inline">Modificar datos</span>
-                      <span className="inline sm:hidden">Volver</span>
-                    </Button>
-                    <Button
-                      onClick={handleConfirm}
-                      disabled={isSubmitting || isLoading}
-                      className="gap-1 sm:gap-2 bg-primary hover:bg-primary/90 text-xs sm:text-sm h-9 sm:h-10"
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <Loader className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
-                          <span className="hidden sm:inline">
-                            Procesando...
-                          </span>
-                          <span className="inline sm:hidden">Enviando...</span>
-                        </>
-                      ) : (
-                        <>
-                          <CheckCheck className="w-3 h-3 sm:w-4 sm:h-4" />
-                          <span className="hidden sm:inline">
-                            Confirmar y Enviar
-                          </span>
-                          <span className="inline sm:hidden">Confirmar</span>
-                        </>
-                      )}
-                    </Button>
+                    <div className="relative group">
+                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-muted/20 to-muted/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-lg scale-110" />
+                      <Button
+                        variant="outline"
+                        onClick={handleBack}
+                        className="relative gap-1 sm:gap-2 text-xs sm:text-sm h-9 sm:h-10 rounded-xl border-2 border-border/50 hover:border-border/80 transition-all duration-300 hover:scale-105 hover:-translate-y-0.5"
+                        disabled={isLoading || isSubmitting}
+                      >
+                        <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4 group-hover:scale-110 transition-transform duration-300" />
+                        <span className="hidden sm:inline">Modificar datos</span>
+                        <span className="inline sm:hidden">Volver</span>
+                      </Button>
+                    </div>
+                    
+                    <div className="relative group">
+                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/20 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-lg scale-110" />
+                      <Button
+                        onClick={handleConfirm}
+                        disabled={isSubmitting || isLoading}
+                        className="relative gap-1 sm:gap-2 text-xs sm:text-sm h-9 sm:h-10 rounded-xl bg-gradient-to-r from-primary via-primary/95 to-primary/90 text-primary-foreground border-2 border-primary/50 hover:border-primary/80 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 hover:-translate-y-0.5 group"
+                        style={{
+                          boxShadow: '0 20px 40px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1)'
+                        }}
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <Loader className="w-3 h-3 sm:w-4 sm:h-4 animate-spin group-hover:scale-110 transition-transform duration-300" />
+                            <span className="hidden sm:inline">
+                              Procesando...
+                            </span>
+                            <span className="inline sm:hidden">Enviando...</span>
+                          </>
+                        ) : (
+                          <>
+                            <CheckCheck className="w-3 h-3 sm:w-4 sm:h-4 group-hover:scale-110 transition-transform duration-300" />
+                            <span className="hidden sm:inline font-bold tracking-wide">
+                              Confirmar y Enviar
+                            </span>
+                            <span className="inline sm:hidden font-bold">Confirmar</span>
+                          </>
+                        )}
+                        {/* Brillo animado */}
+                        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out rounded-xl" />
+                      </Button>
+                    </div>
                   </div>
 
                   <p className="text-[10px] sm:text-xs text-muted-foreground text-center">
@@ -684,6 +760,7 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
         </Card>
       </div>
     </div>
+    </RainbowBackground>
   );
 }
 
