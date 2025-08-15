@@ -18,7 +18,7 @@ import {
 import { appendToSheet } from "../services/googleSheets";
 import { handleError, handleSuccess } from "../utils/errorHandler";
 import RainbowBackground from "./RainbowBackground";
-import AdvancedQuillEditor from "./AdvancedQuillEditor";
+import NativeHTMLEditor from "./NativeHTMLEditor";
 
 // Definición de las estructuras disponibles
 const STRUCTURE_TYPES = {
@@ -537,7 +537,7 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
                     </div>
                   </div>
                 ) : (
-                  <AdvancedQuillEditor
+                  <NativeHTMLEditor
                     initialContent={generatedIndex}
                     onSave={(content) => {
                       setGeneratedIndex(content);

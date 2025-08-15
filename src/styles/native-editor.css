@@ -1,0 +1,343 @@
+/* Estilos optimizados para el editor HTML nativo */
+
+/* Editor contentEditable */
+.native-editor {
+  outline: none;
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #374151;
+}
+
+.native-editor:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* Encabezados optimizados */
+.native-editor h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 32px 0 16px 0;
+  padding: 12px 16px;
+  border-bottom: 3px solid #e2e8f0;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.native-editor h2 {
+  font-size: 1.875rem;
+  font-weight: 600;
+  color: #334155;
+  margin: 28px 0 14px 0;
+  padding: 10px 14px;
+  border-bottom: 2px solid #e2e8f0;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.native-editor h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #475569;
+  margin: 24px 0 12px 0;
+  padding: 8px 12px;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.native-editor h4 {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #64748b;
+  margin: 20px 0 10px 0;
+  padding: 6px 10px;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.native-editor h5 {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: #64748b;
+  margin: 16px 0 8px 0;
+  padding: 4px 8px;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.native-editor h6 {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #64748b;
+  margin: 14px 0 6px 0;
+  padding: 4px 8px;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+/* Efectos hover para encabezados */
+.native-editor h1:hover,
+.native-editor h2:hover,
+.native-editor h3:hover,
+.native-editor h4:hover,
+.native-editor h5:hover,
+.native-editor h6:hover {
+  background-color: rgba(139, 92, 246, 0.05);
+  border-radius: 8px;
+  border: 1px dashed rgba(139, 92, 246, 0.3);
+  transform: translateX(4px);
+  cursor: pointer;
+}
+
+/* Indicadores visuales */
+.native-editor h1:hover::before,
+.native-editor h2:hover::before,
+.native-editor h3:hover::before,
+.native-editor h4:hover::before,
+.native-editor h5:hover::before,
+.native-editor h6:hover::before {
+  content: "✏️";
+  opacity: 1;
+  margin-right: 8px;
+  transition: opacity 0.2s ease;
+  font-size: 0.8em;
+}
+
+.native-editor h1::before,
+.native-editor h2::before,
+.native-editor h3::before,
+.native-editor h4::before,
+.native-editor h5::before,
+.native-editor h6::before {
+  content: "✏️";
+  opacity: 0;
+  margin-right: 8px;
+  transition: opacity 0.2s ease;
+  font-size: 0.8em;
+}
+
+/* Párrafos */
+.native-editor p {
+  margin: 12px 0;
+  color: #374151;
+  line-height: 1.7;
+}
+
+/* Listas */
+.native-editor ul,
+.native-editor ol {
+  padding-left: 24px;
+  margin: 16px 0;
+}
+
+.native-editor li {
+  margin: 8px 0;
+  color: #374151;
+  line-height: 1.6;
+}
+
+/* Tablas optimizadas */
+.native-editor table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 20px 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #ffffff;
+}
+
+.native-editor td,
+.native-editor th {
+  border: 1px solid #e2e8f0;
+  padding: 12px 16px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.native-editor th {
+  background-color: #f8fafc;
+  font-weight: 600;
+  color: #374151;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.native-editor tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.native-editor tr:hover {
+  background-color: #f1f5f9;
+}
+
+/* Elementos personalizados mejorados */
+.native-editor div[style*="background-color: #e0f2fe"] {
+  border-left: 4px solid #0284c7;
+  background-color: #e0f2fe !important;
+  border-radius: 0 8px 8px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.native-editor div[style*="background-color: #fefce8"] {
+  border: 1px solid #eab308;
+  background-color: #fefce8 !important;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.native-editor div[style*="background-color: #fef2f2"] {
+  border: 1px solid #ef4444;
+  background-color: #fef2f2 !important;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.native-editor div[style*="background-color: #f0fdf4"] {
+  border: 1px solid #22c55e;
+  background-color: #f0fdf4 !important;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Botones hover de secciones */
+.section-hover-btn {
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.section-hover-btn:hover div {
+  background-color: #7c3aed !important;
+  transform: scale(1.05);
+}
+
+/* Estilos para texto seleccionado */
+.native-editor ::selection {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: inherit;
+}
+
+/* Blockquotes */
+.native-editor blockquote {
+  border-left: 4px solid #3b82f6;
+  padding-left: 16px;
+  margin: 20px 0;
+  font-style: italic;
+  color: #6b7280;
+  background-color: #f8fafc;
+  padding: 16px;
+  border-radius: 0 8px 8px 0;
+}
+
+/* Enlaces */
+.native-editor a {
+  color: #3b82f6;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.native-editor a:hover {
+  color: #1d4ed8;
+}
+
+/* Texto en negrita, cursiva, subrayado */
+.native-editor strong,
+.native-editor b {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.native-editor em,
+.native-editor i {
+  font-style: italic;
+  color: #475569;
+}
+
+.native-editor u {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Optimización para móviles */
+@media (max-width: 768px) {
+  .native-editor {
+    font-size: 13px;
+    padding: 12px;
+  }
+  
+  .native-editor h1 {
+    font-size: 1.875rem;
+    padding: 8px 12px;
+  }
+  
+  .native-editor h2 {
+    font-size: 1.5rem;
+    padding: 6px 10px;
+  }
+  
+  .native-editor h3 {
+    font-size: 1.25rem;
+    padding: 4px 8px;
+  }
+  
+  .native-editor h1:hover,
+  .native-editor h2:hover,
+  .native-editor h3:hover,
+  .native-editor h4:hover,
+  .native-editor h5:hover,
+  .native-editor h6:hover {
+    transform: translateX(2px);
+  }
+  
+  .native-editor table {
+    font-size: 12px;
+  }
+  
+  .native-editor td,
+  .native-editor th {
+    padding: 8px 12px;
+  }
+}
+
+/* Animaciones suaves */
+.native-editor * {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Placeholder para editor vacío */
+.native-editor:empty::before {
+  content: "Comience a escribir el índice de su documento...";
+  color: #9ca3af;
+  font-style: italic;
+  pointer-events: none;
+}
+
+/* Modo enfoque */
+.native-editor:focus {
+  background-color: #fefefe;
+}
+
+/* Scrollbar personalizada */
+.native-editor::-webkit-scrollbar {
+  width: 8px;
+}
+
+.native-editor::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.native-editor::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.native-editor::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
