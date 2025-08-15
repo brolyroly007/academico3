@@ -48,29 +48,38 @@ export default function Confirmation() {
   const [editedPhoneNumber, setEditedPhoneNumber] = useState(formData?.phoneNumber || "");
   
   // Funciones para manejar cambios
-  const handleSavePhone = () => {
+  const handleSavePhone = async () => {
     // Validar número
     if (!editedPhoneNumber.trim()) {
       alert("Por favor ingresa un número válido");
       return;
     }
     
-    // Actualizar los datos
-    const updatedFormData = {
-      ...formData,
-      countryCode: editedCountryCode,
-      phoneNumber: editedPhoneNumber
-    };
-    
-    // Redireccionar al formulario con los datos actualizados
-    navigate("/configuracion", {
-      state: {
-        formData: updatedFormData,
-        currentStep: 4, // Ir al paso de detalles finales
-        maxVisitedStep: 4,
-        phoneChanged: true // Flag para indicar que se cambió el número
-      }
-    });
+    try {
+      // Actualizar los datos localmente
+      const updatedFormData = {
+        ...formData,
+        countryCode: editedCountryCode,
+        phoneNumber: editedPhoneNumber
+      };
+      
+      // Aquí deberías llamar a la API para reenviar la solicitud
+      // Por ahora simulamos el reenvío
+      console.log("Reenviando solicitud con nuevo número:", updatedFormData);
+      
+      // Actualizar el estado local
+      Object.assign(formData, updatedFormData);
+      
+      // Salir del modo edición
+      setIsEditingPhone(false);
+      
+      // Mostrar mensaje de éxito
+      alert("¡Solicitud reenviada correctamente con el nuevo número!");
+      
+    } catch (error) {
+      console.error("Error al reenviar solicitud:", error);
+      alert("Error al reenviar la solicitud. Inténtalo de nuevo.");
+    }
   };
   
   const handleReturnToForm = () => {
@@ -179,38 +188,103 @@ export default function Confirmation() {
                   <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">Detalles del pedido:</span>
                 </h3>
 
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-background/50 border border-border/30">
-                    <div className="bg-gradient-to-r from-blue-500/20 to-blue-400/10 p-1.5 rounded">
-                      <FileText className="w-5 h-5 text-blue-500" />
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4 p-4 rounded-lg bg-background/50 border border-border/30">
+                    <div className="bg-gradient-to-r from-blue-500/20 to-blue-400/10 p-2 rounded-lg">
+                      <FileText className="w-6 h-6 text-blue-500" />
                     </div>
-                    <span className="font-medium">
+                    <span className="text-lg font-medium">
                       {formData.documentType} - {formData.topic}
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-background/50 border border-border/30">
-                    <div className="bg-gradient-to-r from-purple-500/20 to-purple-400/10 p-1.5 rounded">
-                      <Calendar className="w-5 h-5 text-purple-500" />
+                  <div className="flex items-center gap-4 p-4 rounded-lg bg-background/50 border border-border/30">
+                    <div className="bg-gradient-to-r from-purple-500/20 to-purple-400/10 p-2 rounded-lg">
+                      <Calendar className="w-6 h-6 text-purple-500" />
                     </div>
-                    <span>Formato: <span className="font-medium">{formData.citationFormat}</span></span>
+                    <span className="text-lg">Formato: <span className="font-medium">{formData.citationFormat}</span></span>
                   </div>
 
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-background/50 border border-border/30">
-                    <div className="bg-gradient-to-r from-green-500/20 to-green-400/10 p-1.5 rounded">
-                      <Phone className="w-5 h-5 text-green-500" />
+                  <div className="flex items-center justify-between p-4 rounded-lg bg-background/50 border border-border/30">
+                    <div className="flex items-center gap-4">
+                      <div className="bg-gradient-to-r from-green-500/20 to-green-400/10 p-2 rounded-lg">
+                        <Phone className="w-6 h-6 text-green-500" />
+                      </div>
+                      {!isEditingPhone ? (
+                        <span className="text-lg">
+                          WhatsApp: <span className="font-medium">{formData.countryCode} {formData.phoneNumber}</span>
+                        </span>
+                      ) : (
+                        <div className="flex items-center gap-3">
+                          <span className="text-lg">WhatsApp:</span>
+                          <Select value={editedCountryCode} onValueChange={setEditedCountryCode}>
+                            <SelectTrigger className="w-32 h-9">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {COUNTRY_CODES.map((country) => (
+                                <SelectItem key={country.value} value={country.value}>
+                                  {country.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Input
+                            value={editedPhoneNumber}
+                            onChange={(e) => setEditedPhoneNumber(e.target.value)}
+                            placeholder="Número de teléfono"
+                            className="w-40 h-9"
+                          />
+                        </div>
+                      )}
                     </div>
-                    <span>
-                      WhatsApp: <span className="font-medium">{formData.countryCode} {formData.phoneNumber}</span>
-                    </span>
+                    
+                    <div className="flex gap-2">
+                      {!isEditingPhone ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setIsEditingPhone(true)}
+                          className="text-green-700 dark:text-green-400 hover:bg-green-200/50 dark:hover:bg-green-800/50"
+                        >
+                          <Edit3 className="w-4 h-4 mr-1" />
+                          Cambiar
+                        </Button>
+                      ) : (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleSavePhone}
+                            className="text-green-700 dark:text-green-400 hover:bg-green-200/50 dark:hover:bg-green-800/50"
+                          >
+                            <Save className="w-4 h-4 mr-1" />
+                            Reenviar
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setIsEditingPhone(false);
+                              setEditedCountryCode(formData.countryCode);
+                              setEditedPhoneNumber(formData.phoneNumber);
+                            }}
+                            className="text-red-700 dark:text-red-400 hover:bg-red-200/50 dark:hover:bg-red-800/50"
+                          >
+                            <X className="w-4 h-4 mr-1" />
+                            Cancelar
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </div>
 
                   {formData.coverData && formData.coverData.incluirCaratula && (
-                    <div className="flex items-center gap-3 p-3 rounded-lg bg-background/50 border border-border/30">
-                      <div className="bg-gradient-to-r from-orange-500/20 to-orange-400/10 p-1.5 rounded">
-                        <BookOpen className="w-5 h-5 text-orange-500" />
+                    <div className="flex items-center gap-4 p-4 rounded-lg bg-background/50 border border-border/30">
+                      <div className="bg-gradient-to-r from-orange-500/20 to-orange-400/10 p-2 rounded-lg">
+                        <BookOpen className="w-6 h-6 text-orange-500" />
                       </div>
-                      <span>
+                      <span className="text-lg">
                         Incluye carátula: <span className="font-medium">
                         {formData.coverData.tipoInstitucion === "colegio"
                           ? "Colegio"
@@ -226,88 +300,12 @@ export default function Confirmation() {
 
               <div className="space-y-4 animate-on-scroll fade-up delay-600">
                 <div className="bg-gradient-to-r from-blue-50/80 to-blue-100/60 dark:from-blue-950/30 dark:to-blue-900/20 border border-blue-200/50 dark:border-blue-800/50 rounded-lg p-4">
-                  <p className="text-sm text-blue-700 dark:text-blue-300">
+                  <p className="text-base text-blue-700 dark:text-blue-300">
                     Te contactaremos por WhatsApp para coordinar los detalles y el pago. Revisa tu WhatsApp en los próximos minutos.
                   </p>
                 </div>
 
-                {/* Sección para cambiar número */}
-                <div className="bg-gradient-to-r from-amber-50/80 to-amber-100/60 dark:from-amber-950/30 dark:to-amber-900/20 border border-amber-200/50 dark:border-amber-800/50 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-medium text-amber-800 dark:text-amber-300">Número de contacto</h4>
-                    {!isEditingPhone ? (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setIsEditingPhone(true)}
-                        className="text-amber-700 dark:text-amber-400 hover:bg-amber-200/50 dark:hover:bg-amber-800/50"
-                      >
-                        <Edit3 className="w-4 h-4 mr-1" />
-                        Cambiar
-                      </Button>
-                    ) : (
-                      <div className="flex gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleSavePhone}
-                          className="text-green-700 dark:text-green-400 hover:bg-green-200/50 dark:hover:bg-green-800/50"
-                        >
-                          <Save className="w-4 h-4 mr-1" />
-                          Guardar
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setIsEditingPhone(false);
-                            setEditedCountryCode(formData.countryCode);
-                            setEditedPhoneNumber(formData.phoneNumber);
-                          }}
-                          className="text-red-700 dark:text-red-400 hover:bg-red-200/50 dark:hover:bg-red-800/50"
-                        >
-                          <X className="w-4 h-4 mr-1" />
-                          Cancelar
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {!isEditingPhone ? (
-                    <p className="text-sm text-amber-700 dark:text-amber-300">
-                      {formData.countryCode} {formData.phoneNumber}
-                    </p>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label className="text-xs text-amber-700 dark:text-amber-400">Código</Label>
-                        <Select value={editedCountryCode} onValueChange={setEditedCountryCode}>
-                          <SelectTrigger className="h-9">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {COUNTRY_CODES.map((country) => (
-                              <SelectItem key={country.value} value={country.value}>
-                                {country.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label className="text-xs text-amber-700 dark:text-amber-400">Número</Label>
-                        <Input
-                          value={editedPhoneNumber}
-                          onChange={(e) => setEditedPhoneNumber(e.target.value)}
-                          placeholder="Número de teléfono"
-                          className="h-9"
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="relative group">
                     <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-muted/20 to-muted/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-lg scale-110" />
                     <Button
