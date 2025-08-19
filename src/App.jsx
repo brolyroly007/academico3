@@ -180,11 +180,6 @@ function App() {
                     <h3 className="font-semibold text-foreground mb-4">Legal</h3>
                     <ul className="space-y-3">
                       <li>
-                        <Link to="/garantia-calidad" className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                          Garantía de Calidad
-                        </Link>
-                      </li>
-                      <li>
                         <Link to="/politica-privacidad" className="text-muted-foreground hover:text-primary transition-colors text-sm">
                           Política de Privacidad
                         </Link>
@@ -245,9 +240,6 @@ function App() {
                       </Link>
                       <Link to="/terminos-servicio" className="text-xs text-muted-foreground hover:text-primary transition-colors">
                         Términos de Servicio
-                      </Link>
-                      <Link to="/garantia-calidad" className="text-xs text-muted-foreground hover:text-primary transition-colors">
-                        Garantía de Calidad
                       </Link>
                     </div>
                   </div>

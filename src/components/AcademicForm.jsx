@@ -1537,174 +1537,220 @@ export default function AcademicForm() {
         </div>
 
         {/* Guía para completar el formulario */}
-        <div className="mt-16 space-y-8">
+        <div className="mt-12 space-y-6">
           
-          {/* Guía paso a paso */}
-          <Card className="bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-950/20 dark:to-indigo-950/20 border-blue-200/50 dark:border-blue-800/50">
-            <CardContent className="p-6">
-              <h3 className="text-xl font-semibold mb-6 flex items-center gap-2 text-blue-700 dark:text-blue-300">
-                <BookOpen className="h-5 w-5" />
-                Guía para crear tu documento académico perfecto
-              </h3>
-              
-              <div className="space-y-6">
-                <div className="flex gap-4">
-                  <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">
-                    1
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-foreground mb-2">Elige el tipo de documento correcto</h4>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      <strong>Monografía:</strong> Para trabajos de investigación extensos con múltiples capítulos.
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      <strong>Ensayo:</strong> Para trabajos argumentativos con introducción, desarrollo y conclusión.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">
-                    2
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-foreground mb-2">Define la longitud según tus necesidades</h4>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      <strong>10-15 páginas:</strong> Ideal para ensayos cortos y trabajos básicos.
-                    </p>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      <strong>20-30 páginas:</strong> Perfecto para monografías estándar universitarias.
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      <strong>30-45 páginas:</strong> Para trabajos de investigación profundos.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">
-                    3
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-foreground mb-2">Escribe un tema específico y claro</h4>
-                    <div className="space-y-2">
-                      <p className="text-sm text-green-600 dark:text-green-400">
-                        ✅ <strong>Bien:</strong> "Impacto de las redes sociales en la autoestima de adolescentes"
+          {/* Guía extensa - parte 1 y 2 */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Guía paso a paso - Parte 1 */}
+            <Card className="bg-slate-50/50 dark:bg-slate-900/20 border-slate-200/50 dark:border-slate-700/50">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                  <BookOpen className="h-5 w-5" />
+                  Guía completa del proceso (Parte 1)
+                </h3>
+                
+                <div className="space-y-4">
+                  <div className="flex gap-3">
+                    <div className="w-7 h-7 bg-slate-100 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0">
+                      1
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-foreground text-sm mb-2">Selección del tipo de documento</h4>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        <strong>Monografía:</strong> Trabajos de investigación extensos, ideales para tesis de grado, proyectos universitarios profundos con múltiples capítulos y análisis detallado.
                       </p>
-                      <p className="text-sm text-red-600 dark:text-red-400">
-                        ❌ <strong>Evita:</strong> "Redes sociales" (muy general)
+                      <p className="text-xs text-muted-foreground">
+                        <strong>Ensayo:</strong> Trabajos argumentativos con estructura clara: introducción, desarrollo de argumentos y conclusión. Perfectos para análisis críticos y reflexiones académicas.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <div className="w-7 h-7 bg-slate-100 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0">
+                      2
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-foreground text-sm mb-2">Configuración de longitud y tono</h4>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        <strong>10-15 páginas:</strong> Trabajos básicos, ensayos cortos, informes preliminares.
+                      </p>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        <strong>20-30 páginas:</strong> Monografías estándar, trabajos finales de curso.
+                      </p>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        <strong>30-45 páginas:</strong> Investigaciones profundas, tesis de pregrado.
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        <strong>Tono académico:</strong> Formal, objetivo, con terminología técnica apropiada.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <div className="w-7 h-7 bg-slate-100 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0">
+                      3
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-foreground text-sm mb-2">Definición del contenido</h4>
+                      <p className="text-xs text-emerald-600 dark:text-emerald-400 mb-1">
+                        ✅ <strong>Tema específico:</strong> "Impacto de las redes sociales en la salud mental de adolescentes de 15-18 años"
+                      </p>
+                      <p className="text-xs text-red-500 dark:text-red-400 mb-2">
+                        ❌ <strong>Muy general:</strong> "Redes sociales y adolescentes"
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Incluye curso/asignatura específica y área de estudio para contextualizar mejor el trabajo.
                       </p>
                     </div>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
 
-                <div className="flex gap-4">
-                  <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">
-                    4
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-foreground mb-2">Elige la estructura de índice adecuada</h4>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      <strong>Estándar:</strong> Para trabajos generales (Introducción → Desarrollo → Conclusión)
-                    </p>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      <strong>Por Capítulos:</strong> Para monografías extensas con múltiples temas
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      <strong>Académica:</strong> Para investigaciones con marco teórico y metodología
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Consejos importantes */}
-          <Card className="bg-gradient-to-br from-amber-50/50 to-orange-50/50 dark:from-amber-950/20 dark:to-orange-950/20 border-amber-200/50 dark:border-amber-800/50">
-            <CardContent className="p-6">
-              <h3 className="text-xl font-semibold mb-6 flex items-center gap-2 text-amber-700 dark:text-amber-300">
-                <AlertTriangle className="h-5 w-5" />
-                Consejos importantes antes de enviar
-              </h3>
-              
-              <div className="space-y-4">
-                <div className="flex items-start gap-3 p-3 bg-amber-100/50 dark:bg-amber-900/20 rounded-lg">
-                  <Info className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm text-amber-800 dark:text-amber-200">
-                      <strong>Revisa tu número de WhatsApp:</strong> Es el único medio de entrega. Asegúrate de que esté correcto.
-                    </p>
-                  </div>
-                </div>
+            {/* Guía paso a paso - Parte 2 */}
+            <Card className="bg-stone-50/50 dark:bg-stone-900/20 border-stone-200/50 dark:border-stone-700/50">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2 text-stone-700 dark:text-stone-300">
+                  <FileText className="h-5 w-5" />
+                  Guía completa del proceso (Parte 2)
+                </h3>
                 
-                <div className="flex items-start gap-3 p-3 bg-amber-100/50 dark:bg-amber-900/20 rounded-lg">
-                  <Info className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm text-amber-800 dark:text-amber-200">
-                      <strong>Instrucciones adicionales:</strong> Si tu universidad tiene formato específico, menciónalo en el campo opcional.
-                    </p>
+                <div className="space-y-4">
+                  <div className="flex gap-3">
+                    <div className="w-7 h-7 bg-stone-100 dark:bg-stone-800/50 text-stone-600 dark:text-stone-400 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0">
+                      4
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-foreground text-sm mb-2">Estructura del índice</h4>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        <strong>Estándar:</strong> Introducción → Desarrollo → Conclusión. Para trabajos generales y ensayos.
+                      </p>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        <strong>Por Capítulos:</strong> División temática numerada. Ideal para monografías extensas con múltiples subtemas.
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        <strong>Académica:</strong> Con objetivos, marco teórico, metodología. Para investigaciones formales.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <div className="w-7 h-7 bg-stone-100 dark:bg-stone-800/50 text-stone-600 dark:text-stone-400 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0">
+                      5
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-foreground text-sm mb-2">Datos de contacto y entrega</h4>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        <strong>WhatsApp:</strong> Único medio de entrega del documento. Verifica que esté correcto.
+                      </p>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        <strong>Instrucciones adicionales:</strong> Menciona formatos específicos de tu universidad, estilo de citas particular, etc.
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        <strong>Carátula opcional:</strong> Incluye datos de tu institución educativa si lo requieres.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <div className="w-7 h-7 bg-stone-100 dark:bg-stone-800/50 text-stone-600 dark:text-stone-400 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0">
+                      6
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-foreground text-sm mb-2">Notificación y pago</h4>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        📱 <strong>Te notificaremos por WhatsApp</strong> con los detalles de pago una vez recibida tu solicitud.
+                      </p>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        💳 <strong>Proceso de pago:</strong> Realizas el pago y envías el comprobante por WhatsApp.
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        📄 <strong>Generación del trabajo:</strong> El documento se genera una vez validado el comprobante de pago (3-15 min).
+                      </p>
+                    </div>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          </div>
 
-                <div className="flex items-start gap-3 p-3 bg-amber-100/50 dark:bg-amber-900/20 rounded-lg">
-                  <Info className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm text-amber-800 dark:text-amber-200">
-                      <strong>Tiempo de entrega:</strong> Documentos listos en 3-15 min, según cantidad de páginas solicitada. Para entregas urgentes, contáctanos por WhatsApp.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Ejemplos de temas populares */}
-          <Card className="bg-gradient-to-br from-green-50/50 to-emerald-50/50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200/50 dark:border-green-800/50">
-            <CardContent className="p-6">
-              <h3 className="text-xl font-semibold mb-6 flex items-center gap-2 text-green-700 dark:text-green-300">
-                <Zap className="h-5 w-5" />
-                Ejemplos de temas populares por carrera
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <h4 className="font-medium text-foreground">Psicología</h4>
-                  <ul className="space-y-1 text-sm text-muted-foreground">
-                    <li>• Trastornos de ansiedad en estudiantes universitarios</li>
-                    <li>• Impacto del bullying en el rendimiento académico</li>
-                    <li>• Psicología positiva en el ámbito laboral</li>
-                  </ul>
-                </div>
+          {/* Consejos y ejemplos */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Consejos importantes */}
+            <Card className="bg-zinc-50/50 dark:bg-zinc-900/20 border-zinc-200/50 dark:border-zinc-700/50">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2 text-zinc-700 dark:text-zinc-300">
+                  <AlertTriangle className="h-5 w-5" />
+                  Consejos importantes antes de enviar
+                </h3>
                 
-                <div className="space-y-3">
-                  <h4 className="font-medium text-foreground">Administración</h4>
-                  <ul className="space-y-1 text-sm text-muted-foreground">
-                    <li>• Liderazgo transformacional en empresas modernas</li>
-                    <li>• Marketing digital para pequeñas empresas</li>
-                    <li>• Gestión del talento humano post-pandemia</li>
-                  </ul>
-                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="bg-zinc-100/50 dark:bg-zinc-800/20 rounded-lg p-3 text-center">
+                    <Phone className="h-6 w-6 text-zinc-600 dark:text-zinc-400 mx-auto mb-2" />
+                    <h4 className="font-medium text-zinc-800 dark:text-zinc-200 text-sm mb-1">WhatsApp correcto</h4>
+                    <p className="text-xs text-zinc-700 dark:text-zinc-300">
+                      Único medio de entrega
+                    </p>
+                  </div>
+                  
+                  <div className="bg-zinc-100/50 dark:bg-zinc-800/20 rounded-lg p-3 text-center">
+                    <FileText className="h-6 w-6 text-zinc-600 dark:text-zinc-400 mx-auto mb-2" />
+                    <h4 className="font-medium text-zinc-800 dark:text-zinc-200 text-sm mb-1">Formato específico</h4>
+                    <p className="text-xs text-zinc-700 dark:text-zinc-300">
+                      Menciónalo en instrucciones
+                    </p>
+                  </div>
 
-                <div className="space-y-3">
-                  <h4 className="font-medium text-foreground">Educación</h4>
-                  <ul className="space-y-1 text-sm text-muted-foreground">
-                    <li>• Metodologías activas en educación primaria</li>
-                    <li>• Tecnología educativa en el aula virtual</li>
-                    <li>• Educación inclusiva para niños con TEA</li>
-                  </ul>
+                  <div className="bg-zinc-100/50 dark:bg-zinc-800/20 rounded-lg p-3 text-center">
+                    <BadgeCheck className="h-6 w-6 text-zinc-600 dark:text-zinc-400 mx-auto mb-2" />
+                    <h4 className="font-medium text-zinc-800 dark:text-zinc-200 text-sm mb-1">Entrega rápida</h4>
+                    <p className="text-xs text-zinc-700 dark:text-zinc-300">
+                      3-15 min según páginas
+                    </p>
+                  </div>
                 </div>
+              </CardContent>
+            </Card>
 
-                <div className="space-y-3">
-                  <h4 className="font-medium text-foreground">Derecho</h4>
-                  <ul className="space-y-1 text-sm text-muted-foreground">
-                    <li>• Derechos digitales y protección de datos</li>
-                    <li>• Violencia familiar en el marco jurídico peruano</li>
-                    <li>• Derecho ambiental y sostenibilidad</li>
-                  </ul>
+            {/* Ejemplos de temas populares */}
+            <Card className="bg-gray-50/50 dark:bg-gray-900/20 border-gray-200/50 dark:border-gray-700/50">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                  <Zap className="h-5 w-5" />
+                  Ejemplos de temas populares por carrera
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-gray-100/50 dark:bg-gray-800/20 rounded-lg p-3">
+                    <h4 className="font-medium text-gray-800 dark:text-gray-200 text-sm mb-2">Psicología</h4>
+                    <div className="space-y-1">
+                      <p className="text-xs text-gray-700 dark:text-gray-300">• Ansiedad estudiantil</p>
+                      <p className="text-xs text-gray-700 dark:text-gray-300">• Bullying académico</p>
+                      <p className="text-xs text-gray-700 dark:text-gray-300">• Psicología laboral</p>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gray-100/50 dark:bg-gray-800/20 rounded-lg p-3">
+                    <h4 className="font-medium text-gray-800 dark:text-gray-200 text-sm mb-2">Administración</h4>
+                    <div className="space-y-1">
+                      <p className="text-xs text-gray-700 dark:text-gray-300">• Liderazgo moderno</p>
+                      <p className="text-xs text-gray-700 dark:text-gray-300">• Marketing digital</p>
+                      <p className="text-xs text-gray-700 dark:text-gray-300">• Gestión del talento</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-100/50 dark:bg-gray-800/20 rounded-lg p-3">
+                    <h4 className="font-medium text-gray-800 dark:text-gray-200 text-sm mb-2">Derecho</h4>
+                    <div className="space-y-1">
+                      <p className="text-xs text-gray-700 dark:text-gray-300">• Derechos digitales</p>
+                      <p className="text-xs text-gray-700 dark:text-gray-300">• Violencia familiar</p>
+                      <p className="text-xs text-gray-700 dark:text-gray-300">• Derecho ambiental</p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
 
         </div>
         </div>
