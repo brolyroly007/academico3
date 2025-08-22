@@ -21,15 +21,22 @@ export function LogoSearch({ institutionName, onLogoSelect, selectedLogoUrl }) {
       );
 
       if (!response.ok) {
-        throw new Error("Error en la búsqueda de imágenes");
+        throw new Error(`Error en la búsqueda: ${response.status} ${response.statusText}`);
       }
 
-      const data = await response.json();
+      // Verificar si la respuesta tiene contenido antes de parsear JSON
+      const responseText = await response.text();
+      if (!responseText.trim()) {
+        throw new Error("Respuesta vacía del servidor");
+      }
+
+      const data = JSON.parse(responseText);
       setImages(data.images || []);
       setHasSearched(true);
     } catch (error) {
       console.error("Error buscando logos:", error);
       setImages([]);
+      setHasSearched(true); // Mostrar mensaje de error
     } finally {
       setIsSearching(false);
     }
