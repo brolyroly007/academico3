@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Info, Plus, Minus, BookOpen } from "lucide-react";
+import { LogoSearch } from "@/components/LogoSearch";
 
 export function CoverGenerator({ setCoverData, coverData = {} }) {
   const [includesCover, setIncludesCover] = useState(
@@ -44,6 +45,14 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
   // Función para convertir texto a mayúsculas
   const toUpperCase = (text) => {
     return text.toUpperCase();
+  };
+
+  // Función para manejar la selección de logo
+  const handleLogoSelect = (logoUrl) => {
+    setCoverData({
+      ...coverData,
+      logoUrl: logoUrl,
+    });
   };
 
   // Función para verificar si los campos obligatorios están completos
@@ -109,6 +118,7 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
       tituloTrabajoInstituto: coverData.tituloTrabajoInstituto || "",
       docenteInstituto: coverData.docenteInstituto || "",
       estudiantesInstituto: instituteStudents,
+      logoUrl: coverData.logoUrl || "",
     });
   }, [
     includesCover,
@@ -131,6 +141,7 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
     coverData.programaInstituto,
     coverData.tituloTrabajoInstituto,
     coverData.docenteInstituto,
+    coverData.logoUrl,
   ]);
 
   // Funciones para agregar/eliminar estudiantes
@@ -254,6 +265,18 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                     />
                   </div>
                 </div>
+
+                {/* Búsqueda de logo para colegio */}
+                {coverData.nombreColegio && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Logo del colegio (opcional)</Label>
+                    <LogoSearch
+                      institutionName={coverData.nombreColegio}
+                      onLogoSelect={handleLogoSelect}
+                      selectedLogoUrl={coverData.logoUrl}
+                    />
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -402,6 +425,18 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                   </div>
                 </div>
 
+                {/* Búsqueda de logo para universidad */}
+                {coverData.nombreUniversidad && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Logo de la universidad (opcional)</Label>
+                    <LogoSearch
+                      institutionName={coverData.nombreUniversidad}
+                      onLogoSelect={handleLogoSelect}
+                      selectedLogoUrl={coverData.logoUrl}
+                    />
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Carrera</Label>
@@ -540,6 +575,18 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                     />
                   </div>
                 </div>
+
+                {/* Búsqueda de logo para instituto */}
+                {coverData.nombreInstituto && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Logo del instituto (opcional)</Label>
+                    <LogoSearch
+                      institutionName={coverData.nombreInstituto}
+                      onLogoSelect={handleLogoSelect}
+                      selectedLogoUrl={coverData.logoUrl}
+                    />
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label>Título del trabajo *</Label>

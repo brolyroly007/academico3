@@ -40,7 +40,7 @@ export default async function handler(req, res) {
     });
 
     const sheets = google.sheets({ version: "v4", auth });
-    const RANGE = "Hoja 1!A:AD"; // Rango ampliado para incluir todas las columnas (AD)
+    const RANGE = "Hoja 1!A:AE"; // Rango ampliado para incluir Logo URL (AE)
 
     // Obtener el último ID para generar uno nuevo
     const response = await sheets.spreadsheets.values.get({
@@ -197,6 +197,9 @@ export default async function handler(req, res) {
     // Obtener estructura del índice
     const indexStructure = req.body.indexStructure || "estandar";
 
+    // Extraer Logo URL
+    const logoUrl = req.body.coverData?.logoUrl || "";
+
     // Preparar los datos para insertar - Orden actualizado con nuevas columnas
     const values = [
       [
@@ -229,7 +232,8 @@ export default async function handler(req, res) {
         grado, // AA - Grado (NUEVO)
         seccion, // AB - Sección (NUEVO)
         programa, // AC - Programa (NUEVO)
-        detallesJSON, // AD - Detalles JSON
+        logoUrl, // AD - Logo URL (NUEVO)
+        detallesJSON, // AE - Detalles JSON
       ],
     ];
 
@@ -379,7 +383,7 @@ export default async function handler(req, res) {
               fields: "userEnteredFormat(wrapStrategy,verticalAlignment)",
             },
           },
-          // Formato para texto largo en Detalles JSON (ahora en columna AD - índice 29)
+          // Formato para Logo URL (columna AD - índice 29)
           {
             updateCells: {
               range: {
@@ -388,6 +392,35 @@ export default async function handler(req, res) {
                 endRowIndex: rowIndex + 1,
                 startColumnIndex: 29,
                 endColumnIndex: 30,
+              },
+              rows: [
+                {
+                  values: [
+                    {
+                      userEnteredFormat: {
+                        wrapStrategy: "WRAP",
+                        verticalAlignment: "TOP",
+                        textFormat: {
+                          foregroundColor: { red: 0.2, green: 0.4, blue: 0.8 }, // Azul para URLs
+                          fontSize: 9,
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+              fields: "userEnteredFormat(wrapStrategy,verticalAlignment,textFormat)",
+            },
+          },
+          // Formato para texto largo en Detalles JSON (ahora en columna AE - índice 30)
+          {
+            updateCells: {
+              range: {
+                sheetId: 0,
+                startRowIndex: rowIndex,
+                endRowIndex: rowIndex + 1,
+                startColumnIndex: 30,
+                endColumnIndex: 31,
               },
               rows: [
                 {
