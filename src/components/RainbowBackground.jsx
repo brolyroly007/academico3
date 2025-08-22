@@ -1,12 +1,40 @@
 // src/components/RainbowBackground.jsx
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useTheme } from "./theme-provider";
 
 export function RainbowBackground({ children, className = "" }) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Generar 25 franjas rainbow
+  // Detectar si es móvil para optimizar el rendimiento
+  useEffect(() => {
+    const checkMobile = () => {
+      const isMobileDevice = window.innerWidth < 768 || 
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      setIsMobile(isMobileDevice);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Si es móvil, usar un fondo estático más simple
+  if (isMobile) {
+    return (
+      <div
+        className={`mobile-background-container ${
+          isDark ? "mobile-dark-bg" : "mobile-light-bg"
+        } ${className}`}
+      >
+        {/* Contenido que va encima del fondo */}
+        <div className="relative z-10">{children}</div>
+      </div>
+    );
+  }
+
+  // Generar 25 franjas rainbow solo para desktop
   const rainbowStripes = Array.from({ length: 25 }, (_, i) => i + 1);
 
   return (

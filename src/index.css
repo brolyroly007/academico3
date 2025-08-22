@@ -1164,3 +1164,76 @@ html, body {
   position: relative;
   z-index: 10;
 }
+
+/* ===== FONDOS OPTIMIZADOS PARA MÓVIL ===== */
+
+/* Contenedor principal para móvil - sin animaciones pesadas */
+.mobile-background-container {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Fondo estático simplificado para móvil - modo claro */
+.mobile-light-bg {
+  background: 
+    radial-gradient(circle at 30% 20%, hsl(var(--primary-blue) / 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 70% 80%, hsl(var(--primary-yellow) / 0.06) 0%, transparent 40%),
+    hsl(var(--background));
+}
+
+/* Fondo estático simplificado para móvil - modo oscuro */
+.mobile-dark-bg {
+  background: 
+    radial-gradient(circle at 30% 20%, hsl(var(--primary-yellow) / 0.06) 0%, transparent 40%),
+    radial-gradient(circle at 70% 80%, hsl(var(--primary-blue) / 0.08) 0%, transparent 40%),
+    hsl(var(--background));
+}
+
+/* Asegurar que el contenido móvil sea legible */
+.mobile-background-container > .relative {
+  position: relative;
+  z-index: 10;
+}
+
+/* Media query para asegurar que las animaciones se desactiven en móviles */
+@media (max-width: 767px) {
+  /* Desactivar todas las animaciones pesadas en móvil */
+  .rainbow-background-container::before,
+  .rainbow-background-container::after,
+  .light-rainbow::before,
+  .light-rainbow::after,
+  .dark-rainbow::before,
+  .dark-rainbow::after {
+    display: none !important;
+  }
+  
+  /* Forzar el uso del fondo móvil */
+  .rainbow-background-container {
+    background: 
+      radial-gradient(circle at 30% 20%, hsl(var(--primary-blue) / 0.05) 0%, transparent 40%),
+      radial-gradient(circle at 70% 80%, hsl(var(--primary-yellow) / 0.04) 0%, transparent 40%),
+      hsl(var(--background)) !important;
+  }
+  
+  .rainbow-background-container.dark-rainbow {
+    background: 
+      radial-gradient(circle at 30% 20%, hsl(var(--primary-yellow) / 0.04) 0%, transparent 40%),
+      radial-gradient(circle at 70% 80%, hsl(var(--primary-blue) / 0.05) 0%, transparent 40%),
+      hsl(var(--background)) !important;
+  }
+}
+
+/* Reducir animaciones en dispositivos con preferencia de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  .rainbow-background-container::before,
+  .rainbow-background-container::after,
+  .light-rainbow::before,
+  .light-rainbow::after,
+  .dark-rainbow::before,
+  .dark-rainbow::after {
+    animation: none !important;
+    display: none !important;
+  }
+}
