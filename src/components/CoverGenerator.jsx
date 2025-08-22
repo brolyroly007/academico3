@@ -268,13 +268,22 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
 
                 {/* Búsqueda de logo para colegio */}
                 {coverData.nombreColegio && (
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">Logo del colegio (opcional)</Label>
-                    <ImageSearcher
-                      onImageSelect={handleLogoSelect}
-                      selectedImageUrl={coverData.logoUrl}
-                    />
-                  </div>
+                  <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-900/10 dark:border-blue-800/50">
+                    <CardContent className="pt-4">
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          <Label className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                            🖼️ Buscar logo del colegio (opcional)
+                          </Label>
+                        </div>
+                        <ImageSearcher
+                          onImageSelect={handleLogoSelect}
+                          selectedImageUrl={coverData.logoUrl}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -426,13 +435,22 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
 
                 {/* Búsqueda de logo para universidad */}
                 {coverData.nombreUniversidad && (
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">Logo de la universidad (opcional)</Label>
-                    <ImageSearcher
-                      onImageSelect={handleLogoSelect}
-                      selectedImageUrl={coverData.logoUrl}
-                    />
-                  </div>
+                  <Card className="border-green-200 bg-green-50/50 dark:bg-green-900/10 dark:border-green-800/50">
+                    <CardContent className="pt-4">
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <Label className="text-sm font-medium text-green-700 dark:text-green-300">
+                            🖼️ Buscar logo de la universidad (opcional)
+                          </Label>
+                        </div>
+                        <ImageSearcher
+                          onImageSelect={handleLogoSelect}
+                          selectedImageUrl={coverData.logoUrl}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -576,13 +594,22 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
 
                 {/* Búsqueda de logo para instituto */}
                 {coverData.nombreInstituto && (
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">Logo del instituto (opcional)</Label>
-                    <ImageSearcher
-                      onImageSelect={handleLogoSelect}
-                      selectedImageUrl={coverData.logoUrl}
-                    />
-                  </div>
+                  <Card className="border-purple-200 bg-purple-50/50 dark:bg-purple-900/10 dark:border-purple-800/50">
+                    <CardContent className="pt-4">
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                          <Label className="text-sm font-medium text-purple-700 dark:text-purple-300">
+                            🖼️ Buscar logo del instituto (opcional)
+                          </Label>
+                        </div>
+                        <ImageSearcher
+                          onImageSelect={handleLogoSelect}
+                          selectedImageUrl={coverData.logoUrl}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
                 )}
 
                 <div className="space-y-2">
