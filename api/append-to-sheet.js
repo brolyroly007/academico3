@@ -199,6 +199,10 @@ export default async function handler(req, res) {
 
     // Extraer Logo URL
     const logoUrl = req.body.coverData?.logoUrl || "";
+    
+    // Debug para verificar Logo URL
+    console.log('🖼️ Logo URL recibido:', logoUrl);
+    console.log('📦 CoverData completo:', JSON.stringify(req.body.coverData, null, 2));
 
     // Preparar los datos para insertar - Orden actualizado con nuevas columnas
     const values = [

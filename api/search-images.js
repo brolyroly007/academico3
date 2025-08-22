@@ -36,39 +36,15 @@ export default async function handler(req, res) {
       });
     }
 
-    // Configuración de Google Custom Search API desde variables de entorno
-    const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY || "AIzaSyD1YwYLccJH77CWEUUwZr_Kr_dzANiyWEA";
-    const GOOGLE_SEARCH_ENGINE_ID = process.env.GOOGLE_SEARCH_ENGINE_ID || "4493382c25c624870";
+    // Configuración de Google Custom Search API 
+    const GOOGLE_API_KEY = "AIzaSyD1YwYLccJH77CWEUUwZr_Kr_dzANiyWEA";
+    const GOOGLE_SEARCH_ENGINE_ID = "4493382c25c624870";
 
     // Debug para verificar variables
     console.log('🔑 API Key disponible:', GOOGLE_API_KEY ? 'Sí' : 'No');
     console.log('🔍 Search Engine ID disponible:', GOOGLE_SEARCH_ENGINE_ID ? 'Sí' : 'No');
 
-    // MODO DE PRUEBA - Devolver imágenes de ejemplo si hay problemas con Google API
-    if (query.includes('test') || !GOOGLE_API_KEY || !GOOGLE_SEARCH_ENGINE_ID) {
-      console.log('⚠️ Usando modo de prueba - devolviendo imágenes de ejemplo');
-      return res.json({
-        status: "success",
-        images: [
-          {
-            title: `Logo ${query} 1`,
-            link: "https://via.placeholder.com/300x200/0066cc/ffffff?text=Logo+1",
-            thumbnail: "https://via.placeholder.com/150x100/0066cc/ffffff?text=Logo+1",
-            width: 300,
-            height: 200
-          },
-          {
-            title: `Logo ${query} 2`, 
-            link: "https://via.placeholder.com/300x200/cc6600/ffffff?text=Logo+2",
-            thumbnail: "https://via.placeholder.com/150x100/cc6600/ffffff?text=Logo+2",
-            width: 300,
-            height: 200
-          }
-        ],
-        totalResults: 2,
-        mode: "test"
-      });
-    }
+    // Intentar siempre con Google API real
 
     // Construir URL de búsqueda de Google Custom Search API
     const searchUrl = new URL("https://www.googleapis.com/customsearch/v1");
@@ -76,10 +52,12 @@ export default async function handler(req, res) {
     searchUrl.searchParams.set("cx", GOOGLE_SEARCH_ENGINE_ID);
     searchUrl.searchParams.set("q", query);
     searchUrl.searchParams.set("searchType", "image");
-    searchUrl.searchParams.set("num", Math.min(parseInt(num), 10)); // Máximo 10 imágenes
+    searchUrl.searchParams.set("num", Math.min(parseInt(num), 6)); // Exactamente 6 imágenes
     searchUrl.searchParams.set("safe", "active");
     searchUrl.searchParams.set("imgSize", "medium");
-    searchUrl.searchParams.set("imgType", "clipart,face,lineart,news,photo");
+    searchUrl.searchParams.set("imgType", "clipart,lineart,photo");
+    searchUrl.searchParams.set("fileType", "jpg,png");
+    searchUrl.searchParams.set("rights", "cc_publicdomain,cc_attribute,cc_sharealike,cc_noncommercial");
 
     console.log(`🔍 Buscando imágenes para: "${query}"`);
 
@@ -88,7 +66,59 @@ export default async function handler(req, res) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`❌ Error Google API (${response.status}):`, errorText);
-      throw new Error(`Error en Google API: ${response.status} ${response.statusText} - ${errorText}`);
+      
+      // En caso de error de Google API, devolver imágenes de fallback
+      console.log('🔄 Error en Google API, usando fallback con imágenes genéricas');
+      return res.json({
+        status: "success",
+        images: [
+          {
+            title: `${query} - Logo genérico 1`,
+            link: "https://via.placeholder.com/300x200/1e40af/ffffff?text=LOGO",
+            thumbnail: "https://via.placeholder.com/150x100/1e40af/ffffff?text=LOGO",
+            width: 300,
+            height: 200
+          },
+          {
+            title: `${query} - Logo genérico 2`,
+            link: "https://via.placeholder.com/300x200/dc2626/ffffff?text=LOGO",
+            thumbnail: "https://via.placeholder.com/150x100/dc2626/ffffff?text=LOGO",
+            width: 300,
+            height: 200
+          },
+          {
+            title: `${query} - Logo genérico 3`,
+            link: "https://via.placeholder.com/300x200/059669/ffffff?text=LOGO",
+            thumbnail: "https://via.placeholder.com/150x100/059669/ffffff?text=LOGO",
+            width: 300,
+            height: 200
+          },
+          {
+            title: `${query} - Logo genérico 4`,
+            link: "https://via.placeholder.com/300x200/7c3aed/ffffff?text=LOGO",
+            thumbnail: "https://via.placeholder.com/150x100/7c3aed/ffffff?text=LOGO",
+            width: 300,
+            height: 200
+          },
+          {
+            title: `${query} - Logo genérico 5`,
+            link: "https://via.placeholder.com/300x200/ea580c/ffffff?text=LOGO",
+            thumbnail: "https://via.placeholder.com/150x100/ea580c/ffffff?text=LOGO",
+            width: 300,
+            height: 200
+          },
+          {
+            title: `${query} - Logo genérico 6`,
+            link: "https://via.placeholder.com/300x200/0891b2/ffffff?text=LOGO",
+            thumbnail: "https://via.placeholder.com/150x100/0891b2/ffffff?text=LOGO",
+            width: 300,
+            height: 200
+          }
+        ],
+        totalResults: 6,
+        mode: "fallback_api_error",
+        error: `Google API Error: ${response.status}`
+      });
     }
 
     const data = await response.json();

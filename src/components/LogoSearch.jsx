@@ -172,6 +172,9 @@ export function LogoSearch({ institutionName, onLogoSelect, selectedLogoUrl }) {
                     <Check className="h-4 w-4" />
                     Logo seleccionado correctamente
                   </p>
+                  <p className="text-xs text-green-600 mt-1 break-all">
+                    URL: {selectedLogoUrl}
+                  </p>
                 </div>
               )}
             </>
