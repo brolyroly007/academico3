@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Info, Plus, Minus, BookOpen } from "lucide-react";
-import { LogoSearch } from "@/components/LogoSearch";
+import { ImageSearcher } from "@/components/ImageSearcher";
 
 export function CoverGenerator({ setCoverData, coverData = {} }) {
   const [includesCover, setIncludesCover] = useState(
@@ -270,10 +270,9 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                 {coverData.nombreColegio && (
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Logo del colegio (opcional)</Label>
-                    <LogoSearch
-                      institutionName={coverData.nombreColegio}
-                      onLogoSelect={handleLogoSelect}
-                      selectedLogoUrl={coverData.logoUrl}
+                    <ImageSearcher
+                      onImageSelect={handleLogoSelect}
+                      selectedImageUrl={coverData.logoUrl}
                     />
                   </div>
                 )}
@@ -429,10 +428,9 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                 {coverData.nombreUniversidad && (
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Logo de la universidad (opcional)</Label>
-                    <LogoSearch
-                      institutionName={coverData.nombreUniversidad}
-                      onLogoSelect={handleLogoSelect}
-                      selectedLogoUrl={coverData.logoUrl}
+                    <ImageSearcher
+                      onImageSelect={handleLogoSelect}
+                      selectedImageUrl={coverData.logoUrl}
                     />
                   </div>
                 )}
@@ -580,10 +578,9 @@ export function CoverGenerator({ setCoverData, coverData = {} }) {
                 {coverData.nombreInstituto && (
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Logo del instituto (opcional)</Label>
-                    <LogoSearch
-                      institutionName={coverData.nombreInstituto}
-                      onLogoSelect={handleLogoSelect}
-                      selectedLogoUrl={coverData.logoUrl}
+                    <ImageSearcher
+                      onImageSelect={handleLogoSelect}
+                      selectedImageUrl={coverData.logoUrl}
                     />
                   </div>
                 )}
