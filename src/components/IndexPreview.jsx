@@ -18,6 +18,7 @@ import {
 import { appendToSheet } from "../services/googleSheets";
 import { handleError, handleSuccess } from "../utils/errorHandler";
 import RainbowBackground from "./RainbowBackground";
+import { AnnexManager } from "./AnnexManager";
 
 // Definición de las estructuras disponibles
 const STRUCTURE_TYPES = {
@@ -48,6 +49,7 @@ function IndexPreview() {
   const [generatedIndex, setGeneratedIndex] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState(null);
+  const [annexData, setAnnexData] = useState({});
 
   // Función para obtener información de la estructura
   const getStructureInfo = () => {
@@ -403,6 +405,7 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
       const completeFormData = {
         ...formData,
         index: generatedIndex, // Asegúrate de que esto se está estableciendo correctamente
+        annexData: annexData, // Incluir datos de anexos
         timestamp: new Date().toISOString(),
       };
       // Registrar los datos que estamos enviando para depuración
@@ -591,6 +594,18 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
                           </p>
                         </div>
                       )}
+                    
+                    {/* Información de anexos si están incluidos */}
+                    {annexData.incluirAnexos && (
+                      <div>
+                        <span className="text-xs sm:text-sm font-medium">
+                          Anexos:
+                        </span>
+                        <p className="text-muted-foreground text-sm">
+                          {annexData.anexos?.length || 0} anexo(s) incluido(s)
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
                 {/* Información de contacto */}
@@ -698,6 +713,15 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
                         </ul>
                       </div>
                     </div>
+                  </div>
+
+                  {/* Sección de anexos */}
+                  <div className="mt-6">
+                    <AnnexManager
+                      setAnnexData={setAnnexData}
+                      annexData={annexData}
+                      generatedIndex={generatedIndex}
+                    />
                   </div>
 
                   <div className="flex justify-end gap-2 sm:gap-4">

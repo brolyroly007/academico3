@@ -7,21 +7,93 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ImageSearcher } from "@/components/ImageSearcher";
 import { Plus, Minus, FileImage, Info } from "lucide-react";
 
-export function AnnexManager({ setAnnexData, annexData = {} }) {
+export function AnnexManager({ setAnnexData, annexData = {}, generatedIndex = "" }) {
   const [includeAnnex, setIncludeAnnex] = useState(
     annexData.incluirAnexos || false
   );
   
-  // Títulos sugeridos por defecto
-  const [annexes, setAnnexes] = useState(
-    annexData.anexos?.length 
-      ? annexData.anexos 
-      : [
-          { titulo: "Encuesta aplicada", imagenUrl: "" },
-          { titulo: "Tabla de datos estadísticos", imagenUrl: "" },
-          { titulo: "Fotografías del proceso", imagenUrl: "" }
-        ]
-  );
+  // Función para extraer títulos del índice generado
+  const extractTitlesFromIndex = (indexText) => {
+    if (!indexText) return getDefaultTitles();
+    
+    const lines = indexText.split('\n');
+    const extractedTitles = [];
+    
+    // Buscar líneas que contengan títulos principales (numeración 1., 2., 3., I., II., etc.)
+    lines.forEach(line => {
+      const trimmedLine = line.trim();
+      
+      // Patrones para detectar títulos principales
+      const patterns = [
+        /^(\d+\.)\s+(.+)$/,           // 1. TITULO, 2. TITULO, etc.
+        /^([IVXLC]+\.)\s+(.+)$/,     // I. TITULO, II. TITULO, etc.
+        /^(CAPITULO\s+[IVXLC]+):\s*(.+)$/i, // CAPITULO I: TITULO
+      ];
+      
+      for (let pattern of patterns) {
+        const match = trimmedLine.match(pattern);
+        if (match && match[2]) {
+          let title = match[2].trim();
+          // Limpiar el título y generar sugerencia de anexo
+          title = title.replace(/:/g, '').trim();
+          
+          // Generar títulos de anexos basados en el contenido
+          if (title.toLowerCase().includes('introducción') || title.toLowerCase().includes('aspectos introductorios')) {
+            extractedTitles.push(`Antecedentes históricos de ${title.toLowerCase()}`);
+          } else if (title.toLowerCase().includes('metodología') || title.toLowerCase().includes('método')) {
+            extractedTitles.push(`Instrumentos de recolección de datos`);
+          } else if (title.toLowerCase().includes('resultado') || title.toLowerCase().includes('análisis')) {
+            extractedTitles.push(`Tablas de datos estadísticos`);
+          } else if (title.toLowerCase().includes('marco teórico') || title.toLowerCase().includes('fundamento')) {
+            extractedTitles.push(`Esquemas conceptuales relacionados`);
+          } else if (title.toLowerCase().includes('desarrollo') || title.toLowerCase().includes('discusión')) {
+            extractedTitles.push(`Evidencias fotográficas del proceso`);
+          } else {
+            // Generar título genérico basado en el contenido
+            extractedTitles.push(`Documentación complementaria de ${title.toLowerCase()}`);
+          }
+          
+          if (extractedTitles.length >= 3) break;
+        }
+      }
+      
+      if (extractedTitles.length >= 3) return;
+    });
+    
+    // Si no se encontraron suficientes títulos, completar con títulos por defecto
+    while (extractedTitles.length < 3) {
+      const defaultTitles = getDefaultTitles();
+      const missingTitle = defaultTitles[extractedTitles.length];
+      if (missingTitle && !extractedTitles.find(t => t === missingTitle.titulo)) {
+        extractedTitles.push(missingTitle.titulo);
+      }
+    }
+    
+    return extractedTitles.slice(0, 3).map(titulo => ({ titulo, imagenUrl: "" }));
+  };
+  
+  // Títulos por defecto como fallback
+  const getDefaultTitles = () => [
+    { titulo: "Encuesta aplicada", imagenUrl: "" },
+    { titulo: "Tabla de datos estadísticos", imagenUrl: "" },
+    { titulo: "Fotografías del proceso", imagenUrl: "" }
+  ];
+  
+  // Inicializar anexos basados en el índice o usar valores existentes
+  const [annexes, setAnnexes] = useState(() => {
+    if (annexData.anexos?.length) {
+      return annexData.anexos;
+    }
+    return extractTitlesFromIndex(generatedIndex);
+  });
+  
+  // Actualizar anexos cuando cambie el índice generado
+  useEffect(() => {
+    if (generatedIndex && !annexData.anexos?.length) {
+      const suggestedTitles = extractTitlesFromIndex(generatedIndex);
+      setAnnexes(suggestedTitles);
+    }
+  }, [generatedIndex, annexData.anexos]);
 
   // Efecto para actualizar los datos del componente padre
   useEffect(() => {
@@ -89,7 +161,7 @@ export function AnnexManager({ setAnnexData, annexData = {} }) {
               <Info className="h-5 w-5 text-blue-500 flex-shrink-0" />
               <div>
                 <p className="text-sm text-blue-700 dark:text-blue-300">
-                  Los anexos aparecerán al final del documento. Puedes modificar los títulos sugeridos y buscar imágenes relacionadas para cada uno.
+                  Los anexos aparecerán al final del documento. Los títulos se han sugerido automáticamente basándose en el contenido del índice generado. Puedes modificarlos y buscar imágenes relacionadas para cada uno.
                 </p>
               </div>
             </div>

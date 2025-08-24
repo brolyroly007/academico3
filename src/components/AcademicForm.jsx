@@ -14,7 +14,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { CoverGenerator } from "./CoverGenerator";
-import { AnnexManager } from "./AnnexManager";
 import { ProgressIndicator } from "./ProgressIndicator";
 import { handleError } from "../utils/errorHandler";
 import {
@@ -313,13 +312,6 @@ export default function AcademicForm() {
     }));
   };
 
-  // Función para actualizar los datos de anexos
-  const handleAnnexDataChange = (annexData) => {
-    setFormData((prev) => ({
-      ...prev,
-      annexData,
-    }));
-  };
 
   // Función para manejar la verificación de reCAPTCHA
   const handleRecaptchaVerify = (token) => {
@@ -562,8 +554,6 @@ export default function AcademicForm() {
             // Incluir datos de seguridad
             recaptchaToken: recaptchaToken,
             privacyAccepted: privacyAccepted,
-            // Incluir datos de anexos
-            annexData: formData.annexData || {},
           };
 
           console.log("Datos a enviar:", dataToSend);
@@ -705,14 +695,6 @@ export default function AcademicForm() {
             </div>
           )}
 
-          {formData.annexData && formData.annexData.incluirAnexos && (
-            <div>
-              <span className="font-medium">Anexos:</span>
-              <p className="text-muted-foreground">
-                {formData.annexData.anexos?.length || 0} anexo(s) incluido(s)
-              </p>
-            </div>
-          )}
 
           {/* Mostrar estado de verificación de seguridad */}
           <div className="pt-3 border-t mt-3">
@@ -1495,13 +1477,6 @@ export default function AcademicForm() {
                         />
                       </div>
 
-                      {/* Sección de anexos - Añadir después de carátula */}
-                      <div className="pt-6 border-t">
-                        <AnnexManager
-                          setAnnexData={handleAnnexDataChange}
-                          annexData={formData.annexData || {}}
-                        />
-                      </div>
                     </div>
                   </div>
                 </div>
