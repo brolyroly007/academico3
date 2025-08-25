@@ -117,7 +117,7 @@ export function ImageSearcher({ onImageSelect, selectedImageUrl = null, customQu
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label>Buscar imagen para este anexo</Label>
+        <Label>{contextualPlaceholder ? "Buscar imagen relacionada" : "Buscar logo/imagen institucional"}</Label>
         <div className="flex gap-2">
           <Input
             placeholder={contextualPlaceholder || "Buscar imágenes relacionadas"}

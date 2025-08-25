@@ -280,6 +280,11 @@ export default function AcademicForm() {
   useEffect(() => {
     console.log("[DEBUG] AcademicForm - currentStep cambió a:", currentStep);
   }, [currentStep]);
+
+  // Scroll al top cuando cambia el paso
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentStep]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [maxStep, setMaxStep] = useState(maxVisitedStep);
@@ -495,6 +500,7 @@ export default function AcademicForm() {
       if (validateStep()) {
         if (step + 1 <= maxStep) {
           setCurrentStep(step + 1);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       }
       return;
@@ -504,6 +510,7 @@ export default function AcademicForm() {
     if (validateStep()) {
       if (step <= maxStep) {
         setCurrentStep(step);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     } else {
       // Si no pasa la validación, mantener el paso actual
@@ -522,6 +529,7 @@ export default function AcademicForm() {
 
       setCurrentStep(nextStep);
       setMaxStep(Math.max(maxStep, nextStep));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -534,6 +542,7 @@ export default function AcademicForm() {
     }
 
     setCurrentStep(prevStep);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSubmit = async (e) => {

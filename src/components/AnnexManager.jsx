@@ -26,17 +26,17 @@ export function AnnexManager({ setAnnexData, annexData = {}, generatedIndex = ""
 ÍNDICE:
 ${generatedIndex}
 
-Los anexos deben ser específicos, útiles y relacionados directamente con el contenido. Ejemplos de tipos de anexos: 
-- Tablas de datos estadísticos
-- Instrumentos de recolección (encuestas, cuestionarios)
-- Fotografías o evidencias visuales
-- Esquemas, mapas conceptuales o diagramas
-- Entrevistas o testimonios
-- Documentos legales o normativas
-- Cronogramas o planificaciones
-- Glosarios especializados
-- Análisis complementarios
-- Casos de estudio específicos
+Los anexos deben ser recursos tangibles, documentos reales y materiales concretos que existen o se pueden encontrar fácilmente. Ejemplos de tipos de anexos tangibles: 
+- Fotografías de lugares, personas o eventos relevantes
+- Documentos oficiales, leyes o normativas existentes
+- Tablas, gráficos o estadísticas publicadas
+- Mapas, planos o diagramas técnicos reales
+- Formularios, contratos o documentos modelo
+- Capturas de pantalla de sistemas o aplicaciones
+- Certificados, diplomas o credenciales
+- Artículos de prensa o publicaciones
+- Imágenes de productos, equipos o instalaciones
+- Manuales, guías o instructivos existentes
 
 Responde ÚNICAMENTE con una lista numerada de 10 títulos, sin explicaciones adicionales:
 
@@ -87,38 +87,38 @@ Responde ÚNICAMENTE con una lista numerada de 10 títulos, sin explicaciones ad
   // Función de fallback para generar sugerencias contextuales básicas
   const generateContextualSuggestions = () => {
     const baseSuggestions = [
-      "Encuesta aplicada a estudiantes",
-      "Tabla de datos estadísticos",
-      "Fotografías del proceso de investigación",
-      "Instrumentos de recolección de datos",
-      "Esquemas y mapas conceptuales",
-      "Cronograma de actividades realizadas",
-      "Entrevistas con expertos del tema",
-      "Documentos normativos relacionados",
-      "Glosario de términos técnicos",
-      "Casos de estudio complementarios"
+      "Fotografías relevantes del tema",
+      "Documentos oficiales o normativas",
+      "Tablas estadísticas publicadas",
+      "Mapas o planos relacionados",
+      "Artículos de prensa sobre el tema",
+      "Capturas de pantalla de sistemas",
+      "Formularios o documentos modelo",
+      "Certificados o credenciales",
+      "Imágenes de productos o equipos",
+      "Manuales o guías existentes"
     ];
 
     // Personalizar según el tema y tipo de documento
     if (documentTopic.toLowerCase().includes('educación') || documentTopic.toLowerCase().includes('enseñanza')) {
       return [
-        "Planes de clase o sesiones educativas",
-        "Evaluaciones y rúbricas aplicadas",
-        "Fotografías de actividades educativas",
+        "Fotografías de instituciones educativas",
+        "Documentos del Ministerio de Educación",
+        "Estadísticas educativas oficiales",
         ...baseSuggestions.slice(3, 10)
       ];
     } else if (documentTopic.toLowerCase().includes('empresa') || documentTopic.toLowerCase().includes('negocio')) {
       return [
-        "Estados financieros y reportes económicos",
-        "Organigramas y estructuras organizacionales",
-        "Análisis FODA de la empresa",
+        "Fotografías de instalaciones empresariales",
+        "Documentos legales empresariales",
+        "Reportes financieros publicados",
         ...baseSuggestions.slice(3, 10)
       ];
     } else if (documentTopic.toLowerCase().includes('salud') || documentTopic.toLowerCase().includes('médico')) {
       return [
-        "Historiales clínicos (anonimizados)",
-        "Protocolos médicos utilizados",
-        "Datos epidemiológicos relevantes",
+        "Fotografías de equipamiento médico",
+        "Normativas sanitarias vigentes",
+        "Estadísticas de salud pública",
         ...baseSuggestions.slice(3, 10)
       ];
     }
@@ -186,28 +186,18 @@ Responde ÚNICAMENTE con una lista numerada de 10 títulos, sin explicaciones ad
     return extractedTitles.slice(0, 3).map(titulo => ({ titulo, imagenUrl: "" }));
   };
   
-  // Títulos por defecto como fallback
-  const getDefaultTitles = () => [
-    { titulo: "Encuesta aplicada", imagenUrl: "" },
-    { titulo: "Tabla de datos estadísticos", imagenUrl: "" },
-    { titulo: "Fotografías del proceso", imagenUrl: "" }
-  ];
+  // Títulos por defecto como fallback (vacío inicialmente)
+  const getDefaultTitles = () => [];
   
-  // Inicializar anexos basados en el índice o usar valores existentes
+  // Inicializar anexos basados solo en datos existentes (no por defecto)
   const [annexes, setAnnexes] = useState(() => {
     if (annexData.anexos?.length) {
       return annexData.anexos;
     }
-    return extractTitlesFromIndex(generatedIndex);
+    return []; // Empezar sin anexos por defecto
   });
   
-  // Actualizar anexos cuando cambie el índice generado
-  useEffect(() => {
-    if (generatedIndex && !annexData.anexos?.length) {
-      const suggestedTitles = extractTitlesFromIndex(generatedIndex);
-      setAnnexes(suggestedTitles);
-    }
-  }, [generatedIndex, annexData.anexos]);
+  // No generar anexos automáticamente - solo mostrar sugerencias
 
   // Generar sugerencias automáticamente cuando se tenga el índice y el tema
   useEffect(() => {
@@ -247,7 +237,6 @@ Responde ÚNICAMENTE con una lista numerada de 10 títulos, sin explicaciones ad
 
   // Función para eliminar un anexo
   const removeAnnex = (index) => {
-    if (annexes.length <= 1) return; // Mantener al menos un anexo
     setAnnexes(annexes.filter((_, i) => i !== index));
   };
 
@@ -391,7 +380,7 @@ Responde ÚNICAMENTE con una lista numerada de 10 títulos, sin explicaciones ad
                       <Label className="text-base font-medium">
                         Anexo {index + 1}
                       </Label>
-                      {annexes.length > 1 && (
+                      {annexes.length > 0 && (
                         <Button
                           type="button"
                           size="icon"
