@@ -44,70 +44,43 @@ export function ImageSearcher({ onImageSelect, selectedImageUrl = null, customQu
     setHasSearched(true);
 
     try {
-      // Usar Google Custom Search API directamente desde el frontend
-      const GOOGLE_API_KEY = "AIzaSyD1YwYLccJH77CWEUUwZr_Kr_dzANiyWEA";
-      const GOOGLE_SEARCH_ENGINE_ID = "4493382c25c624870";
-      
-      const searchUrl = new URL("https://www.googleapis.com/customsearch/v1");
-      searchUrl.searchParams.set("key", GOOGLE_API_KEY);
-      searchUrl.searchParams.set("cx", GOOGLE_SEARCH_ENGINE_ID);
       const optimizedQuery = optimizeImageQuery(searchQuery);
-      searchUrl.searchParams.set("q", optimizedQuery);
-      searchUrl.searchParams.set("searchType", "image"); // SOLO búsqueda de imágenes
-      searchUrl.searchParams.set("num", "9"); // Aumentar a 9 para más opciones
-      searchUrl.searchParams.set("safe", "active");
-      searchUrl.searchParams.set("imgSize", "medium"); // Tamaño medio para mejor calidad
-      searchUrl.searchParams.set("imgType", "photo"); // Solo fotos reales, no clipart
-      searchUrl.searchParams.set("imgColorType", "color"); // Priorizar imágenes a color
-      searchUrl.searchParams.set("rights", "cc_publicdomain,cc_attribute,cc_sharealike,cc_noncommercial,cc_nonderived"); // Solo imágenes con derechos de uso
       
-      const response = await fetch(searchUrl.toString());
+      // Usar la nueva API de SerpApi para búsqueda exclusiva en imágenes
+      const response = await fetch('/api/search-images-serpapi', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: optimizedQuery
+        }),
+      });
       
       if (!response.ok) {
-        // Intentar leer el texto de error
-        let errorText = `Error ${response.status}`;
-        try {
-          const errorData = await response.text();
-          if (errorData) {
-            errorText = errorData;
-          }
-        } catch (e) {
-          // Si no se puede leer el error, usar mensaje genérico
-        }
-        throw new Error(`Error al buscar imágenes: ${errorText}`);
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
       }
 
-      // Verificar si la respuesta tiene contenido
-      const responseText = await response.text();
-      if (!responseText || responseText.trim() === '') {
-        throw new Error("La respuesta del servidor está vacía");
-      }
-
-      let data;
-      try {
-        data = JSON.parse(responseText);
-      } catch (jsonError) {
-        console.error("Error parsing JSON:", jsonError);
-        console.error("Response text:", responseText);
-        throw new Error("La respuesta del servidor no es válida");
-      }
+      const data = await response.json();
       
-      if (data.items && data.items.length > 0) {
-        // Procesar resultados de Google Custom Search API
-        const images = data.items.map((item) => ({
+      if (data.success && data.images && data.images.length > 0) {
+        // Procesar resultados de SerpApi
+        const images = data.images.map((item) => ({
           title: item.title,
-          link: item.link,
-          thumbnail: item.image?.thumbnailLink,
-          width: item.image?.width,
-          height: item.image?.height,
-          size: item.image?.byteSize,
-          contextLink: item.image?.contextLink,
+          link: item.original || item.thumbnail,
+          thumbnail: item.thumbnail,
+          width: item.width,
+          height: item.height,
+          contextLink: item.link,
+          source: item.source
         })).filter(img => img.link && img.thumbnail);
         
         setImages(images);
         if (images.length === 0) {
           setError("No se encontraron imágenes válidas para tu búsqueda. Intenta con otros términos.");
         }
+      } else if (data.success === false && data.images.length === 0) {
+        setError(data.error || "No se encontraron imágenes para tu búsqueda. Intenta con otros términos.");
       } else {
         setError("No se encontraron imágenes para tu búsqueda. Intenta con otros términos.");
       }
@@ -140,7 +113,7 @@ export function ImageSearcher({ onImageSelect, selectedImageUrl = null, customQu
         <div className="flex items-center gap-2">
           <Label>{contextualPlaceholder ? "Buscar imagen relacionada" : "Buscar logo/imagen institucional"}</Label>
           <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full dark:text-blue-400 dark:bg-blue-900/30">
-            📸 Solo imágenes
+            🔍 Google Imágenes
           </span>
         </div>
         <div className="flex gap-2">
