@@ -67,75 +67,51 @@ export default async function handler(req, res) {
 
 // Función de fallback para generar sugerencias básicas
 function generateFallbackSuggestions(topic, documentType) {
-  const baseSuggestions = [
-    "1. Encuesta aplicada a participantes del estudio",
-    "2. Tabla de datos estadísticos recolectados", 
-    "3. Fotografías del proceso de investigación",
-    "4. Instrumentos de recolección de datos utilizados",
-    "5. Esquemas y mapas conceptuales del tema",
-    "6. Cronograma de actividades realizadas",
-    "7. Entrevistas con expertos en el área",
-    "8. Documentos normativos y marcos legales",
-    "9. Glosario de términos técnicos especializados",
-    "10. Casos de estudio complementarios"
-  ];
-
-  // Personalizar según el tema
+  // Generar sugerencias específicas basadas en el tema
   const topicLower = topic.toLowerCase();
   
-  if (topicLower.includes('educación') || topicLower.includes('enseñanza') || topicLower.includes('aprendizaje')) {
+  // Sugerencias específicas por tema
+  if (topicLower.includes('redes sociales') || topicLower.includes('social media')) {
     return [
-      "1. Planes de sesión educativas implementadas",
-      "2. Rúbricas y instrumentos de evaluación",
-      "3. Fotografías de actividades pedagógicas",
-      "4. Resultados de evaluaciones estudiantiles",
-      "5. Materiales didácticos utilizados",
-      "6. Entrevistas con docentes participantes",
-      "7. Encuestas de satisfacción educativa",
-      "8. Cronograma de implementación curricular",
-      "9. Marco normativo educativo aplicado",
-      "10. Casos de éxito en el proceso educativo"
+      "1. Timeline de las principales redes sociales",
+      "2. Fundadores de Facebook, Twitter e Instagram", 
+      "3. Estadísticas de usuarios por red social 2024",
+      "4. Comparativa: WhatsApp vs Telegram",
+      "5. Evolución del diseño de Facebook (2004-2024)",
+      "6. Capturas de la primera versión de Twitter",
+      "7. Países con más usuarios de TikTok",
+      "8. Fotografías de Mark Zuckerberg y otros CEO",
+      "9. Infografía: Tiempo promedio en redes sociales",
+      "10. Screenshots de interfaces antiguas vs actuales"
     ].join('\n');
-  } else if (topicLower.includes('empresa') || topicLower.includes('negocio') || topicLower.includes('comercio')) {
+  } else if (topicLower.includes('inteligencia artificial') || topicLower.includes('ia') || topicLower.includes('chatgpt')) {
     return [
-      "1. Estados financieros y reportes económicos",
-      "2. Organigramas y estructuras organizacionales", 
-      "3. Análisis FODA de la organización",
-      "4. Encuestas de clima organizacional",
-      "5. Fotografías de instalaciones y procesos",
-      "6. Entrevistas con directivos y empleados",
-      "7. Documentos de políticas empresariales",
-      "8. Indicadores de rendimiento (KPIs)",
-      "9. Cronograma de implementación estratégica",
-      "10. Casos de estudio de empresas similares"
-    ].join('\n');
-  } else if (topicLower.includes('salud') || topicLower.includes('médico') || topicLower.includes('hospital')) {
-    return [
-      "1. Protocolos médicos y guías clínicas",
-      "2. Datos estadísticos epidemiológicos",
-      "3. Instrumentos de evaluación clínica",
-      "4. Fotografías de equipamiento médico",
-      "5. Entrevistas con profesionales de salud",
-      "6. Historiales clínicos anonimizados",
-      "7. Normativas sanitarias aplicables",
-      "8. Cronograma de intervenciones médicas",
-      "9. Resultados de análisis de laboratorio",
-      "10. Casos clínicos representativos"
-    ].join('\n');
-  } else if (topicLower.includes('tecnología') || topicLower.includes('software') || topicLower.includes('digital')) {
-    return [
-      "1. Diagramas de arquitectura del sistema",
-      "2. Código fuente de módulos principales",
-      "3. Capturas de pantalla de interfaces",
-      "4. Resultados de pruebas de rendimiento",
-      "5. Documentación técnica especializada",
-      "6. Entrevistas con desarrolladores",
-      "7. Especificaciones técnicas del proyecto",
-      "8. Cronograma de desarrollo implementado",
-      "9. Métricas de calidad del software",
-      "10. Casos de uso del sistema desarrollado"
+      "1. Timeline del desarrollo de ChatGPT",
+      "2. Comparativa de modelos de IA: GPT vs Gemini",
+      "3. Fotografías de robots humanoides actuales",
+      "4. Estadísticas de uso de ChatGPT mundial",
+      "5. Capturas de pantalla de diferentes IAs",
+      "6. Fundadores de OpenAI, Google DeepMind",
+      "7. Línea de tiempo: desde Turing hasta GPT-4",
+      "8. Países líderes en inversión en IA",
+      "9. Imágenes generadas por DALL-E vs Midjourney",
+      "10. Gráfico: Crecimiento de startups de IA"
     ].join('\n');
   }
   
+  // Fallback general pero específico para el tema
+  const baseSuggestions = [
+    `1. Cronología histórica de ${topic}`,
+    `2. Estadísticas actuales sobre ${topic}`,
+    `3. Principales figuras relacionadas con ${topic}`,
+    `4. Fotografías relevantes de ${topic}`,
+    `5. Comparativa de aspectos clave en ${topic}`,
+    `6. Documentos oficiales sobre ${topic}`,
+    `7. Países/lugares importantes en ${topic}`,
+    `8. Tecnologías utilizadas en ${topic}`,
+    `9. Impacto económico de ${topic}`,
+    `10. Tendencias futuras en ${topic}`
+  ];
+
   return baseSuggestions.join('\n');
 }

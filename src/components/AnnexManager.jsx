@@ -21,29 +21,38 @@ export function AnnexManager({ setAnnexData, annexData = {}, generatedIndex = ""
     setIsGeneratingSuggestions(true);
     
     try {
-      const prompt = `Basándote en el siguiente índice de un ${documentType} sobre "${documentTopic}", genera exactamente 10 títulos específicos y relevantes para anexos que complementen el documento.
+      const prompt = `Genera exactamente 10 títulos específicos para anexos de un ${documentType} sobre "${documentTopic}".
 
-ÍNDICE:
+TEMA ESPECÍFICO: ${documentTopic}
+ÍNDICE DEL DOCUMENTO:
 ${generatedIndex}
 
-Los anexos deben ser recursos tangibles, documentos reales y materiales concretos que existen o se pueden encontrar fácilmente. Ejemplos de tipos de anexos tangibles: 
-- Fotografías de lugares, personas o eventos relevantes
-- Documentos oficiales, leyes o normativas existentes
-- Tablas, gráficos o estadísticas publicadas
-- Mapas, planos o diagramas técnicos reales
-- Formularios, contratos o documentos modelo
-- Capturas de pantalla de sistemas o aplicaciones
-- Certificados, diplomas o credenciales
-- Artículos de prensa o publicaciones
-- Imágenes de productos, equipos o instalaciones
-- Manuales, guías o instructivos existentes
+Los anexos deben ser recursos tangibles y específicos que se relacionen DIRECTAMENTE con "${documentTopic}". 
 
-Responde ÚNICAMENTE con una lista numerada de 10 títulos, sin explicaciones adicionales:
+EJEMPLOS DE BUENAS SUGERENCIAS PARA DIFERENTES TEMAS:
+- Si el tema es "Evolución de las redes sociales": "Timeline de Facebook (2004-2024)", "Fundadores de las principales redes sociales", "Telegram vs WhatsApp: comparativa de funcionalidades"
+- Si el tema es "Inteligencia artificial": "Cronología del desarrollo de ChatGPT", "Comparativa de modelos de IA más populares", "Fotografías de robots humanoides actuales"
+- Si el tema es "Cambio climático": "Gráficos de temperatura global 1880-2024", "Fotografías del derretimiento glaciar en el Ártico", "Países con mayores emisiones de CO2"
+
+GENERA ANEXOS ESPECÍFICOS PARA "${documentTopic}" que sean:
+- Títulos concretos y específicos (no genéricos)
+- Relacionados directamente con el tema
+- Recursos que existen y se pueden buscar/encontrar
+- Nombres propios, fechas, lugares específicos cuando sea relevante
+- Comparativas, cronologías, estadísticas específicas del tema
+
+Responde ÚNICAMENTE con una lista numerada de 10 títulos específicos para "${documentTopic}":
 
 1.
 2.
 3.
-...`;
+4.
+5.
+6.
+7.
+8.
+9.
+10.`;
 
       const response = await fetch('/api/generate-annexes', {
         method: 'POST',
@@ -86,43 +95,65 @@ Responde ÚNICAMENTE con una lista numerada de 10 títulos, sin explicaciones ad
 
   // Función de fallback para generar sugerencias contextuales básicas
   const generateContextualSuggestions = () => {
-    const baseSuggestions = [
-      "Fotografías relevantes del tema",
-      "Documentos oficiales o normativas",
-      "Tablas estadísticas publicadas",
-      "Mapas o planos relacionados",
-      "Artículos de prensa sobre el tema",
-      "Capturas de pantalla de sistemas",
-      "Formularios o documentos modelo",
-      "Certificados o credenciales",
-      "Imágenes de productos o equipos",
-      "Manuales o guías existentes"
-    ];
-
-    // Personalizar según el tema y tipo de documento
-    if (documentTopic.toLowerCase().includes('educación') || documentTopic.toLowerCase().includes('enseñanza')) {
+    // Generar sugerencias específicas basadas en el tema
+    const topicLower = documentTopic.toLowerCase();
+    
+    // Sugerencias específicas por tema
+    if (topicLower.includes('redes sociales') || topicLower.includes('social media')) {
       return [
-        "Fotografías de instituciones educativas",
-        "Documentos del Ministerio de Educación",
-        "Estadísticas educativas oficiales",
-        ...baseSuggestions.slice(3, 10)
+        `Timeline de las principales redes sociales`,
+        `Fundadores de Facebook, Twitter e Instagram`,
+        `Estadísticas de usuarios por red social 2024`,
+        `Comparativa: WhatsApp vs Telegram`,
+        `Evolución del diseño de Facebook (2004-2024)`,
+        `Capturas de la primera versión de Twitter`,
+        `Países con más usuarios de TikTok`,
+        `Fotografías de Mark Zuckerberg y otros CEO`,
+        `Infografía: Tiempo promedio en redes sociales`,
+        `Screenshots de interfaces antiguas vs actuales`
       ];
-    } else if (documentTopic.toLowerCase().includes('empresa') || documentTopic.toLowerCase().includes('negocio')) {
+    } else if (topicLower.includes('inteligencia artificial') || topicLower.includes('ia') || topicLower.includes('chatgpt')) {
       return [
-        "Fotografías de instalaciones empresariales",
-        "Documentos legales empresariales",
-        "Reportes financieros publicados",
-        ...baseSuggestions.slice(3, 10)
+        `Timeline del desarrollo de ChatGPT`,
+        `Comparativa de modelos de IA: GPT vs Gemini`,
+        `Fotografías de robots humanoides actuales`,
+        `Estadísticas de uso de ChatGPT mundial`,
+        `Capturas de pantalla de diferentes IAs`,
+        `Fundadores de OpenAI, Google DeepMind`,
+        `Línea de tiempo: desde Turing hasta GPT-4`,
+        `Países líderes en inversión en IA`,
+        `Imágenes generadas por DALL-E vs Midjourney`,
+        `Gráfico: Crecimiento de startups de IA`
       ];
-    } else if (documentTopic.toLowerCase().includes('salud') || documentTopic.toLowerCase().includes('médico')) {
+    } else if (topicLower.includes('educación') || topicLower.includes('universidad') || topicLower.includes('estudiantes')) {
       return [
-        "Fotografías de equipamiento médico",
-        "Normativas sanitarias vigentes",
-        "Estadísticas de salud pública",
-        ...baseSuggestions.slice(3, 10)
+        `Rankings de mejores universidades 2024`,
+        `Fotografías de campus universitarios emblemáticos`,
+        `Estadísticas de deserción estudiantil en Perú`,
+        `Comparativa de sistemas educativos mundiales`,
+        `Documentos del Ministerio de Educación`,
+        `Capturas de plataformas educativas online`,
+        `Cronología de la educación virtual`,
+        `Gráficos de rendimiento académico por región`,
+        `Fotografías de aulas tradicionales vs modernas`,
+        `Certificaciones internacionales más valoradas`
       ];
     }
     
+    // Fallback general pero específico para el tema
+    const baseSuggestions = [
+      `Cronología histórica de ${documentTopic}`,
+      `Estadísticas actuales sobre ${documentTopic}`,
+      `Principales figuras relacionadas con ${documentTopic}`,
+      `Fotografías relevantes de ${documentTopic}`,
+      `Comparativa de aspectos clave en ${documentTopic}`,
+      `Documentos oficiales sobre ${documentTopic}`,
+      `Países/lugares importantes en ${documentTopic}`,
+      `Tecnologías utilizadas en ${documentTopic}`,
+      `Impacto económico de ${documentTopic}`,
+      `Tendencias futuras en ${documentTopic}`
+    ];
+
     return baseSuggestions;
   };
   
@@ -303,7 +334,10 @@ Responde ÚNICAMENTE con una lista numerada de 10 títulos, sin explicaciones ad
                   type="button"
                   size="sm"
                   variant="default"
-                  onClick={generateAISuggestions}
+                  onClick={() => {
+                    setAiSuggestions([]); // Limpiar sugerencias anteriores
+                    generateAISuggestions();
+                  }}
                   disabled={isGeneratingSuggestions || !generatedIndex || !documentTopic}
                   className="gap-2 bg-blue-600 hover:bg-blue-700"
                 >
@@ -317,7 +351,7 @@ Responde ÚNICAMENTE con una lista numerada de 10 títulos, sin explicaciones ad
                       <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                       </svg>
-                      Sugerencias IA
+                      {aiSuggestions.length > 0 ? "Refrescar IA" : "Sugerencias IA"}
                     </>
                   )}
                 </Button>
