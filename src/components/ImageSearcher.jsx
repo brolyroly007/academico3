@@ -20,6 +20,22 @@ export function ImageSearcher({ onImageSelect, selectedImageUrl = null, customQu
     }
   }, [customQuery]);
 
+  // Función para optimizar la query de búsqueda para imágenes
+  const optimizeImageQuery = (query) => {
+    // Agregar términos que ayuden a encontrar imágenes más relevantes
+    let optimizedQuery = query;
+    
+    // Si no contiene términos específicos de imagen, agregarlos
+    if (!query.toLowerCase().includes('foto') && 
+        !query.toLowerCase().includes('imagen') && 
+        !query.toLowerCase().includes('picture') &&
+        !query.toLowerCase().includes('photo')) {
+      optimizedQuery = `${query} foto imagen`;
+    }
+    
+    return optimizedQuery;
+  };
+
   const searchImages = async () => {
     if (!searchQuery.trim()) return;
 
@@ -35,11 +51,15 @@ export function ImageSearcher({ onImageSelect, selectedImageUrl = null, customQu
       const searchUrl = new URL("https://www.googleapis.com/customsearch/v1");
       searchUrl.searchParams.set("key", GOOGLE_API_KEY);
       searchUrl.searchParams.set("cx", GOOGLE_SEARCH_ENGINE_ID);
-      searchUrl.searchParams.set("q", searchQuery);
-      searchUrl.searchParams.set("searchType", "image");
-      searchUrl.searchParams.set("num", "6"); // 6 imágenes como solicitaste
+      const optimizedQuery = optimizeImageQuery(searchQuery);
+      searchUrl.searchParams.set("q", optimizedQuery);
+      searchUrl.searchParams.set("searchType", "image"); // SOLO búsqueda de imágenes
+      searchUrl.searchParams.set("num", "9"); // Aumentar a 9 para más opciones
       searchUrl.searchParams.set("safe", "active");
-      searchUrl.searchParams.set("imgSize", "medium");
+      searchUrl.searchParams.set("imgSize", "medium"); // Tamaño medio para mejor calidad
+      searchUrl.searchParams.set("imgType", "photo"); // Solo fotos reales, no clipart
+      searchUrl.searchParams.set("imgColorType", "color"); // Priorizar imágenes a color
+      searchUrl.searchParams.set("rights", "cc_publicdomain,cc_attribute,cc_sharealike,cc_noncommercial,cc_nonderived"); // Solo imágenes con derechos de uso
       
       const response = await fetch(searchUrl.toString());
       
@@ -117,7 +137,12 @@ export function ImageSearcher({ onImageSelect, selectedImageUrl = null, customQu
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label>{contextualPlaceholder ? "Buscar imagen relacionada" : "Buscar logo/imagen institucional"}</Label>
+        <div className="flex items-center gap-2">
+          <Label>{contextualPlaceholder ? "Buscar imagen relacionada" : "Buscar logo/imagen institucional"}</Label>
+          <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full dark:text-blue-400 dark:bg-blue-900/30">
+            📸 Solo imágenes
+          </span>
+        </div>
         <div className="flex gap-2">
           <Input
             placeholder={contextualPlaceholder || "Buscar imágenes relacionadas"}
@@ -195,7 +220,7 @@ export function ImageSearcher({ onImageSelect, selectedImageUrl = null, customQu
           <Label className="text-sm font-medium">
             Resultados de búsqueda (haz clic para seleccionar):
           </Label>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-96 overflow-y-auto">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[500px] overflow-y-auto">
             {images.map((image, index) => (
               <Card
                 key={index}
@@ -236,7 +261,8 @@ export function ImageSearcher({ onImageSelect, selectedImageUrl = null, customQu
         <div className="text-center py-8 text-gray-500 dark:text-gray-400">
           <Search className="h-12 w-12 mx-auto mb-3 opacity-50" />
           <p>No se encontraron imágenes</p>
-          <p className="text-sm">Intenta con otros términos de búsqueda</p>
+          <p className="text-sm">Intenta con términos más específicos o diferentes palabras clave</p>
+          <p className="text-xs mt-2 text-gray-400">💡 Tip: Usa nombres propios, lugares específicos o términos descriptivos</p>
         </div>
       )}
     </div>
