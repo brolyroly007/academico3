@@ -721,6 +721,8 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
                       setAnnexData={setAnnexData}
                       annexData={annexData}
                       generatedIndex={generatedIndex}
+                      documentTopic={formData?.topic || ""}
+                      documentType={formData?.documentType || ""}
                     />
                   </div>
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,12 +6,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Search, Check, X, ExternalLink } from "lucide-react";
 
-export function ImageSearcher({ onImageSelect, selectedImageUrl = null }) {
-  const [searchQuery, setSearchQuery] = useState("");
+export function ImageSearcher({ onImageSelect, selectedImageUrl = null, customQuery = "", contextualPlaceholder = "" }) {
+  const [searchQuery, setSearchQuery] = useState(customQuery);
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [hasSearched, setHasSearched] = useState(false);
+  
+  // Actualizar query cuando cambie customQuery
+  useEffect(() => {
+    if (customQuery && customQuery !== searchQuery) {
+      setSearchQuery(customQuery);
+    }
+  }, [customQuery]);
 
   const searchImages = async () => {
     if (!searchQuery.trim()) return;
@@ -110,10 +117,10 @@ export function ImageSearcher({ onImageSelect, selectedImageUrl = null }) {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label>Buscar logo/imagen institucional</Label>
+        <Label>Buscar imagen para este anexo</Label>
         <div className="flex gap-2">
           <Input
-            placeholder="Ej: universidad nacional mayor san marcos logo"
+            placeholder={contextualPlaceholder || "Buscar imágenes relacionadas"}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyPress={handleKeyPress}
