@@ -44,48 +44,56 @@ export function ImageSearcher({ onImageSelect, selectedImageUrl = null, customQu
     setHasSearched(true);
 
     try {
-      const optimizedQuery = optimizeImageQuery(searchQuery);
+      // Usar Google Custom Search API optimizada SOLO para imágenes
+      const GOOGLE_API_KEY = "AIzaSyD1YwYLccJH77CWEUUwZr_Kr_dzANiyWEA";
+      const GOOGLE_SEARCH_ENGINE_ID = "4493382c25c624870";
       
-      // Usar la nueva API de SerpApi para búsqueda exclusiva en imágenes
-      const response = await fetch('/api/search-images-serpapi', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: optimizedQuery
-        }),
-      });
+      const searchUrl = new URL("https://www.googleapis.com/customsearch/v1");
+      searchUrl.searchParams.set("key", GOOGLE_API_KEY);
+      searchUrl.searchParams.set("cx", GOOGLE_SEARCH_ENGINE_ID);
+      const optimizedQuery = optimizeImageQuery(searchQuery);
+      searchUrl.searchParams.set("q", optimizedQuery);
+      
+      // CONFIGURACIÓN ESPECÍFICA PARA BÚSQUEDA EXCLUSIVA DE IMÁGENES
+      searchUrl.searchParams.set("searchType", "image"); // OBLIGATORIO: Solo imágenes
+      searchUrl.searchParams.set("num", "9"); // 9 resultados
+      searchUrl.searchParams.set("safe", "active"); // Búsqueda segura
+      searchUrl.searchParams.set("imgSize", "medium"); // Tamaño medio
+      searchUrl.searchParams.set("imgType", "photo"); // Solo fotos reales
+      searchUrl.searchParams.set("imgColorType", "color"); // Preferir imágenes a color
+      searchUrl.searchParams.set("fileType", "jpg,png,gif,webp"); // Solo formatos de imagen válidos
+      searchUrl.searchParams.set("rights", "cc_publicdomain,cc_attribute,cc_sharealike,cc_noncommercial,cc_nonderived");
+      
+      const response = await fetch(searchUrl.toString());
       
       if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
+        throw new Error(`Error ${response.status}: Google Custom Search API error`);
       }
 
       const data = await response.json();
       
-      if (data.success && data.images && data.images.length > 0) {
-        // Procesar resultados de SerpApi
-        const images = data.images.map((item) => ({
+      if (data.items && data.items.length > 0) {
+        // Procesar resultados SOLO de imágenes de Google Custom Search
+        const images = data.items.map((item) => ({
           title: item.title,
-          link: item.original || item.thumbnail,
-          thumbnail: item.thumbnail,
-          width: item.width,
-          height: item.height,
-          contextLink: item.link,
-          source: item.source
+          link: item.link,
+          thumbnail: item.image?.thumbnailLink,
+          width: item.image?.width,
+          height: item.image?.height,
+          size: item.image?.byteSize,
+          contextLink: item.image?.contextLink,
+          displayLink: item.displayLink
         })).filter(img => img.link && img.thumbnail);
         
         setImages(images);
         if (images.length === 0) {
           setError("No se encontraron imágenes válidas para tu búsqueda. Intenta con otros términos.");
         }
-      } else if (data.success === false && data.images.length === 0) {
-        setError(data.error || "No se encontraron imágenes para tu búsqueda. Intenta con otros términos.");
       } else {
-        setError("No se encontraron imágenes para tu búsqueda. Intenta con otros términos.");
+        setError("No se encontraron imágenes para tu búsqueda. Intenta con otros términos más específicos.");
       }
     } catch (err) {
-      const errorMessage = err.message || "Error de conexión. Inténtalo de nuevo.";
+      const errorMessage = err.message || "Error de conexión. Verifica tu conexión e inténtalo de nuevo.";
       setError(errorMessage);
       console.error("Error buscando imágenes:", err);
     } finally {
@@ -113,7 +121,7 @@ export function ImageSearcher({ onImageSelect, selectedImageUrl = null, customQu
         <div className="flex items-center gap-2">
           <Label>{contextualPlaceholder ? "Buscar imagen relacionada" : "Buscar logo/imagen institucional"}</Label>
           <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full dark:text-blue-400 dark:bg-blue-900/30">
-            🔍 Google Imágenes
+            📸 Solo imágenes
           </span>
         </div>
         <div className="flex gap-2">
