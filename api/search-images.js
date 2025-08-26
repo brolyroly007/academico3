@@ -4,43 +4,43 @@ function generateFallbackImages(query) {
   return [
     {
       title: `${query} - Logo genérico 1`,
-      link: "https://via.placeholder.com/300x200/1e40af/ffffff?text=LOGO",
-      thumbnail: "https://via.placeholder.com/150x100/1e40af/ffffff?text=LOGO",
+      link: "https://picsum.photos/300/200?random=1",
+      thumbnail: "https://picsum.photos/150/100?random=1",
       width: 300,
       height: 200
     },
     {
       title: `${query} - Logo genérico 2`, 
-      link: "https://via.placeholder.com/300x200/dc2626/ffffff?text=LOGO",
-      thumbnail: "https://via.placeholder.com/150x100/dc2626/ffffff?text=LOGO",
+      link: "https://picsum.photos/300/200?random=2",
+      thumbnail: "https://picsum.photos/150/100?random=2",
       width: 300,
       height: 200
     },
     {
       title: `${query} - Logo genérico 3`,
-      link: "https://via.placeholder.com/300x200/059669/ffffff?text=LOGO",
-      thumbnail: "https://via.placeholder.com/150x100/059669/ffffff?text=LOGO",
+      link: "https://picsum.photos/300/200?random=3",
+      thumbnail: "https://picsum.photos/150/100?random=3",
       width: 300,
       height: 200
     },
     {
       title: `${query} - Logo genérico 4`,
-      link: "https://via.placeholder.com/300x200/7c3aed/ffffff?text=LOGO",
-      thumbnail: "https://via.placeholder.com/150x100/7c3aed/ffffff?text=LOGO",
+      link: "https://picsum.photos/300/200?random=4",
+      thumbnail: "https://picsum.photos/150/100?random=4",
       width: 300,
       height: 200
     },
     {
       title: `${query} - Logo genérico 5`,
-      link: "https://via.placeholder.com/300x200/ea580c/ffffff?text=LOGO",
-      thumbnail: "https://via.placeholder.com/150x100/ea580c/ffffff?text=LOGO",
+      link: "https://picsum.photos/300/200?random=5",
+      thumbnail: "https://picsum.photos/150/100?random=5",
       width: 300,
       height: 200
     },
     {
       title: `${query} - Logo genérico 6`,
-      link: "https://via.placeholder.com/300x200/0891b2/ffffff?text=LOGO",
-      thumbnail: "https://via.placeholder.com/150x100/0891b2/ffffff?text=LOGO",
+      link: "https://picsum.photos/300/200?random=6",
+      thumbnail: "https://picsum.photos/150/100?random=6",
       width: 300,
       height: 200
     }
