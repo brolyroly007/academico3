@@ -1,57 +1,5 @@
 {
   "version": 2,
   "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "builds": [
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "backend/**/*.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist",
-        "buildCommand": "npm run build"
-      }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/generate-index",
-      "dest": "/api/generate-index.js"
-    },
-    {
-      "src": "/api/search-images",
-      "dest": "/api/search-images.js"
-    },
-    {
-      "src": "/api/generate-annexes",
-      "dest": "/api/generate-annexes.js"
-    },
-    {
-      "src": "/api/append-to-sheet",
-      "dest": "/api/append-to-sheet.js"
-    },
-    {
-      "src": "/api/health",
-      "dest": "/api/health.js"
-    },
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/assets/(.*)",
-      "dest": "/dist/assets/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/dist/index.html",
-      "status": 200
-    }
-  ]
+  "outputDirectory": "dist"
 }
