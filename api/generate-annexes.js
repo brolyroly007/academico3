@@ -12,7 +12,14 @@ export default async function handler(req, res) {
     }
 
     // Usar la misma API de Gemini que ya está configurada en el proyecto
-    const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "AIzaSyC4PKX3HoWtEcGlXTxRv20YuEvb2boZgOw";
+    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+    
+    if (!GEMINI_API_KEY) {
+      return res.status(500).json({ 
+        error: 'API key not configured',
+        fallback: true 
+      });
+    }
     
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',

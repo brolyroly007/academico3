@@ -44,49 +44,21 @@ export function ImageSearcher({ onImageSelect, selectedImageUrl = null, customQu
     setHasSearched(true);
 
     try {
-      // Usar Google Custom Search API optimizada SOLO para imágenes
-      const GOOGLE_API_KEY = "AIzaSyD1YwYLccJH77CWEUUwZr_Kr_dzANiyWEA";
-      const GOOGLE_SEARCH_ENGINE_ID = "4493382c25c624870";
-      
-      const searchUrl = new URL("https://www.googleapis.com/customsearch/v1");
-      searchUrl.searchParams.set("key", GOOGLE_API_KEY);
-      searchUrl.searchParams.set("cx", GOOGLE_SEARCH_ENGINE_ID);
+      // Use backend API endpoint for security
+      const apiEndpoint = '/api/search-images';
       const optimizedQuery = optimizeImageQuery(searchQuery);
-      searchUrl.searchParams.set("q", optimizedQuery);
       
-      // CONFIGURACIÓN ESPECÍFICA PARA BÚSQUEDA EXCLUSIVA DE IMÁGENES
-      searchUrl.searchParams.set("searchType", "image"); // OBLIGATORIO: Solo imágenes
-      searchUrl.searchParams.set("num", "9"); // 9 resultados
-      searchUrl.searchParams.set("safe", "active"); // Búsqueda segura
-      searchUrl.searchParams.set("imgSize", "medium"); // Tamaño medio
-      searchUrl.searchParams.set("imgType", "photo"); // Solo fotos reales
-      searchUrl.searchParams.set("imgColorType", "color"); // Preferir imágenes a color
-      searchUrl.searchParams.set("fileType", "jpg,png,gif,webp"); // Solo formatos de imagen válidos
-      searchUrl.searchParams.set("rights", "cc_publicdomain,cc_attribute,cc_sharealike,cc_noncommercial,cc_nonderived");
-      
-      const response = await fetch(searchUrl.toString());
+      const response = await fetch(`${apiEndpoint}?query=${encodeURIComponent(optimizedQuery)}&num=9`);
       
       if (!response.ok) {
-        throw new Error(`Error ${response.status}: Google Custom Search API error`);
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
       }
 
       const data = await response.json();
       
-      if (data.items && data.items.length > 0) {
-        // Procesar resultados SOLO de imágenes de Google Custom Search
-        const images = data.items.map((item) => ({
-          title: item.title,
-          link: item.link,
-          thumbnail: item.image?.thumbnailLink,
-          width: item.image?.width,
-          height: item.image?.height,
-          size: item.image?.byteSize,
-          contextLink: item.image?.contextLink,
-          displayLink: item.displayLink
-        })).filter(img => img.link && img.thumbnail);
-        
-        setImages(images);
-        if (images.length === 0) {
+      if (data.status === 'success' && data.images) {
+        setImages(data.images);
+        if (data.images.length === 0) {
           setError("No se encontraron imágenes válidas para tu búsqueda. Intenta con otros términos.");
         }
       } else {

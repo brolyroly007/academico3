@@ -1,4 +1,52 @@
 // api/search-images.js - Función serverless para búsqueda de imágenes
+
+function generateFallbackImages(query) {
+  return [
+    {
+      title: `${query} - Logo genérico 1`,
+      link: "https://via.placeholder.com/300x200/1e40af/ffffff?text=LOGO",
+      thumbnail: "https://via.placeholder.com/150x100/1e40af/ffffff?text=LOGO",
+      width: 300,
+      height: 200
+    },
+    {
+      title: `${query} - Logo genérico 2`,
+      link: "https://via.placeholder.com/300x200/dc2626/ffffff?text=LOGO",
+      thumbnail: "https://via.placeholder.com/150x100/dc2626/ffffff?text=LOGO",
+      width: 300,
+      height: 200
+    },
+    {
+      title: `${query} - Logo genérico 3`,
+      link: "https://via.placeholder.com/300x200/059669/ffffff?text=LOGO",
+      thumbnail: "https://via.placeholder.com/150x100/059669/ffffff?text=LOGO",
+      width: 300,
+      height: 200
+    },
+    {
+      title: `${query} - Logo genérico 4`,
+      link: "https://via.placeholder.com/300x200/7c3aed/ffffff?text=LOGO",
+      thumbnail: "https://via.placeholder.com/150x100/7c3aed/ffffff?text=LOGO",
+      width: 300,
+      height: 200
+    },
+    {
+      title: `${query} - Logo genérico 5`,
+      link: "https://via.placeholder.com/300x200/ea580c/ffffff?text=LOGO",
+      thumbnail: "https://via.placeholder.com/150x100/ea580c/ffffff?text=LOGO",
+      width: 300,
+      height: 200
+    },
+    {
+      title: `${query} - Logo genérico 6`,
+      link: "https://via.placeholder.com/300x200/0891b2/ffffff?text=LOGO",
+      thumbnail: "https://via.placeholder.com/150x100/0891b2/ffffff?text=LOGO",
+      width: 300,
+      height: 200
+    }
+  ];
+}
+
 export default async function handler(req, res) {
   console.log('🚀 search-images API called with:', req.method, req.query);
   
@@ -37,8 +85,17 @@ export default async function handler(req, res) {
     }
 
     // Configuración de Google Custom Search API 
-    const GOOGLE_API_KEY = "AIzaSyD1YwYLccJH77CWEUUwZr_Kr_dzANiyWEA";
-    const GOOGLE_SEARCH_ENGINE_ID = "4493382c25c624870";
+    const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
+    const GOOGLE_SEARCH_ENGINE_ID = process.env.GOOGLE_SEARCH_ENGINE_ID;
+
+    if (!GOOGLE_API_KEY || !GOOGLE_SEARCH_ENGINE_ID) {
+      console.log('🔄 API credentials not configured, using fallback images');
+      return res.json({
+        status: "success",
+        images: generateFallbackImages(query),
+        mode: "fallback_no_credentials"
+      });
+    }
 
     // Debug para verificar variables
     console.log('🔑 API Key disponible:', GOOGLE_API_KEY ? 'Sí' : 'No');
@@ -71,51 +128,7 @@ export default async function handler(req, res) {
       console.log('🔄 Error en Google API, usando fallback con imágenes genéricas');
       return res.json({
         status: "success",
-        images: [
-          {
-            title: `${query} - Logo genérico 1`,
-            link: "https://via.placeholder.com/300x200/1e40af/ffffff?text=LOGO",
-            thumbnail: "https://via.placeholder.com/150x100/1e40af/ffffff?text=LOGO",
-            width: 300,
-            height: 200
-          },
-          {
-            title: `${query} - Logo genérico 2`,
-            link: "https://via.placeholder.com/300x200/dc2626/ffffff?text=LOGO",
-            thumbnail: "https://via.placeholder.com/150x100/dc2626/ffffff?text=LOGO",
-            width: 300,
-            height: 200
-          },
-          {
-            title: `${query} - Logo genérico 3`,
-            link: "https://via.placeholder.com/300x200/059669/ffffff?text=LOGO",
-            thumbnail: "https://via.placeholder.com/150x100/059669/ffffff?text=LOGO",
-            width: 300,
-            height: 200
-          },
-          {
-            title: `${query} - Logo genérico 4`,
-            link: "https://via.placeholder.com/300x200/7c3aed/ffffff?text=LOGO",
-            thumbnail: "https://via.placeholder.com/150x100/7c3aed/ffffff?text=LOGO",
-            width: 300,
-            height: 200
-          },
-          {
-            title: `${query} - Logo genérico 5`,
-            link: "https://via.placeholder.com/300x200/ea580c/ffffff?text=LOGO",
-            thumbnail: "https://via.placeholder.com/150x100/ea580c/ffffff?text=LOGO",
-            width: 300,
-            height: 200
-          },
-          {
-            title: `${query} - Logo genérico 6`,
-            link: "https://via.placeholder.com/300x200/0891b2/ffffff?text=LOGO",
-            thumbnail: "https://via.placeholder.com/150x100/0891b2/ffffff?text=LOGO",
-            width: 300,
-            height: 200
-          }
-        ],
-        totalResults: 6,
+        images: generateFallbackImages(query),
         mode: "fallback_api_error",
         error: `Google API Error: ${response.status}`
       });
@@ -158,16 +171,7 @@ export default async function handler(req, res) {
     console.log('🔄 Usando fallback con imágenes de ejemplo debido al error');
     return res.json({
       status: "success",
-      images: [
-        {
-          title: `Logo ${query || 'ejemplo'} (fallback)`,
-          link: "https://via.placeholder.com/300x200/dc3545/ffffff?text=Logo+Fallback",
-          thumbnail: "https://via.placeholder.com/150x100/dc3545/ffffff?text=Logo+Fallback",
-          width: 300,
-          height: 200
-        }
-      ],
-      totalResults: 1,
+      images: generateFallbackImages(query || 'ejemplo'),
       mode: "fallback",
       error: error.message
     });
