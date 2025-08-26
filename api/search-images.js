@@ -50,6 +50,11 @@ function generateFallbackImages(query) {
 export default async function handler(req, res) {
   console.log('🚀 search-images API called with:', req.method, req.query);
   
+  // Early response test
+  if (req.query.test === 'ping') {
+    return res.json({ status: 'pong', timestamp: new Date().toISOString() });
+  }
+  
   // Configurar CORS
   res.setHeader("Access-Control-Allow-Credentials", true);
   res.setHeader("Access-Control-Allow-Origin", "*");
