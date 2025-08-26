@@ -48,12 +48,13 @@ function generateFallbackImages(query) {
 }
 
 export default async function handler(req, res) {
-  console.log('🚀 search-images API called with:', req.method, req.query);
-  
-  // Early response test
-  if (req.query.test === 'ping') {
-    return res.json({ status: 'pong', timestamp: new Date().toISOString() });
-  }
+  try {
+    console.log('🚀 search-images API called with:', req.method, req.query);
+    
+    // Early response test
+    if (req.query.test === 'ping') {
+      return res.json({ status: 'pong', timestamp: new Date().toISOString() });
+    }
   
   // Configurar CORS
   res.setHeader("Access-Control-Allow-Credentials", true);
@@ -179,6 +180,14 @@ export default async function handler(req, res) {
       images: generateFallbackImages(query || 'ejemplo'),
       mode: "fallback",
       error: error.message
+    });
+  }
+  } catch (globalError) {
+    console.error('❌ Global error in search-images:', globalError);
+    return res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+      error: globalError.message
     });
   }
 }
