@@ -95,18 +95,25 @@ export default async function handler(req, res) {
     console.log('🔑 API Key disponible:', GOOGLE_API_KEY ? 'Sí' : 'No');
     console.log('🔍 Search Engine ID disponible:', GOOGLE_SEARCH_ENGINE_ID ? 'Sí' : 'No');
 
-    // Construir URL de búsqueda de Google Custom Search API
-    const searchUrl = new URL("https://www.googleapis.com/customsearch/v1");
-    searchUrl.searchParams.set("key", GOOGLE_API_KEY);
-    searchUrl.searchParams.set("cx", GOOGLE_SEARCH_ENGINE_ID);
-    searchUrl.searchParams.set("q", query);
-    searchUrl.searchParams.set("searchType", "image");
-    searchUrl.searchParams.set("num", Math.min(parseInt(num), 10));
-    searchUrl.searchParams.set("safe", "active");
+    // Construir URL de búsqueda de Google Custom Search API con filtros de idioma y región
+    const searchParams = new URLSearchParams({
+      key: GOOGLE_API_KEY,
+      cx: GOOGLE_SEARCH_ENGINE_ID,
+      q: query,
+      searchType: 'image',
+      num: Math.min(parseInt(num), 10).toString(),
+      safe: 'active',
+      // Filtros de idioma y región para mejorar relevancia
+      hl: 'es',       // Idioma de la interfaz (Host Language)
+      gl: 'pe',       // Geolocalización (Country) - Perú
+      lr: 'lang_es',  // Restringir resultados a documentos en español
+    });
+
+    const searchUrl = `https://www.googleapis.com/customsearch/v1?${searchParams.toString()}`;
 
     console.log(`🔍 Buscando imágenes para: "${query}"`);
 
-    const response = await fetch(searchUrl.toString());
+    const response = await fetch(searchUrl);
     
     if (!response.ok) {
       const errorText = await response.text();
