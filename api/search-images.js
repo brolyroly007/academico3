@@ -101,12 +101,8 @@ export default async function handler(req, res) {
     searchUrl.searchParams.set("cx", GOOGLE_SEARCH_ENGINE_ID);
     searchUrl.searchParams.set("q", query);
     searchUrl.searchParams.set("searchType", "image");
-    searchUrl.searchParams.set("num", Math.min(parseInt(num), 6)); // Exactamente 6 imágenes
+    searchUrl.searchParams.set("num", Math.min(parseInt(num), 10));
     searchUrl.searchParams.set("safe", "active");
-    searchUrl.searchParams.set("imgSize", "medium");
-    searchUrl.searchParams.set("imgType", "clipart,lineart,photo");
-    searchUrl.searchParams.set("fileType", "jpg,png");
-    searchUrl.searchParams.set("rights", "cc_publicdomain,cc_attribute,cc_sharealike,cc_noncommercial");
 
     console.log(`🔍 Buscando imágenes para: "${query}"`);
 
@@ -127,7 +123,7 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
-    console.log("Respuesta de Google API:", data);
+    console.log("Respuesta de Google API - items encontrados:", data.items?.length || 0);
 
     if (!data.items || data.items.length === 0) {
       return res.json({
