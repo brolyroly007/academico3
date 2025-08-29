@@ -80,6 +80,11 @@ Responde ÚNICAMENTE con una lista numerada de 10 títulos específicos para "${
           .filter(line => line.match(/^\d+\./))
           .map(line => line.replace(/^\d+\.\s*/, '').trim())
           .filter(title => title.length > 0)
+          .map(title => {
+            // Limitar a máximo 6 palabras
+            const words = title.split(' ');
+            return words.length > 6 ? words.slice(0, 6).join(' ') + '...' : title;
+          })
           .slice(0, 10); // Asegurar máximo 10 sugerencias
 
         setAiSuggestions(suggestions);
@@ -98,46 +103,52 @@ Responde ÚNICAMENTE con una lista numerada de 10 títulos específicos para "${
     // Generar sugerencias específicas basadas en el tema
     const topicLower = documentTopic.toLowerCase();
     
+    // Función auxiliar para limitar palabras
+    const limitWords = (text) => {
+      const words = text.split(' ');
+      return words.length > 6 ? words.slice(0, 6).join(' ') + '...' : text;
+    };
+    
     // Sugerencias específicas por tema
     if (topicLower.includes('redes sociales') || topicLower.includes('social media')) {
       return [
-        `Timeline de las principales redes sociales`,
-        `Fundadores de Facebook, Twitter e Instagram`,
-        `Estadísticas de usuarios por red social 2024`,
-        `Comparativa: WhatsApp vs Telegram`,
-        `Evolución del diseño de Facebook (2004-2024)`,
-        `Capturas de la primera versión de Twitter`,
-        `Países con más usuarios de TikTok`,
-        `Fotografías de Mark Zuckerberg y otros CEO`,
-        `Infografía: Tiempo promedio en redes sociales`,
-        `Screenshots de interfaces antiguas vs actuales`
-      ];
+        `Timeline principales redes sociales`,
+        `Fundadores Facebook Twitter Instagram`,
+        `Estadísticas usuarios red social`,
+        `Comparativa WhatsApp vs Telegram`,
+        `Evolución diseño Facebook 2004`,
+        `Capturas primera versión Twitter`,
+        `Países más usuarios TikTok`,
+        `Fotografías Mark Zuckerberg CEO`,
+        `Infografía tiempo promedio social`,
+        `Screenshots interfaces antiguas actuales`
+      ].map(limitWords);
     } else if (topicLower.includes('inteligencia artificial') || topicLower.includes('ia') || topicLower.includes('chatgpt')) {
       return [
-        `Timeline del desarrollo de ChatGPT`,
-        `Comparativa de modelos de IA: GPT vs Gemini`,
-        `Fotografías de robots humanoides actuales`,
-        `Estadísticas de uso de ChatGPT mundial`,
-        `Capturas de pantalla de diferentes IAs`,
-        `Fundadores de OpenAI, Google DeepMind`,
-        `Línea de tiempo: desde Turing hasta GPT-4`,
-        `Países líderes en inversión en IA`,
-        `Imágenes generadas por DALL-E vs Midjourney`,
-        `Gráfico: Crecimiento de startups de IA`
-      ];
+        `Timeline desarrollo de ChatGPT`,
+        `Comparativa modelos GPT Gemini`,
+        `Fotografías robots humanoides actuales`,
+        `Estadísticas uso ChatGPT mundial`,
+        `Capturas pantalla diferentes IAs`,
+        `Fundadores OpenAI Google DeepMind`,
+        `Línea tiempo Turing GPT`,
+        `Países líderes inversión IA`,
+        `Imágenes DALL-E vs Midjourney`,
+        `Gráfico crecimiento startups IA`
+      ].map(limitWords);
     } else if (topicLower.includes('educación') || topicLower.includes('universidad') || topicLower.includes('estudiantes')) {
       return [
-        `Rankings de mejores universidades 2024`,
-        `Fotografías de campus universitarios emblemáticos`,
-        `Estadísticas de deserción estudiantil en Perú`,
-        `Comparativa de sistemas educativos mundiales`,
-        `Documentos del Ministerio de Educación`,
-        `Capturas de plataformas educativas online`,
-        `Cronología de la educación virtual`,
-        `Gráficos de rendimiento académico por región`,
-        `Fotografías de aulas tradicionales vs modernas`,
+        `Rankings mejores universidades 2024`,
+        `Fotografías campus universitarios emblemáticos`,
+        `Estadísticas deserción estudiantil Perú`,
+        `Comparativa sistemas educativos mundiales`,
+        `Documentos Ministerio de Educación`,
+        `Capturas plataformas educativas online`,
+        `Cronología educación virtual mundial`,
+        `Gráficos rendimiento académico regional`,
+        `Fotografías aulas tradicionales modernas`,
         `Certificaciones internacionales más valoradas`
-      ];
+      ].map(limitWords);
     }
     
     // Fallback general pero específico para el tema
@@ -152,7 +163,7 @@ Responde ÚNICAMENTE con una lista numerada de 10 títulos específicos para "${
       `Tecnologías utilizadas en ${documentTopic}`,
       `Impacto económico de ${documentTopic}`,
       `Tendencias futuras en ${documentTopic}`
-    ];
+    ].map(limitWords);
 
     return baseSuggestions;
   };

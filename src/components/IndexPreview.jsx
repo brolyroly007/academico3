@@ -686,6 +686,17 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
               {/* Sección de acciones finales */}
               <div className="border-t border-border/50 pt-3 sm:pt-6 animate-on-scroll fade-up">
                 <div className="flex flex-col gap-3 sm:gap-4">
+                  {/* Sección de anexos */}
+                  <div>
+                    <AnnexManager
+                      setAnnexData={setAnnexData}
+                      annexData={annexData}
+                      generatedIndex={generatedIndex}
+                      documentTopic={formData?.topic || ""}
+                      documentType={formData?.documentType || ""}
+                    />
+                  </div>
+
                   <div className="bg-gradient-to-r from-blue-50/80 to-blue-100/60 dark:from-blue-950/30 dark:to-blue-900/20 border border-blue-200/50 dark:border-blue-800/50 rounded-lg p-3 sm:p-4 shadow-lg animate-on-scroll bounce-in">
                     <div className="flex items-start gap-2 sm:gap-3">
                       <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" />
@@ -713,17 +724,6 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
                         </ul>
                       </div>
                     </div>
-                  </div>
-
-                  {/* Sección de anexos */}
-                  <div className="mt-6">
-                    <AnnexManager
-                      setAnnexData={setAnnexData}
-                      annexData={annexData}
-                      generatedIndex={generatedIndex}
-                      documentTopic={formData?.topic || ""}
-                      documentType={formData?.documentType || ""}
-                    />
                   </div>
 
                   <div className="flex justify-end gap-2 sm:gap-4">
