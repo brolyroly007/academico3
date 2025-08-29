@@ -30,16 +30,19 @@ ${generatedIndex}
 Los anexos deben ser recursos tangibles y específicos que se relacionen DIRECTAMENTE con "${documentTopic}". 
 
 EJEMPLOS DE BUENAS SUGERENCIAS PARA DIFERENTES TEMAS:
-- Si el tema es "Evolución de las redes sociales": "Timeline de Facebook (2004-2024)", "Fundadores de las principales redes sociales", "Telegram vs WhatsApp: comparativa de funcionalidades"
-- Si el tema es "Inteligencia artificial": "Cronología del desarrollo de ChatGPT", "Comparativa de modelos de IA más populares", "Fotografías de robots humanoides actuales"
-- Si el tema es "Cambio climático": "Gráficos de temperatura global 1880-2024", "Fotografías del derretimiento glaciar en el Ártico", "Países con mayores emisiones de CO2"
+- Si el tema es "Evolución de las redes sociales": "Timeline Facebook 2004-2024", "Fundadores principales redes sociales", "Telegram vs WhatsApp comparativa"
+- Si el tema es "Inteligencia artificial": "Cronología desarrollo de ChatGPT", "Comparativa modelos IA populares", "Fotografías robots humanoides actuales"
+- Si el tema es "Cambio climático": "Gráficos temperatura global 1880-2024", "Fotografías derretimiento glaciar Ártico", "Países mayores emisiones CO2"
 
 GENERA ANEXOS ESPECÍFICOS PARA "${documentTopic}" que sean:
 - Títulos concretos y específicos (no genéricos)
+- MÁXIMO 6 PALABRAS POR TÍTULO (muy importante)
 - Relacionados directamente con el tema
 - Recursos que existen y se pueden buscar/encontrar
 - Nombres propios, fechas, lugares específicos cuando sea relevante
 - Comparativas, cronologías, estadísticas específicas del tema
+
+IMPORTANTE: Cada título debe tener MÁXIMO 6 PALABRAS y ser completo y con sentido.
 
 Responde ÚNICAMENTE con una lista numerada de 10 títulos específicos para "${documentTopic}":
 
@@ -80,11 +83,6 @@ Responde ÚNICAMENTE con una lista numerada de 10 títulos específicos para "${
           .filter(line => line.match(/^\d+\./))
           .map(line => line.replace(/^\d+\.\s*/, '').trim())
           .filter(title => title.length > 0)
-          .map(title => {
-            // Limitar a máximo 6 palabras
-            const words = title.split(' ');
-            return words.length > 6 ? words.slice(0, 6).join(' ') + '...' : title;
-          })
           .slice(0, 10); // Asegurar máximo 10 sugerencias
 
         setAiSuggestions(suggestions);
@@ -103,13 +101,7 @@ Responde ÚNICAMENTE con una lista numerada de 10 títulos específicos para "${
     // Generar sugerencias específicas basadas en el tema
     const topicLower = documentTopic.toLowerCase();
     
-    // Función auxiliar para limitar palabras
-    const limitWords = (text) => {
-      const words = text.split(' ');
-      return words.length > 6 ? words.slice(0, 6).join(' ') + '...' : text;
-    };
-    
-    // Sugerencias específicas por tema
+    // Sugerencias específicas por tema (naturalmente 6 palabras o menos)
     if (topicLower.includes('redes sociales') || topicLower.includes('social media')) {
       return [
         `Timeline principales redes sociales`,
@@ -120,12 +112,12 @@ Responde ÚNICAMENTE con una lista numerada de 10 títulos específicos para "${
         `Capturas primera versión Twitter`,
         `Países más usuarios TikTok`,
         `Fotografías Mark Zuckerberg CEO`,
-        `Infografía tiempo promedio social`,
+        `Tiempo promedio redes sociales`,
         `Screenshots interfaces antiguas actuales`
-      ].map(limitWords);
+      ];
     } else if (topicLower.includes('inteligencia artificial') || topicLower.includes('ia') || topicLower.includes('chatgpt')) {
       return [
-        `Timeline desarrollo de ChatGPT`,
+        `Timeline desarrollo ChatGPT`,
         `Comparativa modelos GPT Gemini`,
         `Fotografías robots humanoides actuales`,
         `Estadísticas uso ChatGPT mundial`,
@@ -135,37 +127,36 @@ Responde ÚNICAMENTE con una lista numerada de 10 títulos específicos para "${
         `Países líderes inversión IA`,
         `Imágenes DALL-E vs Midjourney`,
         `Gráfico crecimiento startups IA`
-      ].map(limitWords);
+      ];
     } else if (topicLower.includes('educación') || topicLower.includes('universidad') || topicLower.includes('estudiantes')) {
       return [
         `Rankings mejores universidades 2024`,
-        `Fotografías campus universitarios emblemáticos`,
-        `Estadísticas deserción estudiantil Perú`,
-        `Comparativa sistemas educativos mundiales`,
-        `Documentos Ministerio de Educación`,
-        `Capturas plataformas educativas online`,
+        `Campus universitarios emblemáticos fotografías`,
+        `Deserción estudiantil Perú estadísticas`,
+        `Sistemas educativos mundiales comparativa`,
+        `Documentos Ministerio Educación oficiales`,
+        `Plataformas educativas online capturas`,
         `Cronología educación virtual mundial`,
-        `Gráficos rendimiento académico regional`,
-        `Fotografías aulas tradicionales modernas`,
+        `Rendimiento académico regional gráficos`,
+        `Aulas tradicionales modernas fotografías`,
         `Certificaciones internacionales más valoradas`
-      ].map(limitWords);
+      ];
     }
     
-    // Fallback general pero específico para el tema
-    const baseSuggestions = [
-      `Cronología histórica de ${documentTopic}`,
-      `Estadísticas actuales sobre ${documentTopic}`,
-      `Principales figuras relacionadas con ${documentTopic}`,
-      `Fotografías relevantes de ${documentTopic}`,
-      `Comparativa de aspectos clave en ${documentTopic}`,
-      `Documentos oficiales sobre ${documentTopic}`,
-      `Países/lugares importantes en ${documentTopic}`,
-      `Tecnologías utilizadas en ${documentTopic}`,
-      `Impacto económico de ${documentTopic}`,
-      `Tendencias futuras en ${documentTopic}`
-    ].map(limitWords);
-
-    return baseSuggestions;
+    // Fallback general con nombres cortos y específicos
+    const words = documentTopic.split(' ').slice(0, 2).join(' ');
+    return [
+      `Cronología histórica ${words}`,
+      `Estadísticas actuales ${words}`,
+      `Principales figuras ${words}`,
+      `Fotografías relevantes ${words}`,
+      `Comparativa aspectos clave`,
+      `Documentos oficiales ${words}`,
+      `Lugares importantes ${words}`,
+      `Tecnologías utilizadas ${words}`,
+      `Impacto económico ${words}`,
+      `Tendencias futuras ${words}`
+    ];
   };
   
   // Función para extraer títulos del índice generado
