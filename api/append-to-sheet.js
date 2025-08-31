@@ -200,69 +200,80 @@ export default async function handler(req, res) {
     // Extraer Logo URL
     const logoUrl = req.body.coverData?.logoUrl || "";
     
-    // Extraer URLs de Anexos del JSON
+    // Extraer URLs de Anexos del JSON - VERSIÓN SIMPLIFICADA Y MÁS AMPLIA
     let anexosUrls = "";
     try {
-      if (req.body.coverData && typeof req.body.coverData === "object") {
-        const anexosEncontrados = [];
+      // Buscar en req.body.coverData AND en todo req.body
+      const datosParaBuscar = [req.body.coverData, req.body];
+      const anexosEncontrados = [];
+      
+      console.log('🔍 Iniciando búsqueda de URLs de anexos...');
+      
+      // Función para buscar URLs recursivamente - MÁS PERMISIVA
+      const buscarUrlsRecursivo = (obj, ruta = '') => {
+        if (!obj || typeof obj !== 'object') return;
         
-        // Función para buscar URLs recursivamente
-        const buscarUrlsRecursivo = (obj) => {
-          if (!obj || typeof obj !== 'object') return;
+        Object.keys(obj).forEach(key => {
+          const valor = obj[key];
+          const rutaCompleta = ruta ? `${ruta}.${key}` : key;
           
-          Object.keys(obj).forEach(key => {
-            const valor = obj[key];
+          // CONDICIÓN MÁS AMPLIA: Cualquier string con http que NO sea logoUrl
+          if (typeof valor === 'string' && valor.includes('http')) {
+            // Excluir solo logoUrl específico, incluir TODO lo demás
+            const esLogoUrl = key.toLowerCase() === 'logourl' || 
+                              rutaCompleta.toLowerCase().includes('logo');
             
-            // Si es una cadena con http, verificar si es relevante
-            if (typeof valor === 'string' && valor.includes('http')) {
-              const esAnexo = key.toLowerCase().includes('anexo') || 
-                             key.toLowerCase().includes('attachment') || 
-                             key.toLowerCase().includes('file') ||
-                             key.toLowerCase().includes('document') ||
-                             key.toLowerCase().includes('recurso') ||
-                             valor.includes('drive.google.com') ||
-                             valor.includes('dropbox.com') ||
-                             valor.includes('onedrive.com') ||
-                             valor.includes('.pdf') ||
-                             valor.includes('.doc') ||
-                             valor.includes('.zip');
-              
-              if (esAnexo) {
-                anexosEncontrados.push(valor);
-              }
-            }
-            // Si es array, buscar en cada elemento
-            else if (Array.isArray(valor)) {
-              valor.forEach((item) => {
-                if (typeof item === 'string' && item.includes('http')) {
-                  anexosEncontrados.push(item);
-                } else if (typeof item === 'object' && item) {
-                  ['url', 'link', 'href', 'src', 'path', 'file'].forEach(prop => {
-                    if (item[prop] && item[prop].toString().includes('http')) {
-                      anexosEncontrados.push(item[prop]);
-                    }
-                  });
-                }
+            if (!esLogoUrl && valor.trim().length > 10) { // URLs válidas mínimas
+              anexosEncontrados.push({
+                url: valor,
+                fuente: rutaCompleta
               });
+              console.log(`📎 URL encontrada en ${rutaCompleta}: ${valor.substring(0, 80)}...`);
             }
-            // Si es objeto, buscar recursivamente
-            else if (typeof valor === 'object' && valor !== null) {
-              buscarUrlsRecursivo(valor);
-            }
-          });
-        };
-        
-        buscarUrlsRecursivo(req.body.coverData);
-        
-        // Limpiar duplicados y crear string
-        const urlsUnicas = [...new Set(anexosEncontrados)].filter(url => 
-          url && url.toString().trim() !== ""
-        );
-        
-        anexosUrls = urlsUnicas.join('\n');
+          }
+          // Si es array, buscar en cada elemento
+          else if (Array.isArray(valor)) {
+            valor.forEach((item, idx) => {
+              if (typeof item === 'string' && item.includes('http')) {
+                anexosEncontrados.push({
+                  url: item,
+                  fuente: `${rutaCompleta}[${idx}]`
+                });
+                console.log(`📎 URL en array ${rutaCompleta}[${idx}]: ${item.substring(0, 80)}...`);
+              } else if (typeof item === 'object' && item) {
+                buscarUrlsRecursivo(item, `${rutaCompleta}[${idx}]`);
+              }
+            });
+          }
+          // Si es objeto, buscar recursivamente
+          else if (typeof valor === 'object' && valor !== null) {
+            buscarUrlsRecursivo(valor, rutaCompleta);
+          }
+        });
+      };
+      
+      // Buscar en ambos objetos
+      datosParaBuscar.forEach((datos, idx) => {
+        if (datos && typeof datos === 'object') {
+          console.log(`🔍 Buscando en objeto ${idx === 0 ? 'coverData' : 'req.body'}...`);
+          buscarUrlsRecursivo(datos, idx === 0 ? 'coverData' : 'body');
+        }
+      });
+      
+      // Limpiar duplicados y crear string
+      const urlsUnicas = [...new Set(anexosEncontrados.map(item => item.url))].filter(url => 
+        url && url.toString().trim().length > 10
+      );
+      
+      anexosUrls = urlsUnicas.join('\n');
+      
+      console.log(`📊 Total URLs encontradas: ${urlsUnicas.length}`);
+      if (urlsUnicas.length > 0) {
+        console.log('📋 URLs que se enviarán:', urlsUnicas);
       }
+      
     } catch (e) {
-      console.error("Error extrayendo URLs de anexos:", e);
+      console.error("❌ Error extrayendo URLs de anexos:", e);
       anexosUrls = "";
     }
     
@@ -310,6 +321,13 @@ export default async function handler(req, res) {
     ];
 
     console.log("Enviando datos a la hoja:", values[0].slice(0, 10)); // Log parcial
+    
+    // Log detallado de las columnas críticas
+    console.log('🔍 DETALLE DE COLUMNAS CRÍTICAS:');
+    console.log(`  📍 Logo URL (AD-${29}): "${values[0][29]}"`);
+    console.log(`  📎 Anexos URLs (AE-${30}): "${values[0][30]}"`); 
+    console.log(`  📄 JSON length (AF-${31}): ${values[0][31] ? values[0][31].length : 0} chars`);
+    console.log('  📊 Total columnas enviadas:', values[0].length);
 
     // Añadir los datos a la hoja
     const result = await sheets.spreadsheets.values.append({
