@@ -40,7 +40,7 @@ export default async function handler(req, res) {
     });
 
     const sheets = google.sheets({ version: "v4", auth });
-    const RANGE = "Hoja 1!A:AE"; // Rango ampliado para incluir Logo URL (AE)
+    const RANGE = "Hoja 1!A:AF"; // Rango ampliado para incluir Logo URL (AD), Anexos URLs (AE) y Detalles JSON (AF)
 
     // Obtener el último ID para generar uno nuevo
     const response = await sheets.spreadsheets.values.get({
@@ -200,8 +200,75 @@ export default async function handler(req, res) {
     // Extraer Logo URL
     const logoUrl = req.body.coverData?.logoUrl || "";
     
-    // Debug para verificar Logo URL
+    // Extraer URLs de Anexos del JSON
+    let anexosUrls = "";
+    try {
+      if (req.body.coverData && typeof req.body.coverData === "object") {
+        const anexosEncontrados = [];
+        
+        // Función para buscar URLs recursivamente
+        const buscarUrlsRecursivo = (obj) => {
+          if (!obj || typeof obj !== 'object') return;
+          
+          Object.keys(obj).forEach(key => {
+            const valor = obj[key];
+            
+            // Si es una cadena con http, verificar si es relevante
+            if (typeof valor === 'string' && valor.includes('http')) {
+              const esAnexo = key.toLowerCase().includes('anexo') || 
+                             key.toLowerCase().includes('attachment') || 
+                             key.toLowerCase().includes('file') ||
+                             key.toLowerCase().includes('document') ||
+                             key.toLowerCase().includes('recurso') ||
+                             valor.includes('drive.google.com') ||
+                             valor.includes('dropbox.com') ||
+                             valor.includes('onedrive.com') ||
+                             valor.includes('.pdf') ||
+                             valor.includes('.doc') ||
+                             valor.includes('.zip');
+              
+              if (esAnexo) {
+                anexosEncontrados.push(valor);
+              }
+            }
+            // Si es array, buscar en cada elemento
+            else if (Array.isArray(valor)) {
+              valor.forEach((item) => {
+                if (typeof item === 'string' && item.includes('http')) {
+                  anexosEncontrados.push(item);
+                } else if (typeof item === 'object' && item) {
+                  ['url', 'link', 'href', 'src', 'path', 'file'].forEach(prop => {
+                    if (item[prop] && item[prop].toString().includes('http')) {
+                      anexosEncontrados.push(item[prop]);
+                    }
+                  });
+                }
+              });
+            }
+            // Si es objeto, buscar recursivamente
+            else if (typeof valor === 'object' && valor !== null) {
+              buscarUrlsRecursivo(valor);
+            }
+          });
+        };
+        
+        buscarUrlsRecursivo(req.body.coverData);
+        
+        // Limpiar duplicados y crear string
+        const urlsUnicas = [...new Set(anexosEncontrados)].filter(url => 
+          url && url.toString().trim() !== ""
+        );
+        
+        anexosUrls = urlsUnicas.join('\n');
+      }
+    } catch (e) {
+      console.error("Error extrayendo URLs de anexos:", e);
+      anexosUrls = "";
+    }
+    
+    // Debug para verificar Logo URL y Anexos
     console.log('🖼️ Logo URL recibido:', logoUrl);
+    console.log('📎 Anexos URLs encontrados:', anexosUrls);
     console.log('📦 CoverData completo:', JSON.stringify(req.body.coverData, null, 2));
 
     // Preparar los datos para insertar - Orden actualizado con nuevas columnas
@@ -237,7 +304,8 @@ export default async function handler(req, res) {
         seccion, // AB - Sección (NUEVO)
         programa, // AC - Programa (NUEVO)
         logoUrl, // AD - Logo URL (NUEVO)
-        detallesJSON, // AE - Detalles JSON
+        anexosUrls, // AE - Anexos URLs (NUEVO)
+        detallesJSON, // AF - Detalles JSON
       ],
     ];
 
@@ -416,7 +484,7 @@ export default async function handler(req, res) {
               fields: "userEnteredFormat(wrapStrategy,verticalAlignment,textFormat)",
             },
           },
-          // Formato para texto largo en Detalles JSON (ahora en columna AE - índice 30)
+          // Formato para Anexos URLs (columna AE - índice 30)
           {
             updateCells: {
               range: {
@@ -425,6 +493,35 @@ export default async function handler(req, res) {
                 endRowIndex: rowIndex + 1,
                 startColumnIndex: 30,
                 endColumnIndex: 31,
+              },
+              rows: [
+                {
+                  values: [
+                    {
+                      userEnteredFormat: {
+                        wrapStrategy: "WRAP",
+                        verticalAlignment: "TOP",
+                        textFormat: {
+                          foregroundColor: { red: 0.0, green: 0.5, blue: 0.2 }, // Verde para Anexos URLs
+                          fontSize: 9,
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+              fields: "userEnteredFormat(wrapStrategy,verticalAlignment,textFormat)",
+            },
+          },
+          // Formato para texto largo en Detalles JSON (ahora en columna AF - índice 31)
+          {
+            updateCells: {
+              range: {
+                sheetId: 0,
+                startRowIndex: rowIndex,
+                endRowIndex: rowIndex + 1,
+                startColumnIndex: 31,
+                endColumnIndex: 32,
               },
               rows: [
                 {
