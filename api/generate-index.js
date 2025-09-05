@@ -17,7 +17,7 @@ export default async function handler(req, res) {
       return res.status(200).end();
     }
 
-    const { documentType, topic, length, indexStructure, additionalInfo } =
+    const { documentType, topic, length, indexStructure, additionalInfo, essayTone } =
       req.body;
 
     console.log("Datos recibidos:", {
@@ -25,6 +25,7 @@ export default async function handler(req, res) {
       topic,
       length,
       indexStructure,
+      essayTone,
     });
 
     // Validar campos requeridos
@@ -164,11 +165,55 @@ ${maxPages >= 20 ? "\nVIII. ANEXOS" : ""}`,
         numSubtemas = 5;
       }
 
+      // Determinar el enfoque específico según el tipo de ensayo
+      let enfoqueEspecifico = "";
+      let estructuraDesarrollo = "";
+      
+      switch(essayTone) {
+        case "argumentativo":
+          enfoqueEspecifico = "Un ensayo argumentativo debe presentar una tesis clara y defenderla con argumentos sólidos y evidencias.";
+          estructuraDesarrollo = "argumentos principales con evidencias y ejemplos que sustenten la tesis";
+          break;
+        case "expositivo":
+          enfoqueEspecifico = "Un ensayo expositivo debe informar y explicar el tema de manera clara, ordenada y objetiva.";
+          estructuraDesarrollo = "aspectos informativos del tema organizados de manera lógica y clara";
+          break;
+        case "descriptivo":
+          enfoqueEspecifico = "Un ensayo descriptivo debe presentar una descripción detallada desde una perspectiva subjetiva.";
+          estructuraDesarrollo = "aspectos descriptivos del tema con detalles sensoriales y perspectiva personal";
+          break;
+        case "narrativo":
+          enfoqueEspecifico = "Un ensayo narrativo debe relatar una historia o suceso con elementos de reflexión personal.";
+          estructuraDesarrollo = "elementos narrativos cronológicos con reflexiones personales";
+          break;
+        case "persuasivo":
+          enfoqueEspecifico = "Un ensayo persuasivo debe convencer al lector apelando a la razón y la emoción.";
+          estructuraDesarrollo = "argumentos persuasivos que combinen lógica y apelo emocional";
+          break;
+        case "comparacion_contraste":
+          enfoqueEspecifico = "Un ensayo de comparación y contraste debe analizar similitudes y diferencias entre elementos.";
+          estructuraDesarrollo = "puntos de comparación y contraste organizados sistemáticamente";
+          break;
+        case "literario":
+          enfoqueEspecifico = "Un ensayo literario debe combinar reflexión temática con estilo estético y cuidado.";
+          estructuraDesarrollo = "aspectos temáticos desarrollados con estilo literario y estético";
+          break;
+        case "cientifico":
+          enfoqueEspecifico = "Un ensayo científico debe abordar el tema con rigor metodológico y evidencia empírica.";
+          estructuraDesarrollo = "aspectos científicos del tema con metodología rigurosa y evidencias";
+          break;
+        default:
+          enfoqueEspecifico = "Un ensayo académico debe desarrollar el tema de manera estructurada y fundamentada.";
+          estructuraDesarrollo = "aspectos principales del tema desarrollados académicamente";
+      }
+
       prompt = `Genera un índice para un ensayo académico sobre "${topic}" de ${length} páginas.
       
+${enfoqueEspecifico}
+
 La estructura debe incluir exactamente:
 - Una introducción con planteamiento del tema, relevancia y tesis
-- Una sección de desarrollo con exactamente ${numSubtemas} subtemas específicos y relevantes
+- Una sección de desarrollo con exactamente ${numSubtemas} subtemas específicos sobre ${estructuraDesarrollo}
 - Una conclusión con recapitulación, síntesis y reflexiones
 - Referencias bibliográficas
 
@@ -181,7 +226,7 @@ I. INTRODUCCIÓN
    1.3 Tesis o argumento principal
 
 II. DESARROLLO
-   [Aquí deben aparecer los ${numSubtemas} subtemas sin numeración]
+   [Aquí deben aparecer los ${numSubtemas} subtemas sin numeración, enfocados en ${estructuraDesarrollo}]
 
 III. CONCLUSIÓN
    3.1 Recapitulación de puntos principales
@@ -198,7 +243,8 @@ IMPORTANTE:
 1. Los subtemas del desarrollo NO deben llevar numeración
 2. NO incluyas explicaciones, solo el índice
 3. Usa el título del tema en mayúsculas al inicio
-4. Cada subtema debe ser específico al tema "${topic}" y NO genérico`;
+4. Cada subtema debe ser específico al tema "${topic}" y enfocado en el tipo de ensayo ${essayTone || 'académico'}
+5. La introducción y conclusión NO deben tener subtemas adicionales`;
     } else {
       // Para otros tipos de documentos
       const selectedTemplate = structureTemplates[indexStructure];

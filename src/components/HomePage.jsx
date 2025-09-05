@@ -418,6 +418,7 @@ El tiempo para debates académicos ha terminado. Cada día de inacción es una e
     }
   }, [ctaSectionRef]);
 
+
   const currentPreview = documentPreviews[activePreview];
 
   return (

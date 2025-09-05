@@ -1014,35 +1014,16 @@ export default function AcademicForm() {
                             <SelectItem
                               key={option.value}
                               value={option.value}
-                              className="hover:bg-primary/10 cursor-pointer relative group"
+                              className="hover:bg-primary/10 cursor-pointer"
+                              title={option.description || ""}
                             >
                               <div className="w-full">
                                 <div className="font-medium">{option.label}</div>
-                                {/* Tooltip hover con diseño atractivo - solo para ensayos */}
                                 {formData.documentType === "ensayo" && option.description && (
-                                  <div className="absolute left-full top-0 ml-3 w-80 p-4 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-out transform translate-x-2 group-hover:translate-x-0 z-50">
-                                    <div className="relative">
-                                      {/* Flecha del tooltip */}
-                                      <div className="absolute -left-2 top-4 w-0 h-0 border-t-8 border-b-8 border-r-8 border-transparent border-r-slate-100 dark:border-r-slate-800"></div>
-                                      
-                                      {/* Contenido del tooltip */}
-                                      <div className="flex items-start gap-3">
-                                        <div className="flex-shrink-0 w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center mt-1">
-                                          <Info className="w-4 h-4 text-primary" />
-                                        </div>
-                                        <div className="flex-1">
-                                          <h4 className="font-semibold text-slate-800 dark:text-slate-200 mb-2">
-                                            {option.label}
-                                          </h4>
-                                          <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                                            {option.description}
-                                          </p>
-                                        </div>
-                                      </div>
-                                      
-                                      {/* Decoración */}
-                                      <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-primary/5 to-transparent rounded-full -translate-y-2 translate-x-2"></div>
-                                    </div>
+                                  <div className="text-xs text-muted-foreground mt-1 pr-4 opacity-75">
+                                    {option.description.length > 60 
+                                      ? `${option.description.substring(0, 60)}...` 
+                                      : option.description}
                                   </div>
                                 )}
                               </div>

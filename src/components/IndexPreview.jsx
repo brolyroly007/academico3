@@ -299,6 +299,59 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
         console.log("Enviando longitud:", formData.length);
         console.log("Enviando tipo de documento:", formData.documentType);
 
+        // Enriquecer la información adicional para ensayos con el tipo específico
+        let enrichedAdditionalInfo = formData.additionalInfo || "";
+        if (formData.documentType === "ensayo" && formData.essayTone) {
+          // Buscar el tipo de ensayo para agregar descripción detallada
+          const ESSAY_TYPES = [
+            { 
+              value: "argumentativo", 
+              label: "Ensayo argumentativo",
+              description: "El autor defiende una tesis (punto de vista) presentando argumentos sólidos y evidencias para convencer al lector."
+            },
+            { 
+              value: "expositivo", 
+              label: "Ensayo expositivo",
+              description: "Su propósito es informar y explicar un tema de forma clara, ordenada y objetiva, sin emitir juicios personales."
+            },
+            { 
+              value: "descriptivo", 
+              label: "Ensayo descriptivo",
+              description: "Presenta una descripción detallada de personas, lugares, objetos o situaciones, desde una perspectiva subjetiva."
+            },
+            { 
+              value: "narrativo", 
+              label: "Ensayo narrativo",
+              description: "Relata una historia o un suceso, pudiendo incluir elementos de reflexión personal."
+            },
+            { 
+              value: "persuasivo", 
+              label: "Ensayo persuasivo",
+              description: "Similar al argumentativo, busca convencer al lector apelando tanto a la razón como a la emoción y la resonancia moral."
+            },
+            { 
+              value: "comparacion_contraste", 
+              label: "Ensayo de comparación y contraste",
+              description: "Analiza las similitudes y diferencias entre dos o más elementos, conceptos o ideas."
+            },
+            { 
+              value: "literario", 
+              label: "Ensayo literario",
+              description: "Combina la reflexión sobre un tema con un estilo formal, estético y cuidado, propio de la literatura."
+            },
+            { 
+              value: "cientifico", 
+              label: "Ensayo científico",
+              description: "Aborda un tema de las ciencias (naturales, sociales o formales) con rigor metodológico y evidencia empírica."
+            }
+          ];
+          
+          const selectedEssayType = ESSAY_TYPES.find(type => type.value === formData.essayTone);
+          if (selectedEssayType) {
+            enrichedAdditionalInfo = `Tipo de ensayo: ${selectedEssayType.label} - ${selectedEssayType.description}${enrichedAdditionalInfo ? '\n\nInstrucciones adicionales: ' + enrichedAdditionalInfo : ''}`;
+          }
+        }
+
         const requestData = {
           documentType: formData.documentType,
           topic: formData.topic,
@@ -307,7 +360,7 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
           course: formData.course,
           career: formData.career,
           essayTone: formData.essayTone,
-          additionalInfo: formData.additionalInfo,
+          additionalInfo: enrichedAdditionalInfo,
         };
 
         const response = await fetch(`${apiUrl}/generate-index`, {
@@ -536,10 +589,26 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
                     </div>
                     <div>
                       <span className="text-xs sm:text-sm font-medium">
-                        Tono de Redacción:
+                        {formData.documentType === "ensayo" ? "Tipo de Ensayo:" : "Tono de Redacción:"}
                       </span>
                       <p className="text-muted-foreground text-sm">
-                        {formData.essayTone}
+                        {formData.documentType === "ensayo" ? (
+                          (() => {
+                            const ESSAY_TYPES = [
+                              { value: "argumentativo", label: "Ensayo argumentativo" },
+                              { value: "expositivo", label: "Ensayo expositivo" },
+                              { value: "descriptivo", label: "Ensayo descriptivo" },
+                              { value: "narrativo", label: "Ensayo narrativo" },
+                              { value: "persuasivo", label: "Ensayo persuasivo" },
+                              { value: "comparacion_contraste", label: "Ensayo de comparación y contraste" },
+                              { value: "literario", label: "Ensayo literario" },
+                              { value: "cientifico", label: "Ensayo científico" }
+                            ];
+                            return ESSAY_TYPES.find(type => type.value === formData.essayTone)?.label || formData.essayTone;
+                          })()
+                        ) : (
+                          formData.essayTone
+                        )}
                       </p>
                     </div>
                   </div>
