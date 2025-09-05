@@ -170,52 +170,62 @@ ${maxPages >= 20 ? "\nVIII. ANEXOS" : ""}`,
       let estructuraDesarrollo = "";
       
       let tipoEnsayoDescripcion = "";
+      let introduccionResumen = "";
       
       switch(essayTone) {
         case "argumentativo":
           enfoqueEspecifico = "Un ensayo argumentativo debe presentar una tesis clara y defenderla con argumentos sólidos y evidencias.";
           estructuraDesarrollo = "argumentos principales con evidencias y ejemplos que sustenten la tesis";
           tipoEnsayoDescripcion = "(Defensa de una tesis con argumentos y evidencia)";
+          introduccionResumen = "Se usará la siguiente tesis sobre el tema presentado, defendida mediante argumentos sólidos, evidencias científicas y ejemplos concretos para convencer al lector de la postura adoptada.";
           break;
         case "expositivo":
           enfoqueEspecifico = "Un ensayo expositivo debe informar y explicar el tema de manera clara, ordenada y objetiva.";
           estructuraDesarrollo = "aspectos informativos del tema organizados de manera lógica y clara";
           tipoEnsayoDescripcion = "(Explicación objetiva de un tema con datos y ejemplos)";
+          introduccionResumen = "Se presentará una explicación objetiva y detallada del tema, utilizando datos verificables, estadísticas y ejemplos concretos para informar al lector de manera clara y ordenada.";
           break;
         case "descriptivo":
           enfoqueEspecifico = "Un ensayo descriptivo debe presentar una descripción detallada desde una perspectiva subjetiva.";
           estructuraDesarrollo = "aspectos descriptivos del tema con detalles sensoriales y perspectiva personal";
           tipoEnsayoDescripcion = "(Creación de una imagen con detalles sensoriales y lenguaje figurado)";
+          introduccionResumen = "Se creará una imagen vivida del tema mediante descripciones detalladas, lenguaje figurado, detalles sensoriales y una perspectiva personal que permita al lector visualizar y experimentar el tema.";
           break;
         case "narrativo":
           enfoqueEspecifico = "Un ensayo narrativo debe relatar una historia o suceso con elementos de reflexión personal.";
           estructuraDesarrollo = "elementos narrativos cronológicos con reflexiones personales";
           tipoEnsayoDescripcion = "(Desarrollo de una historia personal o ficticia y su significado)";
+          introduccionResumen = "Se desarrollará una narrativa cronológica relacionada con el tema, incluyendo experiencias personales, reflexiones profundas y el significado más amplio de los eventos narrados.";
           break;
         case "persuasivo":
           enfoqueEspecifico = "Un ensayo persuasivo debe convencer al lector apelando a la razón y la emoción.";
           estructuraDesarrollo = "argumentos persuasivos que combinen lógica y apelo emocional";
           tipoEnsayoDescripcion = "(Uso de argumentos lógicos y emocionales para convencer al lector)";
+          introduccionResumen = "Se emplearán argumentos lógicos combinados con apelaciones emocionales para persuadir al lector, utilizando evidencias, ejemplos emotivos y conexiones personales para generar convicción.";
           break;
         case "comparacion_contraste":
           enfoqueEspecifico = "Un ensayo de comparación y contraste debe analizar similitudes y diferencias entre elementos.";
           estructuraDesarrollo = "puntos de comparación y contraste organizados sistemáticamente";
           tipoEnsayoDescripcion = "(Análisis de similitudes y diferencias entre dos o más sujetos)";
+          introduccionResumen = "Se realizará un análisis sistemático de similitudes y diferencias entre los elementos del tema, organizando los puntos de comparación de manera lógica para una comprensión completa.";
           break;
         case "literario":
           enfoqueEspecifico = "Un ensayo literario debe combinar reflexión temática con estilo estético y cuidado.";
           estructuraDesarrollo = "aspectos temáticos desarrollados con estilo literario y estético";
           tipoEnsayoDescripcion = "(Análisis de una obra literaria, sus temas y personajes con citas)";
+          introduccionResumen = "Se analizarán los temas centrales, personajes y elementos literarios del tema seleccionado, utilizando citas textuales y un estilo estético que combine rigor académico con belleza expresiva.";
           break;
         case "cientifico":
           enfoqueEspecifico = "Un ensayo científico debe abordar el tema con rigor metodológico y evidencia empírica.";
           estructuraDesarrollo = "aspectos científicos del tema con metodología rigurosa y evidencias";
           tipoEnsayoDescripcion = "(Presentación de una metodología, resultados y discusión de hallazgos)";
+          introduccionResumen = "Se aplicará una metodología rigurosa para examinar el tema, presentando evidencia empírica, resultados de investigación y discusión de hallazgos basados en el método científico.";
           break;
         default:
           enfoqueEspecifico = "Un ensayo académico debe desarrollar el tema de manera estructurada y fundamentada.";
           estructuraDesarrollo = "aspectos principales del tema desarrollados académicamente";
           tipoEnsayoDescripcion = "(Desarrollo académico estructurado del tema)";
+          introduccionResumen = "Se desarrollará el tema de manera estructurada y fundamentada, presentando los aspectos principales con rigor académico y organización lógica.";
       }
 
       prompt = `Genera un índice para un ensayo académico sobre "${topic}" de ${length} páginas.
@@ -233,17 +243,13 @@ Presenta el índice usando exactamente este formato:
 ${tipoEnsayoDescripcion}
 
 I. INTRODUCCIÓN
-   1.1 Planteamiento del tema
-   1.2 Relevancia y contexto
-   1.3 Tesis o argumento principal
+${introduccionResumen}
 
 II. DESARROLLO
    [Aquí deben aparecer los ${numSubtemas} subtemas sin numeración, enfocados en ${estructuraDesarrollo}]
 
 III. CONCLUSIÓN
-   3.1 Recapitulación de puntos principales
-   3.2 Síntesis del argumento global
-   3.3 Reflexiones finales y proyecciones
+Síntesis final de los puntos desarrollados y reflexiones conclusivas sobre el tema analizado.
 
 IV. REFERENCIAS BIBLIOGRÁFICAS
 
