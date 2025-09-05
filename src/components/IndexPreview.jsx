@@ -772,6 +772,24 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
                     />
                   </div>
 
+                  {/* Mensaje especial para ensayos */}
+                  {formData?.documentType === "ensayo" && (
+                    <div className="bg-gradient-to-r from-amber-50/80 to-amber-100/60 dark:from-amber-950/30 dark:to-amber-900/20 border border-amber-200/50 dark:border-amber-800/50 rounded-lg p-3 sm:p-4 shadow-lg animate-on-scroll bounce-in mb-4">
+                      <div className="flex items-start gap-2 sm:gap-3">
+                        <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <h4 className="font-medium text-amber-800 dark:text-amber-300 text-xs sm:text-sm">
+                            📄 Aclaración sobre la estructura del ensayo
+                          </h4>
+                          <p className="text-xs sm:text-sm text-amber-700 dark:text-amber-400 mt-1">
+                            Lo que ves a continuación es <strong>solo la estructura y boceto</strong> de tu ensayo, no el contenido final completo. 
+                            El ensayo desarrollado incluirá todos los párrafos, argumentos detallados, citas y referencias completas según esta estructura.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="bg-gradient-to-r from-blue-50/80 to-blue-100/60 dark:from-blue-950/30 dark:to-blue-900/20 border border-blue-200/50 dark:border-blue-800/50 rounded-lg p-3 sm:p-4 shadow-lg animate-on-scroll bounce-in">
                     <div className="flex items-start gap-2 sm:gap-3">
                       <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" />
