@@ -782,8 +782,7 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
                             📄 Aclaración sobre la estructura del ensayo
                           </h4>
                           <p className="text-xs sm:text-sm text-amber-700 dark:text-amber-400 mt-1">
-                            Lo que ves a continuación es <strong>solo la estructura y boceto</strong> de tu ensayo, no el contenido final completo. 
-                            El ensayo desarrollado incluirá todos los párrafos, argumentos detallados, citas y referencias completas según esta estructura.
+                            Lo que estás viendo es <strong>solo la estructura y boceto</strong> de tu ensayo, no el contenido final.
                           </p>
                         </div>
                       </div>

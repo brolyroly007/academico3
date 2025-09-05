@@ -177,49 +177,49 @@ ${maxPages >= 20 ? "\nVIII. ANEXOS" : ""}`,
           enfoqueEspecifico = "Un ensayo argumentativo debe presentar una tesis clara y defenderla con argumentos sólidos y evidencias.";
           estructuraDesarrollo = "argumentos principales con evidencias y ejemplos que sustenten la tesis";
           tipoEnsayoDescripcion = "(Defensa de una tesis con argumentos y evidencia)";
-          introduccionResumen = "Se usará la siguiente tesis: [GENERAR TESIS ESPECÍFICA SOBRE \"${topic}\"] defendida mediante argumentos como [LISTAR 2-3 ARGUMENTOS PRINCIPALES], evidencias científicas y ejemplos concretos para convencer al lector de la postura adoptada.";
+          introduccionResumen = "Tesis: [TESIS ESPECÍFICA SOBRE \"${topic}\"] con argumentos [2-3 ARGUMENTOS] y evidencias científicas.";
           break;
         case "expositivo":
           enfoqueEspecifico = "Un ensayo expositivo debe informar y explicar el tema de manera clara, ordenada y objetiva.";
           estructuraDesarrollo = "aspectos informativos del tema organizados de manera lógica y clara";
           tipoEnsayoDescripcion = "(Explicación objetiva de un tema con datos y ejemplos)";
-          introduccionResumen = "Se presentará una explicación objetiva sobre \"${topic}\", abordando aspectos como [LISTAR 2-3 ASPECTOS CLAVE], utilizando datos verificables, estadísticas y ejemplos concretos para informar al lector de manera clara y ordenada.";
+          introduccionResumen = "Explicación objetiva sobre \"${topic}\" abordando [2-3 ASPECTOS CLAVE] con datos y ejemplos verificables.";
           break;
         case "descriptivo":
           enfoqueEspecifico = "Un ensayo descriptivo debe presentar una descripción detallada desde una perspectiva subjetiva.";
           estructuraDesarrollo = "aspectos descriptivos del tema con detalles sensoriales y perspectiva personal";
           tipoEnsayoDescripcion = "(Creación de una imagen con detalles sensoriales y lenguaje figurado)";
-          introduccionResumen = "Se creará una imagen vivida de \"${topic}\" mediante descripciones detalladas de [ESPECIFICAR ELEMENTOS A DESCRIBIR], lenguaje figurado, detalles sensoriales y una perspectiva personal que permita al lector visualizar y experimentar el tema.";
+          introduccionResumen = "Descripción vivida de \"${topic}\" con [ELEMENTOS ESPECÍFICOS], lenguaje figurado y detalles sensoriales.";
           break;
         case "narrativo":
           enfoqueEspecifico = "Un ensayo narrativo debe relatar una historia o suceso con elementos de reflexión personal.";
           estructuraDesarrollo = "elementos narrativos cronológicos con reflexiones personales";
           tipoEnsayoDescripcion = "(Desarrollo de una historia personal o ficticia y su significado)";
-          introduccionResumen = "Se desarrollará una narrativa cronológica sobre \"${topic}\", relatando [DESCRIBIR HISTORIA ESPECÍFICA], incluyendo experiencias personales, reflexiones profundas y el significado más amplio de los eventos narrados.";
+          introduccionResumen = "Narrativa sobre \"${topic}\" relatando [HISTORIA ESPECÍFICA] con experiencias personales y reflexiones profundas.";
           break;
         case "persuasivo":
           enfoqueEspecifico = "Un ensayo persuasivo debe convencer al lector apelando a la razón y la emoción.";
           estructuraDesarrollo = "argumentos persuasivos que combinen lógica y apelo emocional";
           tipoEnsayoDescripcion = "(Uso de argumentos lógicos y emocionales para convencer al lector)";
-          introduccionResumen = "Se emplearán argumentos lógicos sobre \"${topic}\" como [LISTAR ARGUMENTOS PERSUASIVOS], combinados con apelaciones emocionales mediante [ESTRATEGIAS EMOCIONALES], para persuadir al lector y generar convicción.";
+          introduccionResumen = "Argumentos lógicos y emocionales sobre \"${topic}\" usando [ARGUMENTOS] y [ESTRATEGIAS EMOCIONALES] persuasivas.";
           break;
         case "comparacion_contraste":
           enfoqueEspecifico = "Un ensayo de comparación y contraste debe analizar similitudes y diferencias entre elementos.";
           estructuraDesarrollo = "puntos de comparación y contraste organizados sistemáticamente";
           tipoEnsayoDescripcion = "(Análisis de similitudes y diferencias entre dos o más sujetos)";
-          introduccionResumen = "Se realizará un análisis sistemático de \"${topic}\", comparando [IDENTIFICAR ELEMENTOS A COMPARAR], examinando similitudes como [SIMILITUDES] y diferencias como [DIFERENCIAS], organizando los puntos de manera lógica.";
+          introduccionResumen = "Análisis comparativo de \"${topic}\" entre [ELEMENTOS] examinando similitudes [X] y diferencias [Y].";  
           break;
         case "literario":
           enfoqueEspecifico = "Un ensayo literario debe combinar reflexión temática con estilo estético y cuidado.";
           estructuraDesarrollo = "aspectos temáticos desarrollados con estilo literario y estético";
           tipoEnsayoDescripcion = "(Análisis de una obra literaria, sus temas y personajes con citas)";
-          introduccionResumen = "Se analizarán los temas centrales de \"${topic}\" como [IDENTIFICAR TEMAS LITERARIOS], examinando personajes clave [PERSONAJES], elementos literarios [ELEMENTOS] y utilizando citas textuales relevantes con un estilo estético.";
+          introduccionResumen = "Análisis de \"${topic}\" examinando temas [TEMAS], personajes [PERSONAJES] y elementos literarios con citas.";  
           break;
         case "cientifico":
           enfoqueEspecifico = "Un ensayo científico debe abordar el tema con rigor metodológico y evidencia empírica.";
           estructuraDesarrollo = "aspectos científicos del tema con metodología rigurosa y evidencias";
           tipoEnsayoDescripcion = "(Presentación de una metodología, resultados y discusión de hallazgos)";
-          introduccionResumen = "Se aplicará una metodología rigurosa para examinar \"${topic}\", utilizando [ESPECIFICAR METODOLOGÍA], presentando evidencia empírica sobre [ASPECTOS CIENTÍFICOS], resultados y discusión de hallazgos.";
+          introduccionResumen = "Metodología [METODOLOGÍA] para examinar \"${topic}\" con evidencia empírica y discusión de hallazgos.";
           break;
         default:
           enfoqueEspecifico = "Un ensayo académico debe desarrollar el tema de manera estructurada y fundamentada.";
