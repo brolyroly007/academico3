@@ -240,7 +240,6 @@ La estructura debe incluir exactamente:
 
 Presenta el índice usando exactamente este formato:
 [TÍTULO]
-${tipoEnsayoDescripcion}
 
 I. INTRODUCCIÓN
 ${introduccionResumen}
@@ -261,15 +260,14 @@ IMPORTANTE:
 1. Los subtemas del desarrollo NO deben llevar numeración
 2. NO incluyas explicaciones, solo el índice
 3. Usa el título del tema en mayúsculas al inicio
-4. Incluye OBLIGATORIAMENTE el mini resumen ${tipoEnsayoDescripcion} inmediatamente después del título
-5. Cada subtema debe ser específico al tema "${topic}" y enfocado en el tipo de ensayo ${essayTone || 'académico'}
-6. En la introducción, DEBES COMPLETAR los elementos entre corchetes con contenido específico:
+4. Cada subtema debe ser específico al tema "${topic}" y enfocado en el tipo de ensayo ${essayTone || 'académico'}
+5. En la introducción, DEBES COMPLETAR los elementos entre corchetes con contenido específico:
    - [GENERAR TESIS ESPECÍFICA]: Crea una tesis concreta sobre "${topic}"
    - [LISTAR ARGUMENTOS]: Enumera argumentos específicos del tema
    - [ASPECTOS CLAVE]: Menciona aspectos concretos del tema
    - [ELEMENTOS A DESCRIBIR/COMPARAR]: Identifica elementos específicos
    - Reemplaza TODOS los marcadores entre corchetes con contenido real y específico
-7. La introducción debe ser un párrafo completo y detallado, no genérico`;
+6. La introducción debe ser un párrafo completo y detallado, no genérico`;
     } else {
       // Para otros tipos de documentos
       const selectedTemplate = structureTemplates[indexStructure];
