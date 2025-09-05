@@ -71,10 +71,60 @@ const DOCUMENT_LENGTHS = [
   { value: "30-45", label: "30-45 páginas" },
 ];
 
+const ESSAY_LENGTHS = [
+  { value: "1-5", label: "1-5 páginas" },
+  { value: "5-10", label: "5-10 páginas" },
+  { value: "10-15", label: "10-15 páginas" },
+  { value: "15-20", label: "15-20 páginas" },
+];
+
 const TONOS_REDACCIÓN = [
   { value: "académico", label: "Académico Formal" },
   { value: "analítico", label: "Analítico Crítico" },
   { value: "narrativo", label: "Narrativo Descriptivo" },
+];
+
+const ESSAY_TYPES = [
+  { 
+    value: "argumentativo", 
+    label: "Ensayo argumentativo",
+    description: "El autor defiende una tesis (punto de vista) presentando argumentos sólidos y evidencias para convencer al lector."
+  },
+  { 
+    value: "expositivo", 
+    label: "Ensayo expositivo",
+    description: "Su propósito es informar y explicar un tema de forma clara, ordenada y objetiva, sin emitir juicios personales."
+  },
+  { 
+    value: "descriptivo", 
+    label: "Ensayo descriptivo",
+    description: "Presenta una descripción detallada de personas, lugares, objetos o situaciones, desde una perspectiva subjetiva."
+  },
+  { 
+    value: "narrativo", 
+    label: "Ensayo narrativo",
+    description: "Relata una historia o un suceso, pudiendo incluir elementos de reflexión personal."
+  },
+  { 
+    value: "persuasivo", 
+    label: "Ensayo persuasivo",
+    description: "Similar al argumentativo, busca convencer al lector apelando tanto a la razón como a la emoción y la resonancia moral."
+  },
+  { 
+    value: "comparacion_contraste", 
+    label: "Ensayo de comparación y contraste",
+    description: "Analiza las similitudes y diferencias entre dos o más elementos, conceptos o ideas."
+  },
+  { 
+    value: "literario", 
+    label: "Ensayo literario",
+    description: "Combina la reflexión sobre un tema con un estilo formal, estético y cuidado, propio de la literatura."
+  },
+  { 
+    value: "cientifico", 
+    label: "Ensayo científico",
+    description: "Aborda un tema de las ciencias (naturales, sociales o formales) con rigor metodológico y evidencia empírica."
+  }
 ];
 
 const COUNTRY_CODES = [
@@ -645,8 +695,13 @@ export default function AcademicForm() {
 
           {formData.essayTone && (
             <div>
-              <span className="font-medium">Tono de Redacción:</span>
-              <p className="text-muted-foreground">{formData.essayTone}</p>
+              <span className="font-medium">{formData.documentType === "ensayo" ? "Tipo de Ensayo:" : "Tono de Redacción:"}</span>
+              <p className="text-muted-foreground">
+                {formData.documentType === "ensayo" 
+                  ? ESSAY_TYPES.find(type => type.value === formData.essayTone)?.label || formData.essayTone
+                  : TONOS_REDACCIÓN.find(tono => tono.value === formData.essayTone)?.label || formData.essayTone
+                }
+              </p>
             </div>
           )}
 
@@ -920,7 +975,7 @@ export default function AcademicForm() {
                           <SelectValue placeholder="Seleccionar longitud" />
                         </SelectTrigger>
                         <SelectContent>
-                          {DOCUMENT_LENGTHS.map((length) => (
+                          {(formData.documentType === "ensayo" ? ESSAY_LENGTHS : DOCUMENT_LENGTHS).map((length) => (
                             <SelectItem
                               key={length.value}
                               value={length.value}
@@ -939,7 +994,7 @@ export default function AcademicForm() {
                     <div className="space-y-2">
                       <Label className="flex items-center gap-2 text-base sm:text-lg">
                         <Info className="w-4 h-4 sm:w-5 sm:h-5" />
-                        Tono de Redacción *
+                        {formData.documentType === "ensayo" ? "Tipo de Ensayo *" : "Tono de Redacción *"}
                       </Label>
                       <Select
                         value={formData.essayTone}
@@ -952,16 +1007,24 @@ export default function AcademicForm() {
                         }}
                       >
                         <SelectTrigger className="h-10 sm:h-12 hover:border-primary/80 transition-colors">
-                          <SelectValue placeholder="Seleccionar tono" />
+                          <SelectValue placeholder={formData.documentType === "ensayo" ? "Seleccionar tipo de ensayo" : "Seleccionar tono"} />
                         </SelectTrigger>
                         <SelectContent>
-                          {TONOS_REDACCIÓN.map((tono) => (
+                          {(formData.documentType === "ensayo" ? ESSAY_TYPES : TONOS_REDACCIÓN).map((option) => (
                             <SelectItem
-                              key={tono.value}
-                              value={tono.value}
-                              className="hover:bg-primary/10"
+                              key={option.value}
+                              value={option.value}
+                              className="hover:bg-primary/10 cursor-pointer"
+                              title={option.description || ""}
                             >
-                              {tono.label}
+                              <div className="w-full">
+                                <div className="font-medium">{option.label}</div>
+                                {formData.documentType === "ensayo" && option.description && (
+                                  <div className="text-xs text-muted-foreground mt-1 max-w-xs">
+                                    {option.description}
+                                  </div>
+                                )}
+                              </div>
                             </SelectItem>
                           ))}
                         </SelectContent>
