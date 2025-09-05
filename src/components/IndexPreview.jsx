@@ -526,7 +526,7 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
                     <List className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                   </div>
                   <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                    Índice Propuesto
+                    {formData?.documentType === "ensayo" ? "Estructura Propuesta" : "Índice Propuesto"}
                   </h2>
                 </div>
                 <Button
@@ -708,9 +708,14 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
                       <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
                     </div>
                     <span className="hidden sm:inline bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
-                      Revisa y ajusta el índice según tus necesidades
+                      {formData?.documentType === "ensayo" 
+                        ? "Revisa y ajusta la estructura según tus necesidades"
+                        : "Revisa y ajusta el índice según tus necesidades"
+                      }
                     </span>
-                    <span className="inline sm:hidden bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">Revisa el índice</span>
+                    <span className="inline sm:hidden bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
+                      {formData?.documentType === "ensayo" ? "Revisa la estructura" : "Revisa el índice"}
+                    </span>
                   </h3>
                   <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-0.5 sm:py-1 bg-gradient-to-r from-muted to-muted/80 rounded-full text-xs sm:text-sm shadow-md border border-border/30">
                     <div className="bg-gradient-to-r from-primary/20 to-primary/10 p-0.5 rounded">
@@ -740,9 +745,10 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
                   )}
                 </div>
                 <p className="text-[10px] sm:text-xs text-muted-foreground mt-2">
-                  Puedes editar directamente el índice para ajustarlo a tus
-                  necesidades específicas. Los cambios que realices aquí se
-                  guardarán con tu pedido.
+                  {formData?.documentType === "ensayo" 
+                    ? "Puedes editar directamente la estructura para ajustarla según tus necesidades. Los cambios que realices aquí se guardarán con tu pedido."
+                    : "Puedes editar directamente el índice para ajustarlo a tus necesidades específicas. Los cambios que realices aquí se guardarán con tu pedido."
+                  }
                   {apiError && (
                     <span className="block text-yellow-600 dark:text-yellow-400 mt-1">
                       Nota: {apiError}. Puedes continuar con este índice o
@@ -775,12 +781,16 @@ IV. REFERENCIAS BIBLIOGRÁFICAS`;
                         </h4>
                         <ul className="text-xs sm:text-sm text-blue-700 dark:text-blue-400 mt-1 space-y-0.5 sm:space-y-1">
                           <li>
-                            • El índice se ha generado para un documento de{" "}
-                            {formData.length} páginas
+                            • {formData?.documentType === "ensayo" 
+                              ? `La estructura se ha generado para un ensayo de ${formData.length} páginas`
+                              : `El índice se ha generado para un documento de ${formData.length} páginas`
+                            }
                           </li>
                           <li>
-                            • Revisa que la estructura del índice sea apropiada
-                            para tu tema
+                            • {formData?.documentType === "ensayo"
+                              ? "Revisa que la estructura del ensayo sea apropiada para tu tema"
+                              : "Revisa que la estructura del índice sea apropiada para tu tema"
+                            }
                           </li>
                           <li>
                             • Verifica que todos los puntos importantes estén
