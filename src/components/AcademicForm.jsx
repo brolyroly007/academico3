@@ -1014,16 +1014,18 @@ export default function AcademicForm() {
                             <SelectItem
                               key={option.value}
                               value={option.value}
-                              className="hover:bg-primary/10 cursor-pointer"
-                              title={option.description || ""}
+                              className="hover:bg-primary/10 cursor-pointer relative group"
                             >
                               <div className="w-full">
-                                <div className="font-medium">{option.label}</div>
+                                <div className="font-medium text-left">{option.label}</div>
+                                {/* Tooltip que aparece solo en hover para ensayos */}
                                 {formData.documentType === "ensayo" && option.description && (
-                                  <div className="text-xs text-muted-foreground mt-1 pr-4 opacity-75">
-                                    {option.description.length > 60 
-                                      ? `${option.description.substring(0, 60)}...` 
-                                      : option.description}
+                                  <div className="absolute left-0 top-full mt-2 w-72 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                                    <div className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                                      {option.description}
+                                    </div>
+                                    {/* Flecha del tooltip */}
+                                    <div className="absolute -top-1 left-4 w-2 h-2 bg-white dark:bg-gray-800 border-l border-t border-gray-200 dark:border-gray-600 transform rotate-45"></div>
                                   </div>
                                 )}
                               </div>
