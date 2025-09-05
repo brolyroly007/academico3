@@ -88,7 +88,8 @@ const ESSAY_TYPES = [
   { 
     value: "argumentativo", 
     label: "Ensayo argumentativo",
-    description: "El autor defiende una tesis (punto de vista) presentando argumentos sólidos y evidencias para convencer al lector."
+    description: "El autor defiende una tesis (punto de vista) presentando argumentos sólidos y evidencias para convencer al lector.",
+    popular: true // Marcar como el más común
   },
   { 
     value: "expositivo", 
@@ -1017,7 +1018,14 @@ export default function AcademicForm() {
                               className="hover:bg-primary/10 cursor-pointer relative group"
                             >
                               <div className="w-full">
-                                <div className="font-medium text-left">{option.label}</div>
+                                <div className="font-medium text-left flex items-center gap-2">
+                                  {option.label}
+                                  {option.popular && (
+                                    <span className="px-2 py-1 text-xs bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full shadow-sm">
+                                      Más común
+                                    </span>
+                                  )}
+                                </div>
                                 {/* Tooltip que aparece solo en hover para ensayos */}
                                 {formData.documentType === "ensayo" && option.description && (
                                   <div className="absolute left-0 top-full mt-2 w-72 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">

@@ -169,42 +169,53 @@ ${maxPages >= 20 ? "\nVIII. ANEXOS" : ""}`,
       let enfoqueEspecifico = "";
       let estructuraDesarrollo = "";
       
+      let tipoEnsayoDescripcion = "";
+      
       switch(essayTone) {
         case "argumentativo":
           enfoqueEspecifico = "Un ensayo argumentativo debe presentar una tesis clara y defenderla con argumentos sólidos y evidencias.";
           estructuraDesarrollo = "argumentos principales con evidencias y ejemplos que sustenten la tesis";
+          tipoEnsayoDescripcion = "(Defensa de una tesis con argumentos y evidencia)";
           break;
         case "expositivo":
           enfoqueEspecifico = "Un ensayo expositivo debe informar y explicar el tema de manera clara, ordenada y objetiva.";
           estructuraDesarrollo = "aspectos informativos del tema organizados de manera lógica y clara";
+          tipoEnsayoDescripcion = "(Explicación objetiva de un tema con datos y ejemplos)";
           break;
         case "descriptivo":
           enfoqueEspecifico = "Un ensayo descriptivo debe presentar una descripción detallada desde una perspectiva subjetiva.";
           estructuraDesarrollo = "aspectos descriptivos del tema con detalles sensoriales y perspectiva personal";
+          tipoEnsayoDescripcion = "(Creación de una imagen con detalles sensoriales y lenguaje figurado)";
           break;
         case "narrativo":
           enfoqueEspecifico = "Un ensayo narrativo debe relatar una historia o suceso con elementos de reflexión personal.";
           estructuraDesarrollo = "elementos narrativos cronológicos con reflexiones personales";
+          tipoEnsayoDescripcion = "(Desarrollo de una historia personal o ficticia y su significado)";
           break;
         case "persuasivo":
           enfoqueEspecifico = "Un ensayo persuasivo debe convencer al lector apelando a la razón y la emoción.";
           estructuraDesarrollo = "argumentos persuasivos que combinen lógica y apelo emocional";
+          tipoEnsayoDescripcion = "(Uso de argumentos lógicos y emocionales para convencer al lector)";
           break;
         case "comparacion_contraste":
           enfoqueEspecifico = "Un ensayo de comparación y contraste debe analizar similitudes y diferencias entre elementos.";
           estructuraDesarrollo = "puntos de comparación y contraste organizados sistemáticamente";
+          tipoEnsayoDescripcion = "(Análisis de similitudes y diferencias entre dos o más sujetos)";
           break;
         case "literario":
           enfoqueEspecifico = "Un ensayo literario debe combinar reflexión temática con estilo estético y cuidado.";
           estructuraDesarrollo = "aspectos temáticos desarrollados con estilo literario y estético";
+          tipoEnsayoDescripcion = "(Análisis de una obra literaria, sus temas y personajes con citas)";
           break;
         case "cientifico":
           enfoqueEspecifico = "Un ensayo científico debe abordar el tema con rigor metodológico y evidencia empírica.";
           estructuraDesarrollo = "aspectos científicos del tema con metodología rigurosa y evidencias";
+          tipoEnsayoDescripcion = "(Presentación de una metodología, resultados y discusión de hallazgos)";
           break;
         default:
           enfoqueEspecifico = "Un ensayo académico debe desarrollar el tema de manera estructurada y fundamentada.";
           estructuraDesarrollo = "aspectos principales del tema desarrollados académicamente";
+          tipoEnsayoDescripcion = "(Desarrollo académico estructurado del tema)";
       }
 
       prompt = `Genera un índice para un ensayo académico sobre "${topic}" de ${length} páginas.
@@ -219,6 +230,7 @@ La estructura debe incluir exactamente:
 
 Presenta el índice usando exactamente este formato:
 [TÍTULO]
+${tipoEnsayoDescripcion}
 
 I. INTRODUCCIÓN
    1.1 Planteamiento del tema
@@ -243,8 +255,9 @@ IMPORTANTE:
 1. Los subtemas del desarrollo NO deben llevar numeración
 2. NO incluyas explicaciones, solo el índice
 3. Usa el título del tema en mayúsculas al inicio
-4. Cada subtema debe ser específico al tema "${topic}" y enfocado en el tipo de ensayo ${essayTone || 'académico'}
-5. La introducción y conclusión NO deben tener subtemas adicionales`;
+4. Incluye OBLIGATORIAMENTE el mini resumen ${tipoEnsayoDescripcion} inmediatamente después del título
+5. Cada subtema debe ser específico al tema "${topic}" y enfocado en el tipo de ensayo ${essayTone || 'académico'}
+6. La introducción y conclusión deben tener exactamente los subtemas mostrados arriba`;
     } else {
       // Para otros tipos de documentos
       const selectedTemplate = structureTemplates[indexStructure];
